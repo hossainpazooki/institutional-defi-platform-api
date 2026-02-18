@@ -1,0 +1,336 @@
+# FCA Cryptoasset Financial Promotions Regime
+# Jurisdiction: UK
+# Regime: fca_crypto_2024
+# Source: PS22/10, FG23/3, COBS 4.12A
+
+- rule_id: fca_crypto_promotion_authorization
+  version: "1"
+  description: "FCA - Authorization for cryptoasset financial promotions to UK consumers"
+
+  # Jurisdiction fields (v4 spec)
+  jurisdiction: UK
+  regime_id: fca_crypto_2024
+  cross_border_relevant: true
+
+  source:
+    document_id: fca_crypto_2024
+    article: "s.21 FSMA"
+    section: "1"
+    paragraphs: ["1.1", "1.2"]
+
+  tags:
+    - authorization
+    - promotion
+    - financial_promotion
+    - UK
+
+  applies_if:
+    all:
+      - field: instrument_type
+        operator: in
+        value: [crypto_asset, stablecoin, utility_token]
+      - field: activity
+        operator: "=="
+        value: financial_promotion
+      - field: target_jurisdiction
+        operator: "=="
+        value: UK
+
+  decision_tree:
+    node_id: check_fca_authorized
+    condition:
+      field: is_fca_authorized
+      operator: "=="
+      value: true
+    true_branch:
+      result: permitted
+      notes: "FCA authorized persons may promote directly"
+    false_branch:
+      node_id: check_approved
+      condition:
+        field: promotion_approved_by_authorized
+        operator: "=="
+        value: true
+      true_branch:
+        result: permitted
+        obligations:
+          - id: maintain_approval_records
+            description: "Maintain records of s.21 approval"
+            source_ref: "FCA SUP 13A"
+      false_branch:
+        node_id: check_mlr_registered
+        condition:
+          field: is_mlr_registered
+          operator: "=="
+          value: true
+        true_branch:
+          result: permitted
+          notes: "MLR registered cryptoasset businesses may promote if FCA registered"
+          obligations:
+            - id: mlr_registration_check
+              description: "Verify MLR registration is current and valid"
+              source_ref: "MLR 2017"
+        false_branch:
+          result: prohibited
+          obligations:
+            - id: obtain_fca_authorization
+              description: "Obtain FCA authorization or s.21 approval before promoting"
+              source_ref: "FSMA s.21"
+
+- rule_id: fca_crypto_risk_warning
+  version: "1"
+  description: "FCA - Mandatory risk warnings for crypto promotions"
+
+  jurisdiction: UK
+  regime_id: fca_crypto_2024
+  cross_border_relevant: false
+
+  source:
+    document_id: fca_crypto_2024
+    article: "COBS 4.12A.15"
+    section: "2"
+    paragraphs: ["2.1", "2.2"]
+
+  tags:
+    - risk_warning
+    - disclosure
+    - consumer_protection
+    - UK
+
+  applies_if:
+    all:
+      - field: activity
+        operator: in
+        value: [financial_promotion, direct_offer]
+      - field: target_jurisdiction
+        operator: "=="
+        value: UK
+      - field: instrument_type
+        operator: in
+        value: [crypto_asset, stablecoin]
+
+  decision_tree:
+    node_id: check_risk_warning
+    condition:
+      field: has_prescribed_risk_warning
+      operator: "=="
+      value: true
+    true_branch:
+      node_id: check_warning_prominence
+      condition:
+        field: risk_warning_prominent
+        operator: "=="
+        value: true
+      true_branch:
+        result: compliant
+        notes: "Risk warning requirements satisfied"
+      false_branch:
+        result: non_compliant
+        obligations:
+          - id: make_warning_prominent
+            description: "Ensure risk warning is prominent and in same font size as most prominent text"
+            source_ref: "COBS 4.12A.15(2)"
+    false_branch:
+      result: non_compliant
+      obligations:
+        - id: add_risk_warning
+          description: "Add prescribed warning: 'Don't invest unless you're prepared to lose all the money you invest'"
+          source_ref: "PS22/10 Annex 1"
+
+- rule_id: fca_crypto_cooling_off
+  version: "1"
+  description: "FCA - 24-hour cooling off for first-time retail crypto investors"
+
+  jurisdiction: UK
+  regime_id: fca_crypto_2024
+  cross_border_relevant: false
+
+  source:
+    document_id: fca_crypto_2024
+    article: "COBS 4.12A.18"
+    section: "3"
+    paragraphs: ["3.1", "3.2"]
+
+  tags:
+    - cooling_off
+    - retail
+    - consumer_protection
+    - UK
+
+  applies_if:
+    all:
+      - field: activity
+        operator: "=="
+        value: direct_offer
+      - field: target_jurisdiction
+        operator: "=="
+        value: UK
+      - field: investor_type
+        operator: "=="
+        value: retail
+      - field: is_first_time_investor
+        operator: "=="
+        value: true
+
+  decision_tree:
+    node_id: check_cooling_off
+    condition:
+      field: cooling_off_period_provided
+      operator: "=="
+      value: true
+    true_branch:
+      node_id: check_reminder_sent
+      condition:
+        field: cooling_off_reminder_sent
+        operator: "=="
+        value: true
+      true_branch:
+        result: compliant
+        notes: "Cooling off requirements satisfied"
+      false_branch:
+        result: non_compliant
+        obligations:
+          - id: send_cooling_reminder
+            description: "Send reminder notification of 24-hour cooling off period"
+            source_ref: "COBS 4.12A.18(b)"
+    false_branch:
+      result: non_compliant
+      obligations:
+        - id: implement_cooling_off
+          description: "Implement 24-hour cooling off period before transaction completes"
+          source_ref: "FCA PS22/10 para 4.15"
+          deadline: "before_transaction_completion"
+
+- rule_id: fca_crypto_appropriateness
+  version: "1"
+  description: "FCA - Appropriateness assessment for retail crypto investors"
+
+  jurisdiction: UK
+  regime_id: fca_crypto_2024
+  cross_border_relevant: false
+
+  source:
+    document_id: fca_crypto_2024
+    article: "COBS 4.12A.20"
+    section: "4"
+    paragraphs: ["4.1", "4.2", "4.3"]
+
+  tags:
+    - appropriateness
+    - assessment
+    - retail
+    - UK
+
+  applies_if:
+    all:
+      - field: activity
+        operator: "=="
+        value: direct_offer
+      - field: target_jurisdiction
+        operator: "=="
+        value: UK
+      - field: investor_type
+        operator: "=="
+        value: retail
+
+  decision_tree:
+    node_id: check_assessment_done
+    condition:
+      field: appropriateness_assessment_completed
+      operator: "=="
+      value: true
+    true_branch:
+      node_id: check_appropriate
+      condition:
+        field: investment_appropriate
+        operator: "=="
+        value: true
+      true_branch:
+        result: compliant
+        notes: "Appropriateness assessment passed"
+      false_branch:
+        node_id: check_acknowledgment
+        condition:
+          field: client_acknowledged_warning
+          operator: "=="
+          value: true
+        true_branch:
+          result: compliant
+          notes: "Client acknowledged warning, may proceed with caution"
+          obligations:
+            - id: maintain_acknowledgment_records
+              description: "Maintain records of assessment and client acknowledgment"
+              source_ref: "COBS 4.12A.20(c)"
+        false_branch:
+          result: non_compliant
+          obligations:
+            - id: obtain_acknowledgment
+              description: "Obtain client's express acknowledgment before proceeding"
+              source_ref: "COBS 4.12A.20(b)"
+    false_branch:
+      result: non_compliant
+      obligations:
+        - id: conduct_assessment
+          description: "Conduct appropriateness assessment before client can invest"
+          source_ref: "COBS 4.12A.20(1)"
+
+- rule_id: fca_crypto_banned_incentives
+  version: "1"
+  description: "FCA - Prohibition on refer-a-friend bonuses and similar incentives"
+
+  jurisdiction: UK
+  regime_id: fca_crypto_2024
+  cross_border_relevant: false
+
+  source:
+    document_id: fca_crypto_2024
+    article: "COBS 4.12A"
+    section: "5"
+    paragraphs: ["5.1"]
+
+  tags:
+    - incentives
+    - prohibited
+    - UK
+
+  applies_if:
+    all:
+      - field: activity
+        operator: in
+        value: [financial_promotion, direct_offer]
+      - field: target_jurisdiction
+        operator: "=="
+        value: UK
+      - field: instrument_type
+        operator: in
+        value: [crypto_asset, stablecoin]
+
+  decision_tree:
+    node_id: check_has_incentives
+    condition:
+      field: has_refer_a_friend_bonus
+      operator: "=="
+      value: true
+    true_branch:
+      result: prohibited
+      notes: "Refer-a-friend bonuses and similar inducements are banned"
+      obligations:
+        - id: remove_incentives
+          description: "Remove all refer-a-friend bonuses and similar inducements from promotions"
+          source_ref: "FCA PS22/10 Section 5"
+    false_branch:
+      node_id: check_guarantee_claims
+      condition:
+        field: claims_guaranteed_returns
+        operator: "=="
+        value: true
+      true_branch:
+        result: prohibited
+        notes: "Claims of guaranteed returns are banned"
+        obligations:
+          - id: remove_guarantee_claims
+            description: "Remove all claims of guaranteed returns or limited risk"
+            source_ref: "FCA PS22/10 Section 5"
+      false_branch:
+        result: compliant
+        notes: "No banned practices detected"

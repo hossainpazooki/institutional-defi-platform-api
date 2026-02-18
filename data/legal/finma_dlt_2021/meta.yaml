@@ -1,0 +1,14 @@
+document_id: finma_dlt_2021
+title: Federal Act on the Adaptation of Federal Law to Developments in Distributed Ledger Technology (DLT Act)
+citation: "Federal Act of 25 September 2020 (Status as of 1 August 2021)"
+jurisdiction: CH
+authority: Swiss Financial Market Supervisory Authority (FINMA)
+effective_date: 2021-08-01
+source_url: https://www.admin.ch/opc/en/classified-compilation/20191803/index.html
+related_documents:
+  - finma_ico_guidelines: "FINMA ICO Guidelines (February 2018)"
+  - finma_stablecoin_supplement: "FINMA Supplement to ICO Guidelines - Stablecoins (September 2019)"
+  - fmia_2015: "Financial Market Infrastructure Act (FMIA)"
+  - finsa_2020: "Financial Services Act (FinSA)"
+  - amla_switzerland: "Anti-Money Laundering Act (AMLA)"
+  - banking_act_ch: "Swiss Banking Act (as amended by DLT Act)"

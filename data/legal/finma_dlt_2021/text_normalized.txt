@@ -1,0 +1,109 @@
+DLT ACT 2021 (SWITZERLAND)
+Federal Act on the Adaptation of Federal Law to Developments in Distributed Ledger Technology
+Key Provisions for Crypto Asset Regulation
+
+FINMA TOKEN CLASSIFICATION (ICO Guidelines February 2018)
+
+Three-tier classification based on economic function:
+
+1. PAYMENT TOKENS
+   - Definition: Tokens intended as means of payment for goods/services or value transfer
+   - Examples: Bitcoin, Ether (as currency)
+   - Regulatory treatment: Not securities; AML requirements apply
+   - Key characteristic: No claims against issuer or third parties
+
+2. UTILITY TOKENS
+   - Definition: Tokens providing digital access to application or service via DLT infrastructure
+   - Regulatory treatment: Minimal regulation if application already operational
+   - Pre-functional tokens: May have investment element requiring securities treatment
+   - Key characteristic: Access rights, not financial claims
+
+3. ASSET TOKENS
+   - Definition: Tokens representing assets (debt, equity, claims on real assets)
+   - Examples: Tokenized shares, bonds, derivatives, real estate tokens
+   - Regulatory treatment: Securities law applies (FMIA, FinSA)
+   - Key characteristic: Economic function analogous to traditional securities
+
+4. HYBRID TOKENS
+   - Tokens combining functions of multiple categories
+   - Must meet requirements of all applicable categories
+   - Classification may change over time as token use evolves
+
+FINANCIAL MARKET INFRASTRUCTURE ACT (FMIA) - SECURITIES DEFINITION
+
+Article 2(b) - Securities:
+Securities are certificated or uncertificated securities, derivatives, intermediated securities
+or DLT Rights, which are:
+(a) standardised and suitable for mass trading, meaning:
+    - Offered publicly in same structure and denomination, OR
+    - Placed with 20 or more clients under identical conditions
+
+DLT ACT AMENDMENTS - KEY PROVISIONS
+
+1. LEDGER-BASED SECURITIES (DLT Rights)
+   - Legal recognition of securities issued on blockchain
+   - Digital alternative to certificated securities
+   - Ownership transfers recorded on distributed ledger have legal effect
+
+2. DLT TRADING FACILITY LICENSE (FMIA Articles 73a-73f)
+   - New FINMA license category for DLT trading venues
+   - Multilateral trading of DLT securities (ledger-based securities)
+   - May allow direct retail participation (unlike traditional exchanges)
+   - Lower requirements than full stock exchange for small facilities
+   - First license granted 2023 to BX Swiss subsidiary
+
+3. CUSTODY SEGREGATION IN BANKRUPTCY (Banking Act Article 16)
+   - Crypto assets individually allocated to customers can be segregated
+   - Customers entitled to return of specifically allocated assets
+   - Collective custody: proportional sharing if shortfall
+   - Custodian must maintain records proving individual allocation
+
+ANTI-MONEY LAUNDERING ACT (AMLA) - CRYPTO REQUIREMENTS
+
+Applicability:
+- Payment token services (exchange, transfer, custody, dealing)
+- Must be FINMA-licensed or member of FINMA-recognized SRO
+
+Key obligations:
+1. Customer identification and verification (KYC)
+2. Enhanced due diligence for high-risk customers/jurisdictions
+3. Transaction monitoring and suspicious activity reporting
+4. Record retention requirements
+
+TRAVEL RULE (FINMA Implementation):
+- Threshold: CHF 1,000 (stricter than FATF EUR/USD 1,000)
+- Zero threshold for unverified or suspicious transfers
+- Originator and beneficiary information must be collected and transmitted
+
+STABLECOIN CLASSIFICATION (FINMA Supplement September 2019)
+
+Stablecoins are NOT a separate category - classified by underlying rights:
+
+1. FIAT-BACKED WITH REDEMPTION RIGHT
+   - Classification: Deposit under Banking Act
+   - Regulatory requirement: Banking license (or fintech license exception)
+   - Rationale: Redemption claim = deposit claim
+
+2. FIAT-BACKED WITHOUT REDEMPTION CLAIM
+   - Classification: Payment token
+   - Regulatory requirement: AML compliance only
+
+3. ASSET-BACKED (Commodities, Securities, Baskets)
+   - Classification: Asset token (security)
+   - Regulatory requirement: Securities regulations
+   - Additional: May trigger collective investment scheme rules
+
+4. ALGORITHMIC (No backing)
+   - Classification: Payment token
+   - Regulatory requirement: AML compliance
+   - Additional: Risk disclosure required
+
+PROSPECTUS REQUIREMENTS (FinSA)
+
+Public offerings of asset tokens require prospectus unless exemption applies:
+- Qualified investors only
+- Offering below threshold
+- Limited number of offerees (<500)
+- High minimum denomination (>100,000 CHF)
+
+Prospectus must be approved by reviewing body before public offering.

@@ -1,0 +1,487 @@
+# Singapore MAS Payment Services Act Rules
+# Based on Payment Services Act 2019 (PSA) and MAS Notice PSN02
+# Sources: https://sso.agc.gov.sg/act/psa2019
+#          https://www.mas.gov.sg/regulation/notices/psn02-aml-cft-notice---digital-payment-token-service
+
+- rule_id: mas_dpt_licensing
+  version: "1.0"
+  description: |
+    Digital Payment Token (DPT) service provider licensing requirement under Payment Services Act 2019.
+    Entities providing DPT services in Singapore must obtain either SPI or MPI license.
+  effective_from: 2020-01-28
+  tags: [mas, psa, licensing, dpt, singapore]
+  jurisdiction: SG
+  regime_id: psa_2019
+  cross_border_relevant: true
+
+  applies_if:
+    all:
+      - field: activity
+        operator: in
+        value: [dpt_dealing, dpt_exchange, dpt_transfer, dpt_custody]
+      - field: jurisdiction
+        operator: "=="
+        value: SG
+
+  decision_tree:
+    node_id: check_license_type
+    condition:
+      field: annual_transaction_volume_sgd
+      operator: ">"
+      value: 3000000
+    true_branch:
+      node_id: check_mpi_license
+      condition:
+        field: license_type
+        operator: "=="
+        value: major_payment_institution
+      true_branch:
+        node_id: check_mpi_capital
+        condition:
+          field: base_capital_sgd
+          operator: ">="
+          value: 250000
+        true_branch:
+          result: authorized
+          notes: "Licensed as Major Payment Institution for DPT services"
+        false_branch:
+          result: non_compliant
+          obligations:
+            - id: increase_capital
+              description: "Increase base capital to minimum S$250,000"
+              deadline: "30 days"
+      false_branch:
+        result: not_authorized
+        obligations:
+          - id: obtain_mpi_license
+            description: "Apply for Major Payment Institution license from MAS"
+            deadline: "Immediate"
+    false_branch:
+      node_id: check_spi_license
+      condition:
+        field: license_type
+        operator: in
+        value: [standard_payment_institution, major_payment_institution]
+      true_branch:
+        result: authorized
+        notes: "Licensed as Standard/Major Payment Institution for DPT services"
+      false_branch:
+        result: not_authorized
+        obligations:
+          - id: obtain_spi_license
+            description: "Apply for Standard Payment Institution license from MAS"
+            deadline: "Immediate"
+
+  source:
+    document_id: psa_2019
+    article: "6"
+    section: "Part 2"
+    url: "https://sso.agc.gov.sg/act/psa2019"
+
+  interpretation_notes: |
+    Payment Services Act 2019 Section 6 requires licensing for DPT services:
+    - Standard Payment Institution (SPI): up to S$3M annual transactions
+    - Major Payment Institution (MPI): over S$3M annual transactions or e-money >S$5M
+    - MPI requires minimum base capital of S$250,000
+
+- rule_id: mas_customer_asset_segregation
+  version: "1.0"
+  description: |
+    Customer asset segregation and custody requirements under MAS Guidelines.
+    DPT service providers must segregate customer assets and maintain 90% in cold storage.
+  effective_from: 2024-04-04
+  tags: [mas, custody, segregation, cold_storage, consumer_protection]
+  jurisdiction: SG
+  regime_id: psa_2019
+  cross_border_relevant: false
+
+  applies_if:
+    all:
+      - field: activity
+        operator: in
+        value: [dpt_custody, dpt_dealing, dpt_exchange]
+      - field: jurisdiction
+        operator: "=="
+        value: SG
+      - field: holds_customer_assets
+        operator: "=="
+        value: true
+
+  decision_tree:
+    node_id: check_segregation
+    condition:
+      field: customer_assets_segregated
+      operator: "=="
+      value: true
+    true_branch:
+      node_id: check_trust_arrangement
+      condition:
+        field: assets_held_on_trust
+        operator: "=="
+        value: true
+      true_branch:
+        node_id: check_cold_storage
+        condition:
+          field: cold_storage_ratio
+          operator: ">="
+          value: 0.90
+        true_branch:
+          node_id: check_daily_reconciliation
+          condition:
+            field: daily_reconciliation
+            operator: "=="
+            value: true
+          true_branch:
+            result: compliant
+            notes: "Customer asset custody requirements satisfied"
+          false_branch:
+            result: non_compliant
+            obligations:
+              - id: implement_reconciliation
+                description: "Implement daily reconciliation of customer assets"
+        false_branch:
+          result: non_compliant
+          obligations:
+            - id: increase_cold_storage
+              description: "Move at least 90% of customer assets to cold storage"
+              deadline: "7 days"
+      false_branch:
+        result: non_compliant
+        obligations:
+          - id: establish_trust
+            description: "Hold customer assets on statutory trust with authorized custodian"
+    false_branch:
+      result: non_compliant
+      obligations:
+        - id: segregate_assets
+          description: "Segregate customer DPT assets from firm operational assets"
+          deadline: "Immediate"
+        - id: separate_wallets
+          description: "Maintain separate blockchain addresses for customer and firm assets"
+
+  source:
+    document_id: psa_2019
+    article: "23"
+    section: "Part 3 Division 4"
+    url: "https://www.mas.gov.sg/regulation/guidelines/guidelines-on-licensing-for-dtsps"
+
+  interpretation_notes: |
+    MAS Guidelines require DPT service providers to:
+    - Segregate customer assets from operational funds
+    - Hold customer assets on statutory trust
+    - Maintain at least 90% of customer assets in cold storage
+    - Conduct daily reconciliation of customer holdings
+    - Ensure custody functions are operationally independent
+
+- rule_id: mas_aml_cft_compliance
+  version: "1.0"
+  description: |
+    Anti-money laundering and countering financing of terrorism requirements under
+    MAS Notice PSN02 for DPT service providers.
+  effective_from: 2024-04-02
+  tags: [mas, aml, cft, kyc, psn02]
+  jurisdiction: SG
+  regime_id: psa_2019
+  cross_border_relevant: true
+
+  applies_if:
+    all:
+      - field: activity
+        operator: in
+        value: [dpt_dealing, dpt_exchange, dpt_transfer, dpt_custody]
+      - field: jurisdiction
+        operator: "=="
+        value: SG
+
+  decision_tree:
+    node_id: check_aml_officer
+    condition:
+      field: aml_compliance_officer_appointed
+      operator: "=="
+      value: true
+    true_branch:
+      node_id: check_cdd_procedures
+      condition:
+        field: customer_due_diligence_implemented
+        operator: "=="
+        value: true
+      true_branch:
+        node_id: check_ongoing_monitoring
+        condition:
+          field: transaction_monitoring_active
+          operator: "=="
+          value: true
+        true_branch:
+          node_id: check_record_keeping
+          condition:
+            field: records_retention_years
+            operator: ">="
+            value: 5
+          true_branch:
+            result: compliant
+            notes: "AML/CFT compliance requirements satisfied under PSN02"
+          false_branch:
+            result: non_compliant
+            obligations:
+              - id: extend_record_retention
+                description: "Retain CDD and transaction records for minimum 5 years"
+        false_branch:
+          result: non_compliant
+          obligations:
+            - id: implement_monitoring
+              description: "Implement ongoing transaction monitoring system"
+            - id: establish_str_procedures
+              description: "Establish Suspicious Transaction Report (STR) filing procedures"
+      false_branch:
+        result: non_compliant
+        obligations:
+          - id: implement_cdd
+            description: "Implement customer due diligence procedures per PSN02"
+          - id: verify_customer_identity
+            description: "Verify identity of all customers before establishing business relationship"
+    false_branch:
+      result: non_compliant
+      obligations:
+        - id: appoint_aml_officer
+          description: "Appoint AML/CFT compliance officer at management level"
+          deadline: "30 days"
+        - id: establish_aml_program
+          description: "Establish comprehensive AML/CFT compliance program"
+
+  source:
+    document_id: psn02_2024
+    article: "Notice PSN02"
+    url: "https://www.mas.gov.sg/regulation/notices/psn02-aml-cft-notice---digital-payment-token-service"
+
+  interpretation_notes: |
+    MAS Notice PSN02 (revised April 2024) requires DPT service providers to:
+    - Appoint AML/CFT compliance officer at management level
+    - Implement risk-based customer due diligence
+    - Conduct ongoing monitoring proportionate to customer risk profile
+    - File Suspicious Transaction Reports (STRs) with STRO
+    - Retain CDD and transaction records for at least 5 years
+
+- rule_id: mas_retail_restrictions
+  version: "1.0"
+  description: |
+    Retail customer protection restrictions under MAS Guidelines.
+    DPT service providers cannot offer lending, staking, or leverage to retail customers.
+  effective_from: 2022-10-26
+  tags: [mas, retail, restrictions, lending, staking, leverage]
+  jurisdiction: SG
+  regime_id: psa_2019
+  cross_border_relevant: false
+
+  applies_if:
+    all:
+      - field: customer_type
+        operator: "=="
+        value: retail
+      - field: jurisdiction
+        operator: "=="
+        value: SG
+
+  decision_tree:
+    node_id: check_activity_type
+    condition:
+      field: activity
+      operator: in
+      value: [dpt_lending, dpt_staking, margin_trading, leveraged_trading]
+    true_branch:
+      result: prohibited
+      obligations:
+        - id: cease_retail_services
+          description: "Cease offering lending, staking, or leverage services to retail customers"
+          deadline: "Immediate"
+      notes: "Lending, staking, and leverage services prohibited for retail customers"
+    false_branch:
+      node_id: check_marketing_compliance
+      condition:
+        field: marketing_compliant
+        operator: "=="
+        value: true
+      true_branch:
+        result: compliant
+        notes: "DPT services to retail customers permitted with restrictions"
+      false_branch:
+        result: non_compliant
+        obligations:
+          - id: remove_public_marketing
+            description: "Remove advertising from public spaces and transport"
+          - id: add_risk_warnings
+            description: "Include prominent risk warnings in all communications"
+
+  source:
+    document_id: mas_guidelines_2022
+    section: "Consumer Protection"
+    url: "https://www.mas.gov.sg/regulation/guidelines/guidelines-on-licensing-for-dtsps"
+
+  interpretation_notes: |
+    MAS Guidelines (October 2022) prohibit offering to retail customers:
+    - DPT lending and borrowing services
+    - Staking services
+    - Margin or leveraged trading
+    Marketing restrictions: no public advertising, no trivializing risks
+
+- rule_id: mas_stablecoin_framework
+  version: "1.0"
+  description: |
+    MAS-regulated stablecoin framework requirements for single-currency stablecoins
+    pegged to SGD or G10 currencies.
+  effective_from: 2023-08-15
+  tags: [mas, stablecoin, scs, reserves, redemption]
+  jurisdiction: SG
+  regime_id: psa_2019
+  cross_border_relevant: true
+
+  applies_if:
+    all:
+      - field: instrument_type
+        operator: "=="
+        value: single_currency_stablecoin
+      - field: jurisdiction
+        operator: "=="
+        value: SG
+      - field: activity
+        operator: "=="
+        value: stablecoin_issuance
+
+  decision_tree:
+    node_id: check_issuer_licensed
+    condition:
+      field: mas_licensed
+      operator: "=="
+      value: true
+    true_branch:
+      node_id: check_reserve_backing
+      condition:
+        field: reserve_ratio
+        operator: ">="
+        value: 1.0
+      true_branch:
+        node_id: check_reserve_quality
+        condition:
+          field: reserve_asset_type
+          operator: in
+          value: [cash, bank_deposits, government_securities]
+        true_branch:
+          node_id: check_issuer_capital
+          condition:
+            field: base_capital_sgd
+            operator: ">="
+            value: 1000000
+          true_branch:
+            node_id: check_redemption_guarantee
+            condition:
+              field: redemption_at_par_guaranteed
+              operator: "=="
+              value: true
+            true_branch:
+              node_id: check_redemption_timeframe
+              condition:
+                field: redemption_days
+                operator: "<="
+                value: 5
+              true_branch:
+                result: compliant
+                notes: "Qualifies as MAS-regulated stablecoin"
+              false_branch:
+                result: non_compliant
+                obligations:
+                  - id: expedite_redemption
+                    description: "Guarantee redemption within 5 business days"
+            false_branch:
+              result: non_compliant
+              obligations:
+                - id: guarantee_par_redemption
+                  description: "Guarantee redemption at par value"
+          false_branch:
+            result: non_compliant
+            obligations:
+              - id: increase_issuer_capital
+                description: "Increase base capital to minimum S$1,000,000 or 50% of annual operating expenses"
+        false_branch:
+          result: non_compliant
+          obligations:
+            - id: convert_reserves
+              description: "Hold reserves in permitted assets: cash, bank deposits, or government securities"
+      false_branch:
+        result: non_compliant
+        obligations:
+          - id: increase_reserves
+            description: "Maintain 100% reserve backing at all times"
+    false_branch:
+      result: not_authorized
+      obligations:
+        - id: obtain_mas_license
+          description: "Obtain appropriate MAS license before issuing stablecoins"
+
+  source:
+    document_id: mas_stablecoin_framework_2023
+    section: "Stablecoin Regulatory Framework"
+    url: "https://www.mas.gov.sg/news/media-releases/2023/mas-finalises-stablecoin-regulatory-framework"
+
+  interpretation_notes: |
+    MAS Stablecoin Framework (August 2023) for MAS-regulated stablecoins requires:
+    - Issuer must be MAS-licensed entity (banks, specified payment institutions)
+    - 100% reserve backing in cash, bank deposits, or short-term government securities
+    - Reserves segregated with accredited custodians
+    - Annual audit with monthly attestations
+    - Minimum base capital S$1M or 50% annual operating expenses
+    - Redemption at par within 5 business days
+    - Single-currency pegged to SGD or G10 currencies only
+
+- rule_id: mas_dtsp_offshore_services
+  version: "1.0"
+  description: |
+    Digital Token Service Provider (DTSP) licensing for Singapore entities
+    providing services exclusively to customers outside Singapore.
+  effective_from: 2025-06-30
+  tags: [mas, dtsp, fsma, offshore, licensing]
+  jurisdiction: SG
+  regime_id: fsma_2022
+  cross_border_relevant: true
+
+  applies_if:
+    all:
+      - field: entity_jurisdiction
+        operator: "=="
+        value: SG
+      - field: customer_jurisdiction
+        operator: "!="
+        value: SG
+      - field: activity
+        operator: in
+        value: [dpt_dealing, dpt_exchange, dpt_transfer, dpt_custody]
+
+  decision_tree:
+    node_id: check_dtsp_license
+    condition:
+      field: dtsp_license
+      operator: "=="
+      value: true
+    true_branch:
+      result: authorized
+      notes: "Licensed as DTSP for offshore digital token services"
+    false_branch:
+      result: not_authorized
+      obligations:
+        - id: obtain_dtsp_license
+          description: "Apply for DTSP license under FSMA or cease offshore services"
+          deadline: "2025-06-30"
+      notes: |
+        From 30 June 2025, Singapore entities providing DPT services to offshore
+        customers must be licensed as DTSP. MAS has indicated high bar for licensing
+        due to elevated money laundering risks.
+
+  source:
+    document_id: fsma_2022
+    article: "Financial Services and Markets Act 2022"
+    url: "https://www.mas.gov.sg/news/media-releases/2025/mas-clarifies-regulatory-regime-for-digital-token-service-providers"
+
+  interpretation_notes: |
+    Financial Services and Markets Act 2022 (FSMA) Section establishes:
+    - DTSP licensing required from 30 June 2025 for Singapore entities
+      serving only offshore customers
+    - MAS applies high bar due to elevated ML risks and limited supervisory reach
+    - Does not apply to utility/governance tokens (only DPT and capital market tokens)

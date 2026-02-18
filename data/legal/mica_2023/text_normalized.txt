@@ -1,0 +1,116 @@
+# Markets in Crypto-Assets Regulation (MiCA)
+# Regulation (EU) 2023/1114
+# Source: https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32023R1114
+#
+# This file contains normalized excerpts of selected MiCA provisions.
+# TODO: Extend with additional articles as needed for rule coverage.
+
+TITLE I - SUBJECT MATTER, SCOPE AND DEFINITIONS
+
+Article 1 - Subject matter
+
+This Regulation lays down uniform rules for the following:
+(a) transparency and disclosure requirements for the issuance, offer to the public and admission to trading on a trading platform of crypto-assets;
+(b) the authorisation and supervision of crypto-asset service providers, issuers of asset-referenced tokens and issuers of e-money tokens, as well as their operation, organisation and governance;
+(c) consumer protection rules for the issuance, offer to the public, and admission to trading of crypto-assets;
+(d) measures to prevent market abuse to ensure the integrity of crypto-asset markets.
+
+Article 2 - Scope
+
+1. This Regulation applies to natural and legal persons and certain other undertakings that are engaged in the issuance, offer to the public and admission to trading of crypto-assets or that provide services related to crypto-assets in the Union.
+
+2. This Regulation does not apply to the following:
+(a) persons who provide crypto-asset services exclusively for their parent undertakings, for their subsidiaries or for other subsidiaries of their parent undertakings;
+(b) a liquidator or an administrator acting in the course of an insolvency procedure, except for the purposes of Article 47;
+(c) the ECB, national central banks of the Member States when acting in their capacity as monetary authority or other public authorities, the European Investment Bank, the European Financial Stability Facility and the European Stability Mechanism, public international organisations.
+
+Article 3 - Definitions
+
+For the purposes of this Regulation, the following definitions apply:
+(1) 'distributed ledger technology' or 'DLT' means a type of technology that supports the distributed recording of encrypted data;
+(2) 'distributed ledger' means an information repository that keeps records of transactions and that is shared across, and synchronised between, a set of DLT network nodes using a consensus mechanism;
+(3) 'consensus mechanism' means the rules and procedures by which an agreement is reached, among DLT network nodes, that a transaction is validated;
+(4) 'DLT network node' means a device or process that is part of a network and that holds a complete or partial replica of records of all transactions on a distributed ledger;
+(5) 'crypto-asset' means a digital representation of a value or of a right that is able to be transferred and stored electronically using distributed ledger technology or similar technology;
+(6) 'asset-referenced token' means a type of crypto-asset that is not an electronic money token and that purports to maintain a stable value by referencing another value or right or a combination thereof, including one or more official currencies;
+(7) 'electronic money token' or 'e-money token' means a type of crypto-asset that purports to maintain a stable value by referencing the value of one official currency;
+(8) 'utility token' means a type of crypto-asset that is only intended to provide access to a good or a service supplied by the issuer of that token.
+
+TITLE III - ASSET-REFERENCED TOKENS
+
+Chapter 1 - Authorisation to offer asset-referenced tokens to the public and to seek their admission to trading
+
+Article 16 - Authorisation
+
+1. No person shall, within the Union, make an offer to the public of an asset-referenced token, or seek an admission of such a token to trading, unless that person is the issuer of such asset-referenced token and:
+(a) is a legal person or other undertaking that is established in the Union and has been authorised in accordance with Article 21 by the competent authority of its home Member State; or
+(b) is a credit institution that complies with Article 17.
+
+2. The competent authority of the home Member State may refuse to grant the authorisation referred to in paragraph 1 where there are objective and demonstrable grounds for believing that:
+(a) the management body of the applicant issuer may pose a threat to its effective, sound and prudent management and business continuity and to the adequate consideration of the interest of its clients and the integrity of the market;
+(b) the applicant issuer does not meet, or is unlikely to meet, any of the requirements of this Title.
+
+Article 21 - Application for authorisation
+
+1. Legal persons or other undertakings that intend to offer asset-referenced tokens to the public or seek admission of such tokens to trading shall submit an application for authorisation to the competent authority of their home Member State.
+
+2. The application referred to in paragraph 1 shall include all of the following:
+(a) the address of the applicant issuer;
+(b) the articles of association of the applicant issuer;
+(c) a programme of operations setting out the business model that the applicant issuer intends to follow;
+(d) a legal opinion that the asset-referenced token does not qualify as a crypto-asset excluded from the scope of this Regulation;
+(e) a detailed description of the governance arrangements referred to in Article 34;
+(f) the identities of the members of the management body;
+(g) proof that the persons referred to in point (f) are of sufficiently good repute and possess appropriate knowledge, skills and experience to manage the issuer of asset-referenced tokens.
+
+Article 36 - Obligation to authorise certain activities in relation to asset-referenced tokens
+
+1. A person shall not, within the Union, offer to the public an asset-referenced token or seek the admission of such a token to trading unless that person is the issuer of such asset-referenced token and is either:
+(a) authorised as an issuer of asset-referenced tokens under Article 21; or
+(b) a credit institution.
+
+2. By way of derogation from paragraph 1, a credit institution that intends to issue asset-referenced tokens shall not require the authorisation referred to in Article 21. Such credit institution shall, prior to issuing asset-referenced tokens, notify the competent authority of its home Member State.
+
+3. The derogation provided for in paragraph 2 shall not apply where the asset-referenced token to be issued by the credit institution is classified as a significant asset-referenced token.
+
+TITLE IV - E-MONEY TOKENS
+
+Article 48 - Authorisation
+
+1. No person shall, within the Union, offer e-money tokens to the public, or seek the admission of such tokens to trading, unless that person is the issuer of such e-money tokens and is either:
+(a) a credit institution; or
+(b) an 'electronic money institution' as defined in Article 2, point (1), of Directive 2009/110/EC, authorised under that Directive.
+
+Article 58 - Reserve of assets
+
+1. Issuers of e-money tokens shall constitute and at all times maintain a reserve of assets. The reserve of assets shall be composed and managed in such a way that:
+(a) the risks associated with the assets referenced by the e-money tokens are covered;
+(b) the liquidity risks associated with the permanent redemption rights of holders are addressed.
+
+2. The reserve of assets shall be legally and operationally segregated from the issuer's estate, from the assets of other token issuers and from the reserve of assets held on behalf of other issuers of crypto-assets.
+
+TITLE V - CRYPTO-ASSET SERVICE PROVIDERS
+
+Article 59 - Crypto-asset services and crypto-asset service providers
+
+1. The following services and activities shall constitute crypto-asset services:
+(a) providing custody and administration of crypto-assets on behalf of clients;
+(b) operation of a trading platform for crypto-assets;
+(c) exchange of crypto-assets for funds;
+(d) exchange of crypto-assets for other crypto-assets;
+(e) execution of orders for crypto-assets on behalf of clients;
+(f) placing of crypto-assets;
+(g) reception and transmission of orders for crypto-assets on behalf of clients;
+(h) providing advice on crypto-assets;
+(i) providing portfolio management on crypto-assets;
+(j) providing transfer services for crypto-assets on behalf of clients.
+
+2. Any person intending to provide crypto-asset services shall obtain authorisation as a crypto-asset service provider in accordance with Article 63.
+
+Article 67 - Custody and administration of crypto-assets on behalf of clients
+
+1. Crypto-asset service providers providing custody and administration of crypto-assets on behalf of clients shall:
+(a) keep a register of positions, opened in the name of each client, that corresponds to each client's right to the crypto-assets;
+(b) ensure that the crypto-assets held in custody or the means of access to such crypto-assets are clearly segregated from any crypto-assets belonging to the crypto-asset service provider or from other clients' crypto-assets.
+
+2. Crypto-asset service providers providing custody and administration of crypto-assets on behalf of clients shall be liable to their clients for the loss of crypto-assets or of the means of access to the crypto-assets as a result of a malfunction or hacks, up to the market value of the crypto-assets lost.

@@ -1,0 +1,80 @@
+PAYMENT SERVICES ACT 2019 (SINGAPORE)
+Key Provisions for Digital Payment Token (DPT) Services
+
+PART 2 - LICENSING OF PAYMENT SERVICE PROVIDERS
+
+Section 6 - Licensing
+(1) A person must not carry on a business of providing any payment service in Singapore
+    unless the person is a licensee authorised to provide that payment service.
+(2) A person who contravenes subsection (1) shall be guilty of an offence.
+
+Section 7 - Types of Licenses
+(1) Standard Payment Institution (SPI) license:
+    - For providers with annual payment transactions up to S$3 million
+    - For e-money issuers with outstanding e-money up to S$5 million
+(2) Major Payment Institution (MPI) license:
+    - For providers exceeding SPI thresholds
+    - Minimum base capital requirement: S$250,000
+
+DEFINITION OF DPT SERVICE (Section 2)
+
+"digital payment token" means any digital representation of value that:
+(a) is expressed as a unit;
+(b) is not denominated in any currency;
+(c) is, or is intended to be, a medium of exchange accepted by the public;
+(d) can be transferred, stored or traded electronically; and
+(e) satisfies such other characteristics as MAS may prescribe.
+
+"digital payment token service" means any of the following services:
+(a) dealing in digital payment tokens (DPT dealing);
+(b) facilitating the exchange of digital payment tokens (DPT exchange);
+(c) digital payment token transfer service (DPT transfer);
+(d) digital payment token custodial service (DPT custody).
+
+PART 3 - CONDUCT OF BUSINESS
+
+Section 23 - Safeguarding of money received
+DPT service providers must:
+- Segregate customer digital payment tokens from operational assets
+- Hold customer assets on statutory trust
+- Maintain separate blockchain addresses for customer and firm assets
+- Store at least 90% of customer assets in cold storage (MAS Guidelines)
+- Conduct daily reconciliation of customer holdings
+
+MAS NOTICE PSN02 - AML/CFT REQUIREMENTS
+
+Key obligations for DPT service providers:
+1. Appoint AML/CFT compliance officer at management level
+2. Implement risk-based customer due diligence (CDD)
+3. Conduct ongoing transaction monitoring
+4. File Suspicious Transaction Reports (STRs) with STRO
+5. Retain CDD and transaction records for minimum 5 years
+6. Implement Travel Rule for transfers >= CHF equivalent threshold
+
+MAS STABLECOIN FRAMEWORK (August 2023)
+
+Requirements for MAS-regulated single-currency stablecoins:
+1. Issuer must be MAS-licensed entity
+2. 100% reserve backing in cash, bank deposits, or government securities
+3. Reserves segregated with accredited custodians
+4. Annual audit with monthly attestations
+5. Minimum base capital S$1,000,000 or 50% annual operating expenses
+6. Redemption at par within 5 business days
+7. Single-currency pegged to SGD or G10 currencies only
+
+RETAIL CUSTOMER RESTRICTIONS (MAS Guidelines October 2022)
+
+Prohibited activities for retail customers:
+- DPT lending and borrowing services
+- Staking services
+- Margin or leveraged trading
+- Public advertising (transport, public spaces)
+- Trivializing cryptocurrency risks
+
+FSMA 2022 - OFFSHORE SERVICES (Effective 30 June 2025)
+
+Digital Token Service Provider (DTSP) licensing:
+- Required for Singapore entities serving only offshore customers
+- Applies to DPT and capital market tokens
+- Does not apply to pure utility/governance tokens
+- MAS applies high bar due to elevated ML risks

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-config
+data:
+  ENVIRONMENT: production
+  DEBUG: "false"
+  ENABLE_VECTOR_SEARCH: "true"
+  ENABLE_FEATURE_STORE: "true"
+  ENABLE_DECODER_SERVICE: "true"
+  TEMPORAL_NAMESPACE: "default"
+  TEMPORAL_TASK_QUEUE: "regulatory-workflows"
+  TEMPORAL_HOST: "temporal-frontend.temporal.svc.cluster.local:7233"
+  CORS_ORIGINS: "https://institutional-defi.example.com"
+  LOG_LEVEL: "WARNING"
+  LOG_FORMAT: "json"

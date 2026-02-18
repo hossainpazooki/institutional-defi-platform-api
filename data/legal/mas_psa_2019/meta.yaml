@@ -1,0 +1,12 @@
+document_id: psa_2019
+title: Payment Services Act 2019 (Singapore)
+citation: "Payment Services Act 2019 (No. 2 of 2019), as amended"
+jurisdiction: SG
+authority: Monetary Authority of Singapore (MAS)
+effective_date: 2020-01-28
+source_url: https://sso.agc.gov.sg/act/psa2019
+related_documents:
+  - psn02_2024: "MAS Notice PSN02 - AML/CFT for Digital Payment Token Service"
+  - mas_guidelines_dpt: "Guidelines on Licensing for Digital Payment Token Service Providers"
+  - stablecoin_framework_2023: "MAS Stablecoin Regulatory Framework"
+  - fsma_2022: "Financial Services and Markets Act 2022"

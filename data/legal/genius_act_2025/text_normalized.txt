@@ -1,0 +1,138 @@
+# GENIUS Act (Guiding and Establishing National Innovation for U.S. Stablecoins)
+# S. 394, 119th Congress (2025)
+# Source: https://www.congress.gov/bill/119th-congress/senate-bill/394
+#
+# This file contains normalized excerpts of selected GENIUS Act provisions.
+# Note: This is draft legislation; provisions may change before enactment.
+# TODO: Extend with additional sections as needed for rule coverage.
+
+TITLE I - DEFINITIONS AND SCOPE
+
+Section 101 - Definitions
+
+In this Act:
+(1) PAYMENT STABLECOIN - The term "payment stablecoin" means a crypto-asset that:
+    (A) is or is designed to be used as a means of payment or settlement;
+    (B) is denominated in a national currency;
+    (C) the issuer is obligated to convert, redeem, or repurchase for a fixed amount of monetary value; and
+    (D) is not a national currency, deposit, or security.
+
+(2) PERMITTED PAYMENT STABLECOIN ISSUER - The term "permitted payment stablecoin issuer" means:
+    (A) a depository institution;
+    (B) a federally qualified nonbank payment stablecoin issuer; or
+    (C) a State qualified payment stablecoin issuer.
+
+(3) RESERVE ASSETS - The term "reserve assets" means:
+    (A) United States coins and currency;
+    (B) funds held as demand deposits at a depository institution insured by the Federal Deposit Insurance Corporation;
+    (C) Treasury bills with a maturity of 93 days or less;
+    (D) repurchase agreements backed by Treasury bills with a maturity of 93 days or less; or
+    (E) reserves maintained at a Federal Reserve Bank.
+
+(4) STABLECOIN RESERVES - The term "stablecoin reserves" means the pool of reserve assets maintained by a permitted payment stablecoin issuer to back its outstanding payment stablecoins.
+
+Section 102 - Scope of Application
+
+(a) IN GENERAL - This Act applies to any person that issues payment stablecoins in or from the United States.
+
+(b) EXCLUSIONS - This Act does not apply to:
+    (1) stablecoins issued solely for testing purposes in a regulatory sandbox;
+    (2) stablecoins with an aggregate outstanding value of less than $1,000,000.
+
+TITLE II - AUTHORIZATION REQUIREMENTS
+
+Section 201 - Prohibition on Unauthorized Issuance
+
+(a) IN GENERAL - It shall be unlawful for any person to issue a payment stablecoin in or from the United States unless such person is a permitted payment stablecoin issuer.
+
+(b) PENALTIES - Any person who violates subsection (a) shall be subject to:
+    (1) a civil money penalty of not more than $100,000 for each day during which the violation continues; and
+    (2) criminal penalties of not more than $1,000,000 or imprisonment for not more than 5 years, or both.
+
+Section 202 - Federal Qualification
+
+(a) APPLICATION - A person seeking to become a federally qualified nonbank payment stablecoin issuer shall submit an application to the appropriate Federal banking agency.
+
+(b) REQUIREMENTS - To qualify as a federally qualified nonbank payment stablecoin issuer, an applicant must demonstrate:
+    (1) sufficient capital to absorb operational losses;
+    (2) adequate governance and risk management frameworks;
+    (3) the technical capability to maintain accurate records of all stablecoin issuances and redemptions;
+    (4) policies and procedures for compliance with anti-money laundering requirements.
+
+Section 203 - State Qualification
+
+(a) STATE AUTHORITY - A State may establish a regulatory framework for payment stablecoin issuers that meets or exceeds the requirements established under this Act.
+
+(b) RECIPROCITY - A payment stablecoin issued by a State qualified payment stablecoin issuer may be offered to residents of other States, provided that:
+    (1) the issuing State has entered into a reciprocity agreement with the receiving State; or
+    (2) the receiving State has not established requirements for payment stablecoin issuers.
+
+TITLE III - RESERVE REQUIREMENTS
+
+Section 301 - Composition of Reserves
+
+(a) 1:1 BACKING - A permitted payment stablecoin issuer shall maintain stablecoin reserves equal to or greater than the aggregate face amount of all outstanding payment stablecoins issued by such issuer.
+
+(b) ELIGIBLE ASSETS - Stablecoin reserves shall consist solely of reserve assets as defined in Section 101(3).
+
+(c) PROHIBITION ON REHYPOTHECATION - A permitted payment stablecoin issuer shall not:
+    (1) pledge, sell, loan, or otherwise encumber any stablecoin reserves; or
+    (2) commingle stablecoin reserves with other assets of the issuer.
+
+Section 302 - Segregation and Custody
+
+(a) SEGREGATION - A permitted payment stablecoin issuer shall hold stablecoin reserves in a manner that is legally and operationally segregated from the issuer's proprietary assets.
+
+(b) CUSTODY REQUIREMENTS - Stablecoin reserves shall be held:
+    (1) in a segregated account at a depository institution insured by the Federal Deposit Insurance Corporation;
+    (2) in a segregated account at a Federal Reserve Bank; or
+    (3) in custody with a qualified custodian approved by the appropriate Federal banking agency.
+
+Section 303 - Disclosure Requirements
+
+(a) MONTHLY ATTESTATION - A permitted payment stablecoin issuer shall publish monthly, on its website:
+    (1) the total value of outstanding payment stablecoins;
+    (2) the composition and value of stablecoin reserves; and
+    (3) an attestation by an independent certified public accountant that stablecoin reserves meet the requirements of this Title.
+
+(b) ANNUAL AUDIT - A permitted payment stablecoin issuer shall obtain an annual audit of its stablecoin reserves by an independent registered public accounting firm.
+
+TITLE IV - REDEMPTION RIGHTS
+
+Section 401 - Right to Redemption
+
+(a) IN GENERAL - A holder of a payment stablecoin issued by a permitted payment stablecoin issuer shall have the right to redeem such stablecoin for the face amount in United States dollars.
+
+(b) TIMING - A permitted payment stablecoin issuer shall honor a redemption request:
+    (1) within 1 business day of receiving the request, for requests of $250,000 or less; and
+    (2) within 3 business days of receiving the request, for requests exceeding $250,000.
+
+(c) FEES - A permitted payment stablecoin issuer may charge a reasonable fee for redemption, provided that:
+    (1) the fee is disclosed in advance; and
+    (2) the fee does not exceed 0.1% of the redemption amount.
+
+Section 402 - Priority in Insolvency
+
+(a) PRIORITY CLAIM - In the event of the insolvency or receivership of a permitted payment stablecoin issuer, holders of payment stablecoins shall have a priority claim on stablecoin reserves ahead of all other creditors.
+
+(b) BANKRUPTCY PROTECTION - Stablecoin reserves held pursuant to Section 302 shall not be subject to attachment, levy, or seizure by creditors of the permitted payment stablecoin issuer, except as necessary to satisfy the claims of stablecoin holders.
+
+TITLE V - INTEROPERABILITY AND CONSUMER PROTECTION
+
+Section 501 - Interoperability Requirements
+
+(a) TRANSFERS - A permitted payment stablecoin issuer shall ensure that its payment stablecoins can be transferred between holders without requiring the involvement of the issuer.
+
+(b) STANDARDS - The appropriate Federal banking agencies, in consultation with the Financial Stability Oversight Council, shall establish standards for:
+    (1) interoperability among payment stablecoins; and
+    (2) compatibility with existing payment systems.
+
+Section 502 - Consumer Protection
+
+(a) DISCLOSURES - A permitted payment stablecoin issuer shall provide clear and conspicuous disclosures to consumers regarding:
+    (1) the nature of payment stablecoins and the risks associated with holding them;
+    (2) redemption rights and procedures;
+    (3) whether payment stablecoins are insured by the Federal Deposit Insurance Corporation; and
+    (4) complaint procedures.
+
+(b) PROHIBITION ON MISLEADING STATEMENTS - A permitted payment stablecoin issuer shall not make any false or misleading statement regarding the backing, stability, or insurance status of its payment stablecoins.

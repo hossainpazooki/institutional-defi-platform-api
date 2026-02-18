@@ -1,0 +1,401 @@
+# GENIUS Act Stablecoin Rules
+# Based on S.394 - Guiding and Establishing National Innovation for U.S. Stablecoins Act
+# Note: Some provisions are illustrative based on the proposed bill structure
+
+- rule_id: genius_issuer_authorization
+  version: "1.0"
+  description: |
+    Payment stablecoin issuer authorization requirement under GENIUS Act Section 3.
+    Only authorized entities may issue payment stablecoins in the United States.
+  effective_from: 2025-01-01
+  tags: [genius, authorization, stablecoin, issuer]
+
+  applies_if:
+    all:
+      - field: instrument_type
+        operator: "=="
+        value: payment_stablecoin
+      - field: activity
+        operator: "=="
+        value: issuance
+      - field: jurisdiction
+        operator: "=="
+        value: US
+
+  decision_tree:
+    node_id: check_issuer_type
+    condition:
+      field: issuer_type
+      operator: in
+      value: [insured_depository, federal_nonbank_issuer, state_qualified_issuer]
+    true_branch:
+      node_id: check_authorization_status
+      condition:
+        field: issuer_authorized
+        operator: "=="
+        value: true
+      true_branch:
+        result: authorized
+        notes: "Issuer is an authorized payment stablecoin issuer"
+      false_branch:
+        result: not_authorized
+        obligations:
+          - id: obtain_issuer_license
+            description: "Obtain payment stablecoin issuer license from appropriate regulator"
+    false_branch:
+      result: prohibited
+      obligations:
+        - id: become_qualified_issuer
+          description: "Entity must become an insured depository, federal nonbank issuer, or state-qualified issuer"
+
+  source:
+    document_id: genius_act_2025
+    article: "101"
+    pages: [5, 6]
+
+  interpretation_notes: |
+    Section 101 establishes that only three categories of entities may issue payment stablecoins:
+    1. Insured depository institutions
+    2. Federal nonbank payment stablecoin issuers (licensed by OCC)
+    3. State-qualified payment stablecoin issuers (licensed by states with federal approval)
+
+- rule_id: genius_reserve_requirements
+  version: "1.0"
+  description: |
+    Reserve asset requirements for payment stablecoin issuers under GENIUS Act Section 4.
+    Issuers must maintain 1:1 backing with high-quality liquid assets.
+  effective_from: 2025-01-01
+  tags: [genius, reserves, stablecoin, backing]
+
+  applies_if:
+    all:
+      - field: instrument_type
+        operator: "=="
+        value: payment_stablecoin
+      - field: activity
+        operator: "=="
+        value: reserve_management
+      - field: jurisdiction
+        operator: "=="
+        value: US
+
+  decision_tree:
+    node_id: check_reserve_ratio
+    condition:
+      field: reserve_ratio
+      operator: ">="
+      value: 1.0
+    true_branch:
+      node_id: check_asset_quality
+      condition:
+        field: reserve_asset_type
+        operator: in
+        value: [us_currency, treasury_bills, treasury_notes, insured_deposits, reverse_repo]
+      true_branch:
+        node_id: check_segregation
+        condition:
+          field: reserves_segregated
+          operator: "=="
+          value: true
+        true_branch:
+          result: compliant
+          notes: "Reserve requirements satisfied"
+        false_branch:
+          result: non_compliant
+          obligations:
+            - id: segregate_reserves
+              description: "Segregate reserve assets from operational funds"
+      false_branch:
+        result: non_compliant
+        obligations:
+          - id: convert_reserves
+            description: "Convert reserves to permitted high-quality liquid assets"
+    false_branch:
+      result: non_compliant
+      obligations:
+        - id: increase_reserves
+          description: "Increase reserves to maintain 1:1 backing ratio"
+        - id: notify_regulator
+          description: "Notify appropriate federal or state regulator of reserve shortfall"
+
+  source:
+    document_id: genius_act_2025
+    article: "201"
+    pages: [12, 13, 14]
+
+  interpretation_notes: |
+    Section 201 requires payment stablecoin issuers to maintain reserves equal to 100%
+    of outstanding stablecoins. Permitted reserve assets include:
+    - U.S. currency and coin
+    - Treasury bills (maturity <= 90 days)
+    - Insured deposits at depository institutions
+    - Reverse repurchase agreements backed by Treasury securities
+
+- rule_id: genius_redemption_rights
+  version: "1.0"
+  description: |
+    Redemption rights for payment stablecoin holders under GENIUS Act Section 5.
+    Holders must be able to redeem stablecoins for U.S. dollars at par value.
+  effective_from: 2025-01-01
+  tags: [genius, redemption, stablecoin, consumer_protection]
+
+  applies_if:
+    all:
+      - field: instrument_type
+        operator: "=="
+        value: payment_stablecoin
+      - field: activity
+        operator: "=="
+        value: redemption
+      - field: jurisdiction
+        operator: "=="
+        value: US
+
+  decision_tree:
+    node_id: check_redemption_value
+    condition:
+      field: redemption_value_usd
+      operator: "=="
+      value: 1.0
+    true_branch:
+      node_id: check_redemption_timeframe
+      condition:
+        field: redemption_days
+        operator: "<="
+        value: 2
+      true_branch:
+        result: compliant
+        notes: "Redemption rights properly honored"
+      false_branch:
+        result: non_compliant
+        obligations:
+          - id: expedite_redemption
+            description: "Process redemption within 2 business days"
+    false_branch:
+      result: non_compliant
+      obligations:
+        - id: honor_par_redemption
+          description: "Redeem stablecoins at par value (1:1 USD)"
+        - id: compensate_holder
+          description: "Compensate holder for any redemption shortfall"
+
+  source:
+    document_id: genius_act_2025
+    article: "202"
+    pages: [15, 16]
+
+  interpretation_notes: |
+    Section 202 establishes mandatory redemption rights:
+    - Holders may redeem at any time for U.S. dollars at par (1:1)
+    - Redemption must be completed within 2 business days
+    - Issuers may not impose redemption fees exceeding reasonable costs
+
+- rule_id: genius_disclosure_requirements
+  version: "1.0"
+  description: |
+    Disclosure requirements for payment stablecoin issuers under GENIUS Act Section 6.
+    Monthly attestations of reserves and public disclosure of material information.
+  effective_from: 2025-01-01
+  tags: [genius, disclosure, transparency, reporting]
+
+  applies_if:
+    all:
+      - field: instrument_type
+        operator: "=="
+        value: payment_stablecoin
+      - field: activity
+        operator: "=="
+        value: disclosure
+      - field: jurisdiction
+        operator: "=="
+        value: US
+
+  decision_tree:
+    node_id: check_monthly_attestation
+    condition:
+      field: monthly_attestation_current
+      operator: "=="
+      value: true
+    true_branch:
+      node_id: check_public_disclosure
+      condition:
+        field: reserve_composition_public
+        operator: "=="
+        value: true
+      true_branch:
+        result: compliant
+        notes: "Disclosure requirements satisfied"
+      false_branch:
+        result: non_compliant
+        obligations:
+          - id: publish_reserve_composition
+            description: "Publicly disclose reserve asset composition on issuer website"
+    false_branch:
+      result: non_compliant
+      obligations:
+        - id: obtain_attestation
+          description: "Obtain monthly attestation from registered public accountant"
+        - id: file_with_regulator
+          description: "File attestation with appropriate federal or state regulator"
+
+  source:
+    document_id: genius_act_2025
+    article: "203"
+    pages: [17, 18]
+
+  interpretation_notes: |
+    Section 203 mandates:
+    - Monthly attestations by registered public accountants
+    - Public disclosure of reserve composition
+    - Immediate disclosure of material events affecting reserves
+
+- rule_id: genius_aml_compliance
+  version: "1.0"
+  description: |
+    Anti-money laundering compliance requirements for payment stablecoin issuers
+    under GENIUS Act Section 7. BSA/AML program requirements.
+  effective_from: 2025-01-01
+  tags: [genius, aml, compliance, bsa]
+
+  applies_if:
+    all:
+      - field: instrument_type
+        operator: "=="
+        value: payment_stablecoin
+      - field: activity
+        operator: in
+        value: [issuance, transfer, redemption]
+      - field: jurisdiction
+        operator: "=="
+        value: US
+
+  decision_tree:
+    node_id: check_aml_program
+    condition:
+      field: aml_program_implemented
+      operator: "=="
+      value: true
+    true_branch:
+      node_id: check_kyc_compliance
+      condition:
+        field: kyc_procedures_current
+        operator: "=="
+        value: true
+      true_branch:
+        node_id: check_sar_filing
+        condition:
+          field: sar_filing_current
+          operator: "=="
+          value: true
+        true_branch:
+          result: compliant
+          notes: "AML compliance requirements satisfied"
+        false_branch:
+          result: non_compliant
+          obligations:
+            - id: file_overdue_sars
+              description: "File any overdue Suspicious Activity Reports"
+      false_branch:
+        result: non_compliant
+        obligations:
+          - id: update_kyc_procedures
+            description: "Update and implement current KYC procedures"
+    false_branch:
+      result: non_compliant
+      obligations:
+        - id: implement_aml_program
+          description: "Implement comprehensive AML program per BSA requirements"
+        - id: designate_bsa_officer
+          description: "Designate BSA compliance officer"
+        - id: establish_monitoring
+          description: "Establish transaction monitoring systems"
+
+  source:
+    document_id: genius_act_2025
+    article: "301"
+    pages: [22, 23, 24]
+
+  interpretation_notes: |
+    Section 301 requires payment stablecoin issuers to comply with Bank Secrecy Act
+    requirements including:
+    - Customer identification programs (CIP)
+    - Know Your Customer (KYC) procedures
+    - Suspicious Activity Reporting (SAR)
+    - Currency Transaction Reporting (CTR)
+
+- rule_id: genius_state_licensing
+  version: "1.0"
+  description: |
+    State licensing requirements for state-qualified payment stablecoin issuers
+    under GENIUS Act Section 8. State regimes must meet federal standards.
+  effective_from: 2025-01-01
+  tags: [genius, state, licensing, qualified_issuer]
+
+  applies_if:
+    all:
+      - field: instrument_type
+        operator: "=="
+        value: payment_stablecoin
+      - field: issuer_type
+        operator: "=="
+        value: state_qualified_issuer
+      - field: jurisdiction
+        operator: "=="
+        value: US
+
+  decision_tree:
+    node_id: check_state_license
+    condition:
+      field: state_license_valid
+      operator: "=="
+      value: true
+    true_branch:
+      node_id: check_state_regime_approved
+      condition:
+        field: state_regime_federally_approved
+        operator: "=="
+        value: true
+      true_branch:
+        node_id: check_reciprocity
+        condition:
+          field: operating_in_home_state_only
+          operator: "=="
+          value: true
+        true_branch:
+          result: authorized
+          notes: "State-qualified issuer authorized in home state"
+        false_branch:
+          node_id: check_interstate_approval
+          condition:
+            field: interstate_operation_approved
+            operator: "=="
+            value: true
+          true_branch:
+            result: authorized
+            notes: "State-qualified issuer authorized for interstate operation"
+          false_branch:
+            result: restricted
+            obligations:
+              - id: obtain_interstate_approval
+                description: "Obtain approval for interstate operation from host states or federal regulator"
+      false_branch:
+        result: not_authorized
+        obligations:
+          - id: await_federal_approval
+            description: "State licensing regime must receive federal approval"
+    false_branch:
+      result: not_authorized
+      obligations:
+        - id: obtain_state_license
+          description: "Obtain payment stablecoin issuer license from qualifying state"
+
+  source:
+    document_id: genius_act_2025
+    article: "102"
+    pages: [7, 8, 9]
+
+  interpretation_notes: |
+    Section 102 establishes the framework for state-qualified issuers:
+    - State must have licensing regime approved by federal regulators
+    - State regime must meet minimum federal standards for reserves, redemption, etc.
+    - Interstate operation requires additional approvals

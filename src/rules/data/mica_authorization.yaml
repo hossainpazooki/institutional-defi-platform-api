@@ -1,0 +1,114 @@
+# MiCA Authorization Rules
+# Based on Regulation (EU) 2023/1114 (Markets in Crypto-Assets)
+
+- rule_id: mica_art36_public_offer_authorization
+  version: "1.0"
+  description: |
+    Authorization requirement for public offers of asset-referenced tokens (ARTs)
+    and certain crypto-assets under MiCA Article 36.
+  effective_from: 2024-06-30
+  tags: [mica, authorization, art, public_offer]
+
+  applies_if:
+    all:
+      - field: instrument_type
+        operator: in
+        value: [art, stablecoin]
+      - field: activity
+        operator: "=="
+        value: public_offer
+      - field: jurisdiction
+        operator: "=="
+        value: EU
+
+  decision_tree:
+    node_id: check_exemption
+    condition:
+      field: is_credit_institution
+      operator: "=="
+      value: true
+    true_branch:
+      result: exempt
+      notes: "Credit institutions are exempt from separate authorization under Art. 36(2)"
+    false_branch:
+      node_id: check_authorization
+      condition:
+        field: authorized
+        operator: "=="
+        value: true
+      true_branch:
+        result: authorized
+        notes: "Issuer holds valid authorization"
+      false_branch:
+        result: not_authorized
+        obligations:
+          - id: obtain_authorization_art21
+            description: "Obtain authorization from competent authority per Article 21"
+          - id: submit_whitepaper_art6
+            description: "Prepare and submit crypto-asset white paper per Article 6"
+
+  source:
+    document_id: mica_2023
+    article: "36(1)"
+    pages: [65, 66]
+
+  interpretation_notes: |
+    Article 36(1) requires authorization for public offers of ARTs in the EU.
+    Credit institutions under Directive 2013/36/EU are exempt per Art. 36(2).
+    The authorization process follows Article 21.
+
+- rule_id: mica_art48_emt_authorization
+  version: "1.0"
+  description: |
+    Authorization requirement for issuance of e-money tokens (EMTs) under MiCA Article 48.
+  effective_from: 2024-06-30
+  tags: [mica, authorization, emt, stablecoin]
+
+  applies_if:
+    all:
+      - field: instrument_type
+        operator: "=="
+        value: emt
+      - field: activity
+        operator: in
+        value: [public_offer, admission_to_trading]
+      - field: jurisdiction
+        operator: "=="
+        value: EU
+
+  decision_tree:
+    node_id: check_institution_type
+    condition:
+      field: is_authorized_institution
+      operator: "=="
+      value: true
+    true_branch:
+      node_id: check_institution_class
+      condition:
+        field: issuer_type
+        operator: in
+        value: [credit_institution, e_money_institution]
+      true_branch:
+        result: authorized
+        notes: "Authorized credit institutions and e-money institutions may issue EMTs"
+      false_branch:
+        result: not_authorized
+        obligations:
+          - id: obtain_emi_authorization
+            description: "Obtain e-money institution authorization per Directive 2009/110/EC"
+    false_branch:
+      result: not_authorized
+      obligations:
+        - id: obtain_emi_authorization
+          description: "Obtain e-money institution authorization per Directive 2009/110/EC"
+        - id: submit_emt_whitepaper
+          description: "Prepare and submit EMT white paper per Article 51"
+
+  source:
+    document_id: mica_2023
+    article: "48"
+    pages: [75, 76]
+
+  interpretation_notes: |
+    EMTs can only be issued by authorized credit institutions or e-money institutions.
+    This is more restrictive than ARTs, which can be issued by any authorized entity.

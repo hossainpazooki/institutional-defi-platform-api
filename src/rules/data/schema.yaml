@@ -1,0 +1,83 @@
+# Rule DSL Schema Reference
+# This file documents the YAML rule format used by the decision engine.
+
+# A rule file can contain a single rule or a list of rules.
+
+# =============================================================================
+# RULE STRUCTURE
+# =============================================================================
+
+rule_id: string          # Required. Unique identifier for this rule.
+version: string          # Optional. Semantic version (default: "1.0")
+description: string      # Optional. Human-readable description.
+effective_from: date     # Optional. ISO date (YYYY-MM-DD) when rule becomes active.
+effective_to: date       # Optional. ISO date when rule expires.
+tags: [string]           # Optional. Tags for filtering (e.g., ["mica", "stablecoin"])
+
+# =============================================================================
+# APPLICABILITY CONDITIONS (applies_if)
+# =============================================================================
+
+applies_if:              # Optional. Conditions that must be true for rule to apply.
+  all:                   # All conditions must be true (AND)
+    - field: string      # Field name to check
+      operator: string   # One of: ==, !=, in, not_in, >, <, >=, <=, exists
+      value: any         # Expected value (type depends on operator)
+  any:                   # Any condition must be true (OR)
+    - field: string
+      operator: string
+      value: any
+
+# Conditions can be nested:
+#   all:
+#     - field: instrument_type
+#       operator: in
+#       value: [art, stablecoin]
+#     - any:
+#         - field: jurisdiction
+#           operator: "=="
+#           value: EU
+#         - field: is_significant
+#           operator: "=="
+#           value: true
+
+# =============================================================================
+# DECISION TREE
+# =============================================================================
+
+decision_tree:           # The decision logic as a tree of nodes.
+  node_id: string        # Identifier for this node (for tracing)
+  condition:             # Condition to evaluate at this node
+    field: string
+    operator: string
+    value: any
+  true_branch:           # Branch if condition is true
+    # Can be another node or a leaf
+  false_branch:          # Branch if condition is false
+    # Can be another node or a leaf
+
+# Leaf nodes (terminal results):
+#   result: string       # The decision outcome
+#   obligations: []      # Optional list of triggered obligations
+#   notes: string        # Optional explanation
+
+# =============================================================================
+# OBLIGATIONS
+# =============================================================================
+
+obligations:
+  - id: string           # Required. Obligation identifier
+    description: string  # Optional. What must be done
+    deadline: string     # Optional. When it must be done
+
+# =============================================================================
+# SOURCE REFERENCE
+# =============================================================================
+
+source:                  # Citation to legal source
+  document_id: string    # Required. Document identifier
+  article: string        # Optional. Article number
+  section: string        # Optional. Section
+  pages: [int]           # Optional. Page numbers
+
+interpretation_notes: string  # Optional. Explanation of modeling choices

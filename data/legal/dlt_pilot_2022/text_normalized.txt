@@ -1,0 +1,107 @@
+# DLT Pilot Regime Regulation
+# Regulation (EU) 2022/858
+# Source: https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32022R0858
+#
+# This file contains normalized excerpts of selected DLT Pilot provisions.
+# TODO: Extend with additional articles as needed for rule coverage.
+
+CHAPTER I - GENERAL PROVISIONS
+
+Article 1 - Subject matter and scope
+
+1. This Regulation lays down requirements on multilateral trading facilities and settlement systems based on distributed ledger technology for crypto-assets that qualify as financial instruments.
+
+2. This Regulation establishes:
+(a) requirements for granting and withdrawing specific permission to operate a DLT market infrastructure under this Regulation;
+(b) conditions for granting, modifying and withdrawing exemptions associated with such specific permission;
+(c) the conditions attached to such exemptions;
+(d) requirements for operating a DLT market infrastructure;
+(e) the conditions for and supervision of DLT market infrastructures, including the cooperation between operators of DLT market infrastructures and competent authorities and ESMA.
+
+Article 2 - Definitions
+
+For the purposes of this Regulation, the following definitions apply:
+(1) 'distributed ledger technology' or 'DLT' means a type of technology that enables the operation and use of distributed ledgers;
+(2) 'distributed ledger' means an information repository that keeps records of transactions and that is shared across, and synchronised between, a set of DLT network nodes using a consensus mechanism;
+(3) 'DLT market infrastructure' means a DLT multilateral trading facility, a DLT settlement system, or a DLT trading and settlement system;
+(4) 'DLT multilateral trading facility' or 'DLT MTF' means a multilateral trading facility that only admits to trading DLT financial instruments;
+(5) 'DLT settlement system' or 'DLT SS' means a settlement system that settles transactions in DLT financial instruments against payment or against delivery;
+(6) 'DLT trading and settlement system' or 'DLT TSS' means a DLT MTF or a DLT SS that combines services performed by both a DLT MTF and a DLT SS.
+
+Article 3 - Restrictions on DLT financial instruments
+
+1. A DLT financial instrument shall only be admitted to trading on a DLT MTF or recorded on a DLT SS if, at the time of its admission to trading or initial recording, it is one of the following:
+(a) a share, the issuer of which has a market capitalisation, or a tentative market capitalisation, of less than EUR 500 million;
+(b) a bond, other form of securitised debt, including depositary receipts in respect of such securities, or a money-market instrument, with an issue size of less than EUR 1 billion, excluding those that embed a derivative or incorporate a structure which makes it difficult for the client to understand the risk involved;
+(c) a unit in collective investment undertakings covered by Article 25(4), point (a)(iv), of Directive 2014/65/EU, the market value of the assets under management of which is less than EUR 500 million.
+
+2. The total market value of all DLT financial instruments admitted to trading on a DLT MTF or recorded on a DLT SS shall not exceed EUR 6 billion.
+
+CHAPTER II - DLT MARKET INFRASTRUCTURES
+
+Article 4 - Requirements relating to DLT MTF
+
+1. A DLT MTF may only be operated by a market operator or an investment firm that has received specific permission under Article 8.
+
+2. An operator of a DLT MTF shall comply with all the requirements applicable to a multilateral trading facility under Directive 2014/65/EU and Regulation (EU) No 600/2014, unless:
+(a) it has been granted one or more of the exemptions provided for in Article 4; and
+(b) it complies with:
+   (i) the conditions attached to those exemptions;
+   (ii) this Article and Articles 7, 8, 9, 10 and 11;
+   (iii) any additional compensatory measures that the competent authority considers appropriate.
+
+Article 5 - Requirements relating to DLT SS
+
+1. A DLT SS may only be operated by a central securities depository (CSD) that has received specific permission under Article 8.
+
+2. An operator of a DLT SS shall comply with all the requirements applicable to a CSD under Regulation (EU) No 909/2014, unless:
+(a) it has been granted one or more of the exemptions provided for in Article 5; and
+(b) it complies with:
+   (i) the conditions attached to those exemptions;
+   (ii) this Article and Articles 7, 8, 9, 10 and 11;
+   (iii) any additional compensatory measures that the competent authority considers appropriate.
+
+Article 6 - Requirements relating to DLT TSS
+
+1. A DLT TSS may only be operated by:
+(a) a market operator or an investment firm authorised as a DLT MTF; or
+(b) a CSD authorised as a DLT SS.
+
+2. An operator of a DLT TSS shall comply with all requirements applicable to either a DLT MTF or a DLT SS, as appropriate.
+
+Article 7 - Requirements applicable to all DLT market infrastructures
+
+1. The operator of a DLT market infrastructure shall establish clear and detailed written rules on the functioning of the distributed ledger technology that it operates, including:
+(a) the rules on accessing the distributed ledger, the participation in the validation process, the resolution of conflicts of interests and the management of operational risks;
+(b) the rules for ensuring the integrity, security, confidentiality and availability of any data stored on the distributed ledger;
+(c) the rules for the recovery and orderly wind-down of the DLT market infrastructure.
+
+2. The operator of a DLT market infrastructure shall ensure that the IT and cyber arrangements related to the use of the distributed ledger technology are proportionate to the nature, scale and complexity of its business.
+
+3. The operator of a DLT market infrastructure shall ensure that the distributed ledger technology it uses provides for the timely and accurate recording of all transactions in DLT financial instruments on the distributed ledger.
+
+Article 8 - Specific permission to operate a DLT market infrastructure
+
+1. A legal person that intends to operate a DLT market infrastructure shall apply to the competent authority of its home Member State for the specific permission referred to in Articles 4(1), 5(1) and 6(1).
+
+2. The application for specific permission shall include all of the following information:
+(a) the business plan, rules of the DLT market infrastructure, legal terms and any other relevant contractual arrangements with applicants for membership or participants;
+(b) a description of the functioning of the distributed ledger technology to be used;
+(c) a description of the overall IT and cyber arrangements;
+(d) a description of the custody arrangements for DLT financial instruments;
+(e) proof that the applicant has sufficient financial resources and appropriate insurance coverage.
+
+CHAPTER III - EXEMPTIONS
+
+Article 9 - Exemptions that may be granted to DLT MTFs
+
+1. An operator of a DLT MTF may request that the competent authority grant it one or more of the following exemptions:
+(a) an exemption from the obligation to record transactions in DLT financial instruments in separate accounts;
+(b) an exemption allowing natural persons to be admitted as members or participants, provided that those persons are of sufficiently good repute;
+(c) an exemption from the settlement finality requirements.
+
+Article 10 - Exemptions that may be granted to DLT SSs
+
+1. An operator of a DLT SS may request that the competent authority grant it one or more of the following exemptions:
+(a) an exemption from the requirement to keep securities accounts in book-entry form;
+(b) an exemption allowing cash settlement to take place through commercial bank money.

@@ -1,0 +1,174 @@
+# RWA (Real-World Asset) Authorization Rules
+# Based on EU regulatory framework for tokenized assets (hypothetical rwa_eu_2025)
+
+- rule_id: rwa_tokenization_authorization
+  version: "1.0"
+  description: |
+    Authorization requirement for tokenizing real-world assets in the EU.
+    Issuers must obtain authorization before offering tokenized RWAs to the public.
+  effective_from: 2025-01-01
+  tags: [rwa, authorization, tokenization]
+
+  applies_if:
+    all:
+      - field: instrument_type
+        operator: in
+        value: [rwa_token, rwa_debt, rwa_equity, rwa_property]
+      - field: activity
+        operator: "=="
+        value: tokenization
+      - field: jurisdiction
+        operator: "=="
+        value: EU
+
+  decision_tree:
+    node_id: check_regulated_market
+    condition:
+      field: is_regulated_market_issuer
+      operator: "=="
+      value: true
+    true_branch:
+      result: authorized
+      notes: "Issuers already authorized under MiFID II may tokenize assets"
+    false_branch:
+      node_id: check_authorization
+      condition:
+        field: rwa_authorized
+        operator: "=="
+        value: true
+      true_branch:
+        result: authorized
+        notes: "Issuer holds valid RWA tokenization authorization"
+      false_branch:
+        result: not_authorized
+        obligations:
+          - id: obtain_rwa_authorization
+            description: "Obtain RWA tokenization authorization from competent authority"
+          - id: submit_asset_documentation
+            description: "Submit asset verification documentation and legal structure"
+
+  source:
+    document_id: rwa_eu_2025
+    article: "5(1)"
+    pages: [12, 13]
+
+  interpretation_notes: |
+    Article 5(1) requires authorization for tokenizing real-world assets in the EU.
+    Entities already authorized as investment firms under MiFID II are exempt
+    from separate RWA authorization per Art. 5(2).
+
+- rule_id: rwa_disclosure_requirements
+  version: "1.0"
+  description: |
+    Ongoing disclosure requirements for tokenized real-world assets.
+    Issuers must provide periodic reports on underlying asset performance and valuation.
+  effective_from: 2025-01-01
+  tags: [rwa, disclosure, reporting]
+
+  applies_if:
+    all:
+      - field: instrument_type
+        operator: in
+        value: [rwa_token, rwa_debt, rwa_equity, rwa_property]
+      - field: activity
+        operator: "=="
+        value: disclosure
+      - field: jurisdiction
+        operator: "=="
+        value: EU
+
+  decision_tree:
+    node_id: check_reporting_status
+    condition:
+      field: disclosure_current
+      operator: "=="
+      value: true
+    true_branch:
+      result: compliant
+      notes: "Disclosure requirements satisfied"
+    false_branch:
+      node_id: check_exemption
+      condition:
+        field: total_token_value_eur
+        operator: "<"
+        value: 1000000
+      true_branch:
+        result: exempt
+        notes: "Small offerings (<EUR 1M) exempt from periodic disclosure"
+      false_branch:
+        result: non_compliant
+        obligations:
+          - id: submit_quarterly_report
+            description: "Submit quarterly asset performance report per Article 12"
+          - id: publish_valuation
+            description: "Publish independent asset valuation per Article 13"
+          - id: notify_material_changes
+            description: "Notify investors of material changes to underlying asset"
+
+  source:
+    document_id: rwa_eu_2025
+    article: "12"
+    pages: [28, 29]
+
+  interpretation_notes: |
+    Article 12 mandates ongoing disclosure for RWA tokens above EUR 1M threshold.
+    Quarterly reports must include asset performance, valuation updates, and
+    any material changes to the underlying asset or legal structure.
+
+- rule_id: rwa_custody_requirements
+  version: "1.0"
+  description: |
+    Custody requirements for underlying assets of tokenized RWAs.
+    Assets must be held by authorized custodians with proper segregation.
+  effective_from: 2025-01-01
+  tags: [rwa, custody, safekeeping]
+
+  applies_if:
+    all:
+      - field: instrument_type
+        operator: in
+        value: [rwa_token, rwa_debt, rwa_equity, rwa_property]
+      - field: activity
+        operator: "=="
+        value: custody
+      - field: jurisdiction
+        operator: "=="
+        value: EU
+
+  decision_tree:
+    node_id: check_custodian_authorized
+    condition:
+      field: custodian_authorized
+      operator: "=="
+      value: true
+    true_branch:
+      node_id: check_segregation
+      condition:
+        field: assets_segregated
+        operator: "=="
+        value: true
+      true_branch:
+        result: compliant
+        notes: "Custody requirements satisfied"
+      false_branch:
+        result: non_compliant
+        obligations:
+          - id: segregate_assets
+            description: "Ensure underlying assets are segregated from custodian's own assets"
+    false_branch:
+      result: non_compliant
+      obligations:
+        - id: appoint_authorized_custodian
+          description: "Appoint custodian authorized under CSDR or equivalent"
+        - id: execute_custody_agreement
+          description: "Execute custody agreement with asset segregation provisions"
+
+  source:
+    document_id: rwa_eu_2025
+    article: "18"
+    pages: [42, 43]
+
+  interpretation_notes: |
+    Article 18 requires underlying RWA assets to be held by authorized custodians.
+    For financial instruments, this means CSDR-authorized CSDs or custodians.
+    For real property, this may involve escrow arrangements with licensed trustees.

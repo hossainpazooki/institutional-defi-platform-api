@@ -1,0 +1,19 @@
+document_id: fca_crypto_2024
+title: FCA Cryptoasset Financial Promotions Regime
+citation: "PS22/10, FG23/3, COBS 4.12A"
+jurisdiction: UK
+authority: FCA
+source_url: https://www.fca.org.uk/firms/cryptoassets
+effective_date: 2024-01-08
+version: "1.0"
+description: |
+  The FCA's cryptoasset financial promotions regime establishes rules for
+  firms promoting cryptoassets to UK consumers. Key requirements include:
+  - Authorization requirements for financial promotions
+  - Mandatory risk warnings
+  - Ban on incentives to invest
+  - 24-hour cooling off period for first-time retail investors
+  - Appropriateness assessments
+
+  This regime applies to qualifying cryptoassets promoted to UK persons,
+  regardless of where the firm is based.

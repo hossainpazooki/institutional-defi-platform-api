@@ -1,0 +1,137 @@
+name: CD Staging
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  EKS_CLUSTER: institutional-defi-eks
+  NAMESPACE: institutional-defi-dev
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    outputs:
+      image-tag: ${{ steps.meta.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_CD_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set image tag
+        id: meta
+        run: echo "sha=${GITHUB_SHA::8}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push API image
+        run: |
+          docker build -t ${{ steps.ecr.outputs.registry }}/institutional-defi-api:${{ steps.meta.outputs.sha }} .
+          docker push ${{ steps.ecr.outputs.registry }}/institutional-defi-api:${{ steps.meta.outputs.sha }}
+
+      - name: Build and push Worker image
+        run: |
+          docker build -f Dockerfile.worker -t ${{ steps.ecr.outputs.registry }}/institutional-defi-worker:${{ steps.meta.outputs.sha }} .
+          docker push ${{ steps.ecr.outputs.registry }}/institutional-defi-worker:${{ steps.meta.outputs.sha }}
+
+  scan:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_CD_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Scan API image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.ecr.outputs.registry }}/institutional-defi-api:${{ needs.build-and-push.outputs.image-tag }}
+          severity: CRITICAL,HIGH
+          exit-code: 1
+
+      - name: Scan Worker image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.ecr.outputs.registry }}/institutional-defi-worker:${{ needs.build-and-push.outputs.image-tag }}
+          severity: CRITICAL,HIGH
+          exit-code: 1
+
+  deploy:
+    needs: [build-and-push, scan]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_CD_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER }} --region ${{ env.AWS_REGION }}
+
+      - name: Set image tags in kustomization
+        working-directory: kube/overlays/dev
+        run: |
+          kustomize edit set image \
+            institutional-defi-api=${{ steps.ecr.outputs.registry }}/institutional-defi-api:${{ needs.build-and-push.outputs.image-tag }} \
+            institutional-defi-worker=${{ steps.ecr.outputs.registry }}/institutional-defi-worker:${{ needs.build-and-push.outputs.image-tag }}
+
+      - name: Deploy to dev
+        run: kubectl apply -k kube/overlays/dev
+
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/api-dev -n ${{ env.NAMESPACE }} --timeout=300s
+          kubectl rollout status deployment/worker-dev -n ${{ env.NAMESPACE }} --timeout=300s
+
+      - name: Smoke test
+        run: |
+          API_URL=$(kubectl get ingress -n ${{ env.NAMESPACE }} -o jsonpath='{.items[0].status.loadBalancer.ingress[0].hostname}')
+          for i in {1..10}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://${API_URL}/health" || true)
+            if [ "$STATUS" = "200" ]; then
+              echo "Health check passed"
+              exit 0
+            fi
+            echo "Attempt $i: status=$STATUS, retrying..."
+            sleep 10
+          done
+          echo "Health check failed after 10 attempts"
+          exit 1
+
+      - name: Notify success
+        if: success()
+        run: |
+          curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+            -H 'Content-type: application/json' \
+            -d "{\"text\":\"Staging deploy succeeded: ${{ needs.build-and-push.outputs.image-tag }}\"}" || true
+
+      - name: Notify failure
+        if: failure()
+        run: |
+          curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+            -H 'Content-type: application/json' \
+            -d "{\"text\":\"Staging deploy FAILED: ${{ needs.build-and-push.outputs.image-tag }}\"}" || true

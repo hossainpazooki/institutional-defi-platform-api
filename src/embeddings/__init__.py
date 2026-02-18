@@ -1,0 +1,92 @@
+"""Embeddings domain - rule embedding CRUD and similarity search."""
+
+from .generator import EmbeddingGenerator, GeneratedEmbedding, create_embedding_records, ml_available
+from .graph import GraphEmbeddingService
+from .models import (
+    EmbeddingCondition,
+    EmbeddingDecision,
+    EmbeddingLegalSource,
+    EmbeddingRule,
+    EmbeddingType,
+    GraphEmbedding,
+    RuleEmbedding,
+)
+from .router import router as embedding_router
+from .schemas import (
+    ConditionCreate,
+    ConditionRead,
+    DecisionCreate,
+    DecisionRead,
+    EmbeddingRead,
+    EmbeddingTypeEnum,
+    EmbeddingWithVector,
+    EntitySearchRequest,
+    GraphComparisonRequest,
+    GraphComparisonResult,
+    GraphEdge,
+    GraphNode,
+    GraphSearchRequest,
+    HybridSearchRequest,
+    LegalSourceCreate,
+    LegalSourceRead,
+    LegalSourceSearchRequest,
+    OutcomeSearchRequest,
+    RuleCreate,
+    RuleGraph,
+    RuleList,
+    RuleRead,
+    RuleUpdate,
+    SearchRequest,
+    SearchResult,
+    SimilarityResult,
+    TextSearchRequest,
+)
+from .service import EmbeddingRuleService
+
+__all__ = [
+    # Router
+    "embedding_router",
+    # Models
+    "EmbeddingRule",
+    "EmbeddingCondition",
+    "EmbeddingDecision",
+    "EmbeddingLegalSource",
+    "RuleEmbedding",
+    "EmbeddingType",
+    "GraphEmbedding",
+    # Schemas
+    "ConditionCreate",
+    "ConditionRead",
+    "DecisionCreate",
+    "DecisionRead",
+    "LegalSourceCreate",
+    "LegalSourceRead",
+    "RuleCreate",
+    "RuleUpdate",
+    "RuleRead",
+    "RuleList",
+    "EmbeddingRead",
+    "EmbeddingWithVector",
+    "SimilarityResult",
+    "SearchRequest",
+    "EmbeddingTypeEnum",
+    "TextSearchRequest",
+    "EntitySearchRequest",
+    "OutcomeSearchRequest",
+    "LegalSourceSearchRequest",
+    "HybridSearchRequest",
+    "SearchResult",
+    "GraphSearchRequest",
+    "GraphComparisonRequest",
+    "GraphNode",
+    "GraphEdge",
+    "RuleGraph",
+    "GraphComparisonResult",
+    # Services
+    "EmbeddingRuleService",
+    "EmbeddingGenerator",
+    "ml_available",
+    "GeneratedEmbedding",
+    "create_embedding_records",
+    "GraphEmbeddingService",
+]

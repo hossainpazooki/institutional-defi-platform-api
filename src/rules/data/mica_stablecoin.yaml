@@ -1,0 +1,419 @@
+# MiCA Stablecoin Reserve Requirements
+# Based on Regulation (EU) 2023/1114
+
+- rule_id: mica_art38_reserve_assets
+  version: "1.0"
+  description: |
+    Reserve asset requirements for asset-referenced tokens (ARTs) under MiCA Article 38.
+    Issuers must maintain a reserve of assets backing the ART.
+  effective_from: 2024-06-30
+  tags: [mica, stablecoin, art, reserves]
+
+  applies_if:
+    all:
+      - field: instrument_type
+        operator: in
+        value: [art, stablecoin]
+      - field: activity
+        operator: in
+        value: [public_offer, admission_to_trading]
+      - field: jurisdiction
+        operator: "=="
+        value: EU
+
+  decision_tree:
+    node_id: check_reserve_exists
+    condition:
+      field: has_reserve
+      operator: "=="
+      value: true
+    true_branch:
+      node_id: check_reserve_custody
+      condition:
+        field: reserve_custodian_authorized
+        operator: "=="
+        value: true
+      true_branch:
+        result: compliant
+        notes: "Reserve requirements satisfied"
+      false_branch:
+        result: non_compliant
+        obligations:
+          - id: appoint_custodian_art37
+            description: "Appoint authorized custodian for reserve assets per Article 37"
+    false_branch:
+      result: non_compliant
+      obligations:
+        - id: establish_reserve_art38
+          description: "Establish reserve of assets per Article 38"
+        - id: appoint_custodian_art37
+          description: "Appoint authorized custodian for reserve assets per Article 37"
+
+  source:
+    document_id: mica_2023
+    article: "38"
+    pages: [67, 68]
+
+  interpretation_notes: |
+    Article 38 requires ART issuers to maintain a reserve of assets at all times.
+    The reserve must be segregated and held by authorized custodians (Art. 37).
+
+- rule_id: mica_art45_significant_art
+  version: "1.0"
+  description: |
+    Additional requirements for significant asset-referenced tokens under MiCA Article 45.
+  effective_from: 2024-06-30
+  tags: [mica, stablecoin, art, significant]
+
+  applies_if:
+    all:
+      - field: instrument_type
+        operator: in
+        value: [art, stablecoin]
+      - field: is_significant
+        operator: "=="
+        value: true
+      - field: jurisdiction
+        operator: "=="
+        value: EU
+
+  decision_tree:
+    node_id: check_eba_supervision
+    condition:
+      field: under_eba_supervision
+      operator: "=="
+      value: true
+    true_branch:
+      node_id: check_enhanced_requirements
+      condition:
+        field: enhanced_requirements_met
+        operator: "=="
+        value: true
+      true_branch:
+        result: compliant
+        notes: "Enhanced requirements for significant ARTs satisfied"
+      false_branch:
+        result: non_compliant
+        obligations:
+          - id: higher_own_funds_art45
+            description: "Maintain higher own funds requirements per Article 45(5)"
+          - id: liquidity_stress_testing
+            description: "Implement liquidity management and stress testing per Article 45(4)"
+          - id: recovery_plan
+            description: "Prepare recovery plan per Article 46"
+    false_branch:
+      result: supervision_required
+      obligations:
+        - id: notify_eba
+          description: "Issuer must be notified of significant status and transferred to EBA supervision"
+
+  source:
+    document_id: mica_2023
+    article: "45"
+    pages: [72, 73]
+
+  interpretation_notes: |
+    Significant ARTs (determined by criteria in Art. 43) are subject to EBA supervision
+    and enhanced prudential requirements including higher capital and liquidity buffers.
+    Thresholds: >EUR 5bn market cap, >10m holders, >EUR 500m daily transactions.
+
+- rule_id: mica_art6_whitepaper_requirements
+  version: "1.0"
+  description: |
+    Crypto-asset white paper requirements under MiCA Article 6.
+    Offerors must publish a white paper before offering crypto-assets to the public.
+  effective_from: 2024-06-30
+  tags: [mica, whitepaper, disclosure, public_offer]
+
+  applies_if:
+    all:
+      - field: instrument_type
+        operator: in
+        value: [art, emt, crypto_asset, utility_token]
+      - field: activity
+        operator: "=="
+        value: public_offer
+      - field: jurisdiction
+        operator: "=="
+        value: EU
+
+  decision_tree:
+    node_id: check_whitepaper_published
+    condition:
+      field: whitepaper_published
+      operator: "=="
+      value: true
+    true_branch:
+      node_id: check_whitepaper_content
+      condition:
+        field: whitepaper_compliant
+        operator: "=="
+        value: true
+      true_branch:
+        node_id: check_whitepaper_notification
+        condition:
+          field: whitepaper_notified_to_nca
+          operator: "=="
+          value: true
+        true_branch:
+          result: compliant
+          notes: "White paper requirements satisfied"
+        false_branch:
+          result: non_compliant
+          obligations:
+            - id: notify_nca_art8
+              description: "Notify competent authority of published white paper per Article 8"
+      false_branch:
+        result: non_compliant
+        obligations:
+          - id: update_whitepaper_content
+            description: "Update white paper to include all required information per Article 6(1)"
+    false_branch:
+      result: non_compliant
+      obligations:
+        - id: draft_whitepaper
+          description: "Draft and publish crypto-asset white paper per Article 6"
+        - id: notify_nca_art8
+          description: "Notify competent authority of published white paper per Article 8"
+
+  source:
+    document_id: mica_2023
+    article: "6"
+    pages: [28, 29, 30]
+
+  interpretation_notes: |
+    Article 6 requires white papers to contain:
+    - Information about offeror/issuer
+    - Project description and technology
+    - Rights and obligations attached to crypto-asset
+    - Risk warnings and disclaimers
+    White paper must be fair, clear, and not misleading.
+
+- rule_id: mica_art59_casp_authorization
+  version: "1.0"
+  description: |
+    Authorization requirements for crypto-asset service providers (CASPs) under MiCA Article 59.
+    CASPs must obtain authorization before providing services in the EU.
+  effective_from: 2024-06-30
+  tags: [mica, casp, authorization, services]
+
+  applies_if:
+    all:
+      - field: entity_type
+        operator: "=="
+        value: casp
+      - field: activity
+        operator: in
+        value: [custody, trading_platform, exchange, portfolio_management, advice, transfer]
+      - field: jurisdiction
+        operator: "=="
+        value: EU
+
+  decision_tree:
+    node_id: check_casp_type
+    condition:
+      field: is_credit_institution
+      operator: "=="
+      value: true
+    true_branch:
+      result: authorized
+      notes: "Credit institutions may provide crypto-asset services under existing license with notification"
+    false_branch:
+      node_id: check_investment_firm
+      condition:
+        field: is_investment_firm
+        operator: "=="
+        value: true
+      true_branch:
+        result: authorized
+        notes: "MiFID investment firms may provide certain crypto-asset services with notification"
+      false_branch:
+        node_id: check_casp_authorization
+        condition:
+          field: casp_authorized
+          operator: "=="
+          value: true
+        true_branch:
+          result: authorized
+          notes: "Entity holds valid CASP authorization"
+        false_branch:
+          result: not_authorized
+          obligations:
+            - id: apply_casp_authorization
+              description: "Apply for CASP authorization per Article 62"
+            - id: meet_prudential_requirements
+              description: "Meet prudential requirements per Article 66-68"
+            - id: establish_governance
+              description: "Establish governance arrangements per Article 68"
+
+  source:
+    document_id: mica_2023
+    article: "59"
+    pages: [88, 89, 90]
+
+  interpretation_notes: |
+    Article 59 establishes CASP authorization requirements.
+    CASPs must meet requirements for:
+    - Own funds (Article 66-67)
+    - Governance (Article 68)
+    - Safeguarding client assets (Article 70)
+    - Complaints handling (Article 71)
+    - Conflicts of interest (Article 72)
+
+- rule_id: mica_art91_market_abuse_prohibition
+  version: "1.0"
+  description: |
+    Prohibition of market abuse for crypto-assets under MiCA Article 91.
+    Insider dealing and market manipulation are prohibited.
+  effective_from: 2024-06-30
+  tags: [mica, market_abuse, insider_dealing, manipulation]
+
+  applies_if:
+    all:
+      - field: instrument_type
+        operator: in
+        value: [art, emt, crypto_asset, utility_token]
+      - field: activity
+        operator: in
+        value: [trading, transfer, public_offer, admission_to_trading]
+      - field: jurisdiction
+        operator: "=="
+        value: EU
+
+  decision_tree:
+    node_id: check_insider_dealing
+    condition:
+      field: has_inside_information
+      operator: "=="
+      value: true
+    true_branch:
+      node_id: check_dealing_on_info
+      condition:
+        field: dealt_on_inside_information
+        operator: "=="
+        value: true
+      true_branch:
+        result: prohibited
+        obligations:
+          - id: cease_dealing
+            description: "Immediately cease trading based on inside information"
+          - id: report_to_nca
+            description: "Self-report to competent authority"
+      false_branch:
+        node_id: check_disclosure
+        condition:
+          field: inside_information_disclosed
+          operator: "=="
+          value: true
+        true_branch:
+          result: compliant
+          notes: "Inside information properly disclosed"
+        false_branch:
+          result: non_compliant
+          obligations:
+            - id: disclose_information
+              description: "Disclose inside information per Article 88"
+    false_branch:
+      node_id: check_manipulation
+      condition:
+        field: market_manipulation_detected
+        operator: "=="
+        value: true
+      true_branch:
+        result: prohibited
+        obligations:
+          - id: cease_manipulation
+            description: "Immediately cease manipulative activities"
+          - id: report_to_nca
+            description: "Report to competent authority"
+      false_branch:
+        result: compliant
+        notes: "No market abuse detected"
+
+  source:
+    document_id: mica_2023
+    article: "91"
+    pages: [108, 109]
+
+  interpretation_notes: |
+    Article 91 prohibits:
+    - Insider dealing (using inside information to trade)
+    - Unlawful disclosure of inside information
+    - Market manipulation (including wash trading, spoofing)
+    Violations subject to administrative and criminal penalties.
+
+- rule_id: mica_art54_emt_redemption
+  version: "1.0"
+  description: |
+    Redemption rights for e-money token (EMT) holders under MiCA Article 54.
+    Holders must be able to redeem EMTs at par value at any time.
+  effective_from: 2024-06-30
+  tags: [mica, emt, redemption, par_value]
+
+  applies_if:
+    all:
+      - field: instrument_type
+        operator: "=="
+        value: emt
+      - field: activity
+        operator: "=="
+        value: redemption
+      - field: jurisdiction
+        operator: "=="
+        value: EU
+
+  decision_tree:
+    node_id: check_redemption_request
+    condition:
+      field: redemption_requested
+      operator: "=="
+      value: true
+    true_branch:
+      node_id: check_par_value
+      condition:
+        field: redemption_at_par
+        operator: "=="
+        value: true
+      true_branch:
+        node_id: check_fee_compliance
+        condition:
+          field: redemption_fee_percentage
+          operator: "<="
+          value: 0
+        true_branch:
+          result: compliant
+          notes: "EMT redemption at par value without fee"
+        false_branch:
+          node_id: check_fee_justified
+          condition:
+            field: fee_reflects_costs
+            operator: "=="
+            value: true
+          true_branch:
+            result: compliant
+            notes: "Redemption fee reflects actual costs only"
+          false_branch:
+            result: non_compliant
+            obligations:
+              - id: remove_excess_fee
+                description: "Remove fees exceeding actual redemption costs"
+      false_branch:
+        result: non_compliant
+        obligations:
+          - id: redeem_at_par
+            description: "Redeem EMT at par value (1:1 with reference currency)"
+    false_branch:
+      result: pending
+      notes: "No redemption request pending"
+
+  source:
+    document_id: mica_2023
+    article: "54"
+    pages: [80, 81]
+
+  interpretation_notes: |
+    Article 54 establishes redemption rights for EMT holders:
+    - Redemption at par value at any time
+    - No minimum redemption thresholds permitted
+    - Fees may only reflect actual costs of redemption
+    - Redemption in fiat currency or equivalent

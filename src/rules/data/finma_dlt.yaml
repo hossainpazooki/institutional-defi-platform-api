@@ -1,0 +1,493 @@
+# Switzerland FINMA DLT Rules
+# Based on DLT Act 2021 and FINMA Guidelines on ICOs/Tokens
+# Sources: https://www.finma.ch/en/documentation/dossier/dossier-fintech/
+#          https://www.admin.ch/opc/en/classified-compilation/20191803/index.html
+
+- rule_id: finma_token_classification
+  version: "1.0"
+  description: |
+    Token classification under FINMA ICO Guidelines. Tokens are classified as
+    payment, utility, or asset tokens based on their economic function.
+  effective_from: 2018-02-16
+  tags: [finma, token, classification, ico, switzerland]
+  jurisdiction: CH
+  regime_id: finma_dlt_2021
+  cross_border_relevant: true
+
+  applies_if:
+    all:
+      - field: activity
+        operator: in
+        value: [token_issuance, ico, token_offering]
+      - field: jurisdiction
+        operator: "=="
+        value: CH
+
+  decision_tree:
+    node_id: check_token_function
+    condition:
+      field: token_primary_function
+      operator: "=="
+      value: payment
+    true_branch:
+      result: payment_token
+      obligations:
+        - id: aml_compliance
+          description: "Comply with AMLA requirements for payment tokens"
+      notes: "Token classified as payment token (pure cryptocurrency) - AML rules apply"
+    false_branch:
+      node_id: check_utility_function
+      condition:
+        field: token_primary_function
+        operator: "=="
+        value: utility
+      true_branch:
+        node_id: check_utility_operational
+        condition:
+          field: application_operational
+          operator: "=="
+          value: true
+        true_branch:
+          result: utility_token
+          notes: "Token classified as utility token - minimal regulation if application operational"
+        false_branch:
+          result: hybrid_token
+          obligations:
+            - id: securities_prospectus
+              description: "May require prospectus if investment element present pre-launch"
+          notes: "Pre-functional utility token may have investment characteristics"
+      false_branch:
+        node_id: check_asset_characteristics
+        condition:
+          field: represents_claim
+          operator: "=="
+          value: true
+        true_branch:
+          result: asset_token
+          obligations:
+            - id: securities_compliance
+              description: "Comply with securities regulations (FMIA, FinSA)"
+            - id: prospectus_requirement
+              description: "Publish prospectus if publicly offered"
+          notes: "Token classified as asset token (security) - full securities law applies"
+        false_branch:
+          result: hybrid_token
+          obligations:
+            - id: finma_consultation
+              description: "Consult FINMA for classification of hybrid token"
+
+  source:
+    document_id: finma_ico_guidelines
+    article: "ICO Guidelines"
+    pages: [3, 4, 5]
+    url: "https://www.finma.ch/en/news/2018/02/20180216-mm-ico-wegleitung/"
+
+  interpretation_notes: |
+    FINMA ICO Guidelines (February 2018) establish three token categories:
+    1. Payment tokens: Means of payment, no claims against issuer (e.g., Bitcoin)
+    2. Utility tokens: Access to digital application/service (must be operational)
+    3. Asset tokens: Represent debt/equity claims, analogous to securities
+    Hybrid tokens combining functions must meet requirements of all applicable categories.
+
+- rule_id: finma_asset_token_securities
+  version: "1.0"
+  description: |
+    Asset token regulation as securities under Financial Market Infrastructure Act (FMIA).
+    Asset tokens representing claims are treated as securities if standardized for mass trading.
+  effective_from: 2021-08-01
+  tags: [finma, asset_token, securities, fmia, prospectus]
+  jurisdiction: CH
+  regime_id: finma_dlt_2021
+  cross_border_relevant: true
+
+  applies_if:
+    all:
+      - field: token_classification
+        operator: "=="
+        value: asset_token
+      - field: jurisdiction
+        operator: "=="
+        value: CH
+      - field: activity
+        operator: in
+        value: [token_issuance, public_offer, trading]
+
+  decision_tree:
+    node_id: check_standardized
+    condition:
+      field: standardized_for_mass_trading
+      operator: "=="
+      value: true
+    true_branch:
+      node_id: check_offering_type
+      condition:
+        field: offering_type
+        operator: "=="
+        value: public
+      true_branch:
+        node_id: check_prospectus
+        condition:
+          field: prospectus_approved
+          operator: "=="
+          value: true
+        true_branch:
+          result: compliant
+          notes: "Public offering of asset token with approved prospectus"
+        false_branch:
+          node_id: check_exemption
+          condition:
+            field: prospectus_exemption_applies
+            operator: "=="
+            value: true
+          true_branch:
+            result: compliant
+            notes: "Prospectus exemption applies (qualified investors, small offering, etc.)"
+          false_branch:
+            result: non_compliant
+            obligations:
+              - id: prepare_prospectus
+                description: "Prepare and submit prospectus to reviewing body for approval"
+              - id: finsa_compliance
+                description: "Comply with Financial Services Act (FinSA) prospectus requirements"
+      false_branch:
+        result: compliant
+        notes: "Private placement of asset token - reduced requirements"
+    false_branch:
+      result: not_securities
+      notes: "Token not standardized for mass trading - not classified as securities under FMIA"
+
+  source:
+    document_id: fmia_2015
+    article: "2(b)"
+    section: "Financial Market Infrastructure Act"
+    url: "https://www.admin.ch/opc/en/classified-compilation/20141779/index.html"
+
+  interpretation_notes: |
+    Under FMIA Article 2(b), securities are defined as instruments that are:
+    - Standardized and suitable for mass trading
+    - Offered publicly in same structure/denomination, OR
+    - Placed with 20+ clients under identical conditions
+    Asset tokens meeting this definition require prospectus under FinSA for public offers.
+
+- rule_id: finma_dlt_trading_facility
+  version: "1.0"
+  description: |
+    DLT Trading Facility license requirements under DLT Act 2021.
+    New license category for trading venues handling DLT securities.
+  effective_from: 2021-08-01
+  tags: [finma, dlt, trading_facility, exchange, license]
+  jurisdiction: CH
+  regime_id: finma_dlt_2021
+  cross_border_relevant: false
+
+  applies_if:
+    all:
+      - field: activity
+        operator: "=="
+        value: multilateral_dlt_trading
+      - field: jurisdiction
+        operator: "=="
+        value: CH
+
+  decision_tree:
+    node_id: check_trading_type
+    condition:
+      field: trades_dlt_securities
+      operator: "=="
+      value: true
+    true_branch:
+      node_id: check_license
+      condition:
+        field: dlt_trading_facility_license
+        operator: "=="
+        value: true
+      true_branch:
+        node_id: check_participant_access
+        condition:
+          field: allows_retail_access
+          operator: "=="
+          value: true
+        true_branch:
+          node_id: check_retail_safeguards
+          condition:
+            field: retail_safeguards_implemented
+            operator: "=="
+            value: true
+          true_branch:
+            result: authorized
+            notes: "DLT Trading Facility with retail access - full safeguards required"
+          false_branch:
+            result: non_compliant
+            obligations:
+              - id: implement_retail_safeguards
+                description: "Implement investor protection measures for retail participants"
+        false_branch:
+          result: authorized
+          notes: "DLT Trading Facility for institutional/professional participants"
+      false_branch:
+        result: not_authorized
+        obligations:
+          - id: obtain_dlt_license
+            description: "Apply for DLT Trading Facility license from FINMA"
+            deadline: "Before commencing operations"
+    false_branch:
+      result: not_applicable
+      notes: "Traditional securities trading - standard exchange/MTF rules apply"
+
+  source:
+    document_id: fmia_dlt_2021
+    article: "73a-73f"
+    section: "DLT Trading Facilities"
+    url: "https://www.admin.ch/opc/en/classified-compilation/20141779/index.html"
+
+  interpretation_notes: |
+    DLT Act 2021 introduced DLT Trading Facility as new FINMA license category:
+    - Multilateral trading of DLT securities (ledger-based securities)
+    - May allow direct retail participation (unlike traditional exchanges)
+    - Lower requirements than full stock exchange for small facilities
+    - First license granted in 2023 to BX Swiss subsidiary
+
+- rule_id: finma_crypto_custody_segregation
+  version: "1.0"
+  description: |
+    Crypto asset custody and segregation requirements under amended Banking Act.
+    Clarifies treatment of crypto assets in custodian bankruptcy.
+  effective_from: 2021-08-01
+  tags: [finma, custody, segregation, bankruptcy, banking_act]
+  jurisdiction: CH
+  regime_id: finma_dlt_2021
+  cross_border_relevant: true
+
+  applies_if:
+    all:
+      - field: activity
+        operator: "=="
+        value: crypto_custody
+      - field: jurisdiction
+        operator: "=="
+        value: CH
+
+  decision_tree:
+    node_id: check_segregation_method
+    condition:
+      field: assets_individually_allocated
+      operator: "=="
+      value: true
+    true_branch:
+      node_id: check_record_keeping
+      condition:
+        field: allocation_records_maintained
+        operator: "=="
+        value: true
+      true_branch:
+        result: compliant
+        notes: "Crypto assets properly segregated - protected in bankruptcy"
+      false_branch:
+        result: non_compliant
+        obligations:
+          - id: maintain_allocation_records
+            description: "Maintain records showing individual customer allocation at all times"
+    false_branch:
+      node_id: check_collective_custody
+      condition:
+        field: collective_custody_disclosed
+        operator: "=="
+        value: true
+      true_branch:
+        result: compliant
+        notes: "Collective custody with proper disclosure - proportional return in bankruptcy"
+        obligations:
+          - id: disclose_collective_risk
+            description: "Disclose to customers that collective custody may result in proportional loss"
+      false_branch:
+        result: non_compliant
+        obligations:
+          - id: implement_segregation
+            description: "Implement individual allocation or disclose collective custody risks"
+
+  source:
+    document_id: banking_act_dlt
+    article: "16(1bis)"
+    section: "Banking Act (amended)"
+    url: "https://www.admin.ch/opc/en/classified-compilation/19340083/index.html"
+
+  interpretation_notes: |
+    DLT Act 2021 amended Banking Act Article 16 to clarify:
+    - Crypto assets individually allocated to customers can be segregated in bankruptcy
+    - Customer entitled to return of specifically allocated assets
+    - Collective custody: proportional sharing if shortfall
+    - Custodian must maintain records proving individual allocation
+
+- rule_id: finma_aml_payment_tokens
+  version: "1.0"
+  description: |
+    Anti-money laundering requirements for payment token services under AMLA.
+    Payment tokens (cryptocurrencies) trigger AML obligations.
+  effective_from: 2021-08-01
+  tags: [finma, aml, payment_token, amla, travel_rule]
+  jurisdiction: CH
+  regime_id: finma_dlt_2021
+  cross_border_relevant: true
+
+  applies_if:
+    all:
+      - field: token_classification
+        operator: "=="
+        value: payment_token
+      - field: activity
+        operator: in
+        value: [exchange, transfer, custody, dealing]
+      - field: jurisdiction
+        operator: "=="
+        value: CH
+
+  decision_tree:
+    node_id: check_finma_license_or_sro
+    condition:
+      field: aml_supervision
+      operator: in
+      value: [finma_licensed, sro_member]
+    true_branch:
+      node_id: check_travel_rule_threshold
+      condition:
+        field: transaction_value_chf
+        operator: ">="
+        value: 1000
+      true_branch:
+        node_id: check_travel_rule_compliance
+        condition:
+          field: originator_beneficiary_info_collected
+          operator: "=="
+          value: true
+        true_branch:
+          result: compliant
+          notes: "AML compliance satisfied including Travel Rule"
+        false_branch:
+          result: non_compliant
+          obligations:
+            - id: collect_travel_data
+              description: "Collect and transmit originator/beneficiary information for transfers >= CHF 1,000"
+      false_branch:
+        node_id: check_basic_aml
+        condition:
+          field: kyc_completed
+          operator: "=="
+          value: true
+        true_branch:
+          result: compliant
+          notes: "AML compliance satisfied for transactions below Travel Rule threshold"
+        false_branch:
+          result: non_compliant
+          obligations:
+            - id: complete_kyc
+              description: "Complete customer identification and verification"
+    false_branch:
+      result: not_authorized
+      obligations:
+        - id: obtain_aml_supervision
+          description: "Obtain FINMA license or join FINMA-recognized Self-Regulatory Organization (SRO)"
+
+  source:
+    document_id: amla_switzerland
+    article: "AMLA"
+    section: "Anti-Money Laundering Act"
+    url: "https://www.finma.ch/en/supervision/anti-money-laundering/"
+
+  interpretation_notes: |
+    Swiss AML requirements for crypto/payment token services:
+    - Must be FINMA-licensed or member of FINMA-recognized SRO
+    - KYC required for all customer relationships
+    - Travel Rule applies at CHF 1,000 threshold (stricter than FATF)
+    - Zero threshold for unverified/suspicious transfers
+    - Enhanced due diligence for high-risk customers/jurisdictions
+
+- rule_id: finma_stablecoin_classification
+  version: "1.0"
+  description: |
+    Stablecoin classification under FINMA Supplement to ICO Guidelines.
+    Stablecoins classified based on underlying rights, not stability mechanism.
+  effective_from: 2019-09-11
+  tags: [finma, stablecoin, classification, deposits, securities]
+  jurisdiction: CH
+  regime_id: finma_dlt_2021
+  cross_border_relevant: true
+
+  applies_if:
+    all:
+      - field: instrument_type
+        operator: in
+        value: [stablecoin, stable_token]
+      - field: jurisdiction
+        operator: "=="
+        value: CH
+
+  decision_tree:
+    node_id: check_backing_type
+    condition:
+      field: stablecoin_backing
+      operator: "=="
+      value: fiat_currency
+    true_branch:
+      node_id: check_deposit_characteristics
+      condition:
+        field: represents_deposit_claim
+        operator: "=="
+        value: true
+      true_branch:
+        result: deposit_token
+        obligations:
+          - id: banking_license
+            description: "Obtain banking license or qualify for fintech license exception"
+        notes: "Fiat-backed stablecoin with redemption right = deposit under Banking Act"
+      false_branch:
+        result: payment_token
+        obligations:
+          - id: aml_compliance
+            description: "Comply with AMLA requirements"
+        notes: "Fiat-backed without deposit claim = payment token"
+    false_branch:
+      node_id: check_asset_backing
+      condition:
+        field: stablecoin_backing
+        operator: in
+        value: [commodities, securities, basket]
+      true_branch:
+        result: asset_token
+        obligations:
+          - id: securities_compliance
+            description: "Comply with securities regulations"
+          - id: collective_investment_check
+            description: "Assess if qualifies as collective investment scheme"
+        notes: "Asset-backed stablecoin = asset token (securities) or possibly CIS"
+      false_branch:
+        node_id: check_algorithmic
+        condition:
+          field: stablecoin_backing
+          operator: "=="
+          value: algorithmic
+        true_branch:
+          result: payment_token
+          obligations:
+            - id: aml_compliance
+              description: "Comply with AMLA requirements"
+            - id: risk_disclosure
+              description: "Disclose algorithmic stability risks"
+          notes: "Algorithmic stablecoin without backing = payment token"
+        false_branch:
+          result: hybrid_token
+          obligations:
+            - id: finma_consultation
+              description: "Consult FINMA for classification"
+
+  source:
+    document_id: finma_stablecoin_supplement
+    article: "Supplement to ICO Guidelines"
+    url: "https://www.finma.ch/en/news/2019/09/20190911-mm-stable-coins/"
+
+  interpretation_notes: |
+    FINMA Stablecoin Supplement (September 2019) clarifies:
+    - Stablecoins not a separate category - classified by underlying rights
+    - Fiat-backed with redemption = deposit (banking law)
+    - Asset-backed = asset token (securities law)
+    - May also trigger collective investment scheme rules
+    - Algorithmic = payment token (AML only)

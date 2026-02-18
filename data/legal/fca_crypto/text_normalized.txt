@@ -1,0 +1,81 @@
+FCA CRYPTOASSET FINANCIAL PROMOTIONS REGIME
+==========================================
+
+Section 1: Authorization Requirements (FSMA s.21)
+-------------------------------------------------
+
+1.1 A person must not, in the course of business, communicate an invitation
+or inducement to engage in investment activity unless:
+(a) the person is an authorized person; or
+(b) the content of the communication is approved by an authorized person.
+
+1.2 For cryptoasset promotions, the following routes are available:
+- FCA authorized firms may promote directly
+- Unauthorized firms may have promotions approved by an FCA authorized firm
+- Cryptoasset businesses registered under MLR may promote to UK persons
+  if registered with the FCA for this purpose
+
+Section 2: Risk Warnings (COBS 4.12A.15)
+----------------------------------------
+
+2.1 All direct offer financial promotions for qualifying cryptoassets must
+include the following risk warning:
+
+"Don't invest unless you're prepared to lose all the money you invest.
+This is a high-risk investment and you should not expect to be protected
+if something goes wrong."
+
+2.2 The risk warning must be:
+- Prominent and clearly displayed
+- In the same font size as the most prominent text in the promotion
+- Directly adjacent to any investment claim or call to action
+
+Section 3: Cooling-Off Period (COBS 4.12A.18)
+---------------------------------------------
+
+3.1 For first-time retail investors responding to direct offer financial
+promotions, firms must:
+(a) Provide a 24-hour cooling off period before the transaction completes
+(b) Send a reminder notification of the cooling off period
+(c) Allow cancellation during the cooling off period without penalty
+
+3.2 A first-time investor is defined as a person who:
+(a) Has not previously invested in qualifying cryptoassets; and
+(b) Is classified as a retail client
+
+Section 4: Appropriateness Assessments (COBS 4.12A.20)
+------------------------------------------------------
+
+4.1 Before a retail client can respond to a direct offer financial promotion
+for qualifying cryptoassets, firms must assess whether the investment is
+appropriate for the client.
+
+4.2 The appropriateness assessment must consider:
+(a) The client's knowledge and experience of cryptoassets
+(b) The client's understanding of the risks involved
+(c) Whether the client can bear the loss of the entire investment
+
+4.3 If the investment is assessed as not appropriate, the firm must:
+(a) Provide a clear warning to the client
+(b) Obtain the client's express acknowledgment before proceeding
+(c) Maintain records of the assessment and acknowledgment
+
+Section 5: Banned Practices
+---------------------------
+
+5.1 The following are prohibited in cryptoasset promotions:
+(a) Refer a friend bonuses and similar inducements
+(b) Claims of guaranteed returns or limited risk
+(c) Misleading comparisons to regulated investments
+(d) Time-limited offers creating undue pressure
+
+Section 6: Record Keeping (SUP 13A)
+-----------------------------------
+
+6.1 Firms must maintain records of:
+(a) All s.21 approvals given or received
+(b) Risk warnings displayed and client acknowledgments
+(c) Appropriateness assessments conducted
+(d) Cooling off notifications sent
+
+6.2 Records must be retained for a minimum of 5 years.

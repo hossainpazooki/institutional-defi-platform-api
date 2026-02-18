@@ -1,0 +1,118 @@
+# Temporal Helm chart values
+# Chart: temporalio/temporal
+# Install: helm install temporal temporalio/temporal -f kube/temporal/values.yaml \
+#   --set server.config.persistence.default.sql.host=<RDS_ENDPOINT> \
+#   --set server.config.persistence.default.sql.password=<DB_PASSWORD> \
+#   --set server.config.persistence.visibility.sql.host=<RDS_ENDPOINT> \
+#   --set server.config.persistence.visibility.sql.password=<DB_PASSWORD>
+
+server:
+  config:
+    persistence:
+      default:
+        driver: sql
+        sql:
+          driver: postgres
+          host: TEMPORAL_DB_HOST  # Override via --set at deploy time
+          port: 5432
+          database: temporal
+          user: temporal
+          password: TEMPORAL_DB_PASSWORD  # Override via --set at deploy time
+          maxConns: 20
+          maxIdleConns: 20
+          maxConnLifetime: "1h"
+
+      visibility:
+        driver: sql
+        sql:
+          driver: postgres
+          host: TEMPORAL_DB_HOST  # Same RDS instance, separate database
+          port: 5432
+          database: temporal_visibility
+          user: temporal
+          password: TEMPORAL_DB_PASSWORD
+          maxConns: 10
+          maxIdleConns: 10
+          maxConnLifetime: "1h"
+
+  frontend:
+    replicaCount: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+  history:
+    replicaCount: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+  matching:
+    replicaCount: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 250m
+        memory: 256Mi
+
+  worker:
+    replicaCount: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 250m
+        memory: 256Mi
+
+# Web UI
+web:
+  enabled: true
+  replicaCount: 1
+  ingress:
+    enabled: true
+    className: alb
+    annotations:
+      alb.ingress.kubernetes.io/scheme: internal
+      alb.ingress.kubernetes.io/target-type: ip
+    hosts:
+      - host: temporal.institutional-defi.internal
+        paths:
+          - path: /
+            pathType: Prefix
+
+# Prometheus metrics
+prometheus:
+  enabled: true
+
+grafana:
+  enabled: false
+
+# Disable in-cluster databases — using external RDS
+cassandra:
+  enabled: false
+
+mysql:
+  enabled: false
+
+postgresql:
+  enabled: false
+
+elasticsearch:
+  enabled: false
+
+schema:
+  setup:
+    enabled: true
+  update:
+    enabled: true
