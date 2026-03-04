@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: institutional-defi
-  labels:
-    app.kubernetes.io/name: institutional-defi
-    app.kubernetes.io/part-of: institutional-defi-platform

@@ -1,0 +1,12 @@
+.git
+.github
+.venv
+__pycache__
+data/raw/
+tests/
+docs/
+kube/
+terraform/
+*.md
+.env*
+node_modules/

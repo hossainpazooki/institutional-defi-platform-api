@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/c/Users/hossa/dev/institutional-defi-platform-infra/terraform/rds.tf:*)",
+      "Bash(/c/Users/hossa/dev/institutional-defi-platform-infra/terraform/elasticache.tf:*)",
+      "Bash(/c/Users/hossa/dev/institutional-defi-platform-infra/terraform/ecr.tf:*)",
+      "Bash(/c/Users/hossa/dev/institutional-defi-platform-infra/terraform/secrets.tf:*)",
+      "Bash(/c/Users/hossa/dev/institutional-defi-platform-infra/terraform/outputs.tf:*)",
+      "Bash(/c/Users/hossa/dev/institutional-defi-platform-infra/terraform/envs/dev.tfvars:*)",
+      "Bash(/c/Users/hossa/dev/institutional-defi-platform-infra/terraform/envs/prod.tfvars:*)",
+      "Bash(/c/Users/hossa/dev/institutional-defi-platform-infra/kube/base/service-account.yaml:*)",
+      "Bash(/c/Users/hossa/dev/institutional-defi-platform-infra/kube/base/api-deployment.yaml:*)",
+      "Bash(/c/Users/hossa/dev/institutional-defi-platform-infra/kube/base/worker-deployment.yaml:*)",
+      "Bash(/c/Users/hossa/dev/institutional-defi-platform-infra/kube/base/api-service.yaml:*)",
+      "Bash(/c/Users/hossa/dev/institutional-defi-platform-infra/kube/base/external-secret.yaml:*)",
+      "Bash(/c/Users/hossa/dev/institutional-defi-platform-infra/kube/base/hpa-api.yaml:*)",
+      "Bash(/c/Users/hossa/dev/institutional-defi-platform-infra/kube/base/hpa-worker.yaml:*)",
+      "Bash(/c/Users/hossa/dev/institutional-defi-platform-infra/kube/base/pdb-api.yaml:*)",
+      "Bash(/c/Users/hossa/dev/institutional-defi-platform-infra/kube/base/pdb-worker.yaml:*)",
+      "Bash(/c/Users/hossa/dev/institutional-defi-platform-infra/kube/base/egress-common.yaml:*)",
+      "Bash(/c/Users/hossa/dev/institutional-defi-platform-infra/kube/base/kustomization.yaml:*)",
+      "Bash(/c/Users/hossa/dev/institutional-defi-platform-infra/README.md:*)"
+    ]
+  }
+}

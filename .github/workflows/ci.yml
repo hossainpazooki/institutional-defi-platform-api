@@ -6,6 +6,14 @@ on:
   pull_request:
     branches: [main, master]
 
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: 547729607601.dkr.ecr.us-east-1.amazonaws.com
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -58,9 +66,51 @@ jobs:
           ENVIRONMENT: test
 
   docker-build:
+    needs: [lint, test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - name: Build Docker image
         run: docker build -t institutional-defi-platform-api .
+
+  docker-push:
+    needs: [lint, test]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_BUILDER_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and Push API Image
+        run: |
+          docker build -t $ECR_REGISTRY/institutional-defi-api:${{ github.sha }} \
+                        -t $ECR_REGISTRY/institutional-defi-api:latest .
+          docker push $ECR_REGISTRY/institutional-defi-api:${{ github.sha }}
+          docker push $ECR_REGISTRY/institutional-defi-api:latest
+
+      - name: Tag and Push Worker Image
+        run: |
+          docker tag $ECR_REGISTRY/institutional-defi-api:${{ github.sha }} \
+                     $ECR_REGISTRY/institutional-defi-worker:${{ github.sha }}
+          docker tag $ECR_REGISTRY/institutional-defi-api:latest \
+                     $ECR_REGISTRY/institutional-defi-worker:latest
+          docker push $ECR_REGISTRY/institutional-defi-worker:${{ github.sha }}
+          docker push $ECR_REGISTRY/institutional-defi-worker:latest
+
+      - name: Trigger infra deploy
+        if: success()
+        run: |
+          curl -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token ${{ secrets.INFRA_DISPATCH_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository_owner }}/institutional-defi-platform-infra/dispatches \
+            -d '{"event_type":"deploy-dev"}' || true
