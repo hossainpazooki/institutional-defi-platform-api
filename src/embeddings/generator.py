@@ -21,13 +21,13 @@ from .models import EmbeddingRule, EmbeddingType, RuleEmbedding
 
 if TYPE_CHECKING:
     import numpy as np
-    from sentence_transformers import SentenceTransformer
+
+from src.config import get_sentence_transformer
 
 # Default embedding dimension
 DEFAULT_DIM = 384
 
 # Try to load sentence-transformers
-_encoder: SentenceTransformer | None = None
 _ml_available = False
 
 try:
@@ -43,16 +43,12 @@ def ml_available() -> bool:
     return _ml_available
 
 
-def get_encoder() -> SentenceTransformer:
-    """Get or create the sentence transformer encoder."""
-    global _encoder
-    if _encoder is None:
-        if not _ml_available:
-            raise RuntimeError("sentence-transformers not installed")
-        from sentence_transformers import SentenceTransformer
-
-        _encoder = SentenceTransformer("all-MiniLM-L6-v2")
-    return _encoder
+def get_encoder():
+    """Get the shared sentence transformer encoder."""
+    encoder = get_sentence_transformer()
+    if encoder is None:
+        raise RuntimeError("sentence-transformers not installed")
+    return encoder
 
 
 @dataclass

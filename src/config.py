@@ -93,3 +93,26 @@ def ml_available() -> bool:
         return True
     except ImportError:
         return False
+
+
+_sentence_transformer = None
+_sentence_transformer_checked = False
+
+SENTENCE_TRANSFORMER_MODEL = "all-MiniLM-L6-v2"
+
+
+def get_sentence_transformer():
+    """Get or create a shared SentenceTransformer instance.
+
+    Returns the cached model, or None if sentence-transformers is not installed.
+    """
+    global _sentence_transformer, _sentence_transformer_checked
+    if not _sentence_transformer_checked:
+        try:
+            from sentence_transformers import SentenceTransformer
+
+            _sentence_transformer = SentenceTransformer(SENTENCE_TRANSFORMER_MODEL)
+        except ImportError:
+            _sentence_transformer = None
+        _sentence_transformer_checked = True
+    return _sentence_transformer

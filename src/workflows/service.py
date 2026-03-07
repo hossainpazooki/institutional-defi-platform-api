@@ -22,12 +22,16 @@ import uuid
 from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING
 
-import temporalio.client
-from temporalio.client import Client
-from temporalio.service import RPCError
+try:
+    import temporalio.client
+    from temporalio.client import Client
+    from temporalio.service import RPCError
+
+    _TEMPORAL_AVAILABLE = True
+except ImportError:
+    _TEMPORAL_AVAILABLE = False
 
 from .config import WorkflowConfig
-from .credit_decision import CreditDecisionWorkflow
 from .schemas import (
     ComplianceCheckInput,
     ComplianceCheckOutput,
@@ -49,12 +53,15 @@ from .schemas import (
     WorkflowInfo,
     WorkflowStatus,
 )
-from .workflows import (
-    ComplianceCheckWorkflow,
-    CounterfactualAnalysisWorkflow,
-    DriftDetectionWorkflow,
-    RuleVerificationWorkflow,
-)
+
+if _TEMPORAL_AVAILABLE:
+    from .credit_decision import CreditDecisionWorkflow
+    from .workflows import (
+        ComplianceCheckWorkflow,
+        CounterfactualAnalysisWorkflow,
+        DriftDetectionWorkflow,
+        RuleVerificationWorkflow,
+    )
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
@@ -95,6 +102,10 @@ class WorkflowClient:
 
     async def connect(self) -> None:
         """Connect to Temporal server."""
+        if not _TEMPORAL_AVAILABLE:
+            raise RuntimeError(
+                "temporalio is not installed. Install with: pip install -e '.[temporal]'"
+            )
         if self._client is None:
             self._client = await Client.connect(
                 self._host,

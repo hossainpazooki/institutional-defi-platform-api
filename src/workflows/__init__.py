@@ -72,19 +72,23 @@ from .service import (
     get_client,
     workflow_client,
 )
-from .worker import (
-    ACTIVITIES,
-    WORKFLOWS,
-    create_client,
-    create_worker,
-    run_worker,
-)
-from .workflows import (
-    ComplianceCheckWorkflow,
-    CounterfactualAnalysisWorkflow,
-    DriftDetectionWorkflow,
-    RuleVerificationWorkflow,
-)
+
+try:
+    from .worker import (
+        ACTIVITIES,
+        WORKFLOWS,
+        create_client,
+        create_worker,
+        run_worker,
+    )
+    from .workflows import (
+        ComplianceCheckWorkflow,
+        CounterfactualAnalysisWorkflow,
+        DriftDetectionWorkflow,
+        RuleVerificationWorkflow,
+    )
+except ImportError:
+    pass
 
 __all__ = [
     # Enums
