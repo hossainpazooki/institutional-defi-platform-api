@@ -19,5 +19,19 @@
   "env": {
     "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "85",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'INPUT=$(cat); FILE=$(echo \"$INPUT\" | jq -r \".tool_input.file_path // empty\"); if [ -n \"$FILE\" ] && [[ \"$FILE\" == *.py ]]; then ruff check \"$FILE\" 2>&1 || true; fi'",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
   }
 }
