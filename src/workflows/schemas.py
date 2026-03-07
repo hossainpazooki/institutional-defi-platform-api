@@ -386,3 +386,47 @@ class WorkflowInfo(CustomBaseModel):
     completed_at: datetime | None
     run_id: str | None = None
     task_queue: str = "compliance-workflows"
+
+
+# =============================================================================
+# CreditDecisionWorkflow Schemas
+# =============================================================================
+
+
+class CreditDecisionParams(CustomBaseModel):
+    """Input for CreditDecisionWorkflow."""
+
+    app_id: str = Field(..., description="Credit application ID")
+    borrower_name: str = Field(..., description="Borrower entity name")
+    deal_amount_usd: float = Field(..., description="Deal amount in USD")
+    document_ids: list[str] = Field(default_factory=list, description="Uploaded document IDs")
+    industry: str = Field("technology", description="Borrower industry sector")
+    borrower_type: str = Field("corporate", description="Borrower entity type")
+
+
+class CreditDecisionResult(CustomBaseModel):
+    """Output from CreditDecisionWorkflow."""
+
+    workflow_id: str
+    status: WorkflowStatus
+    started_at: datetime
+    completed_at: datetime | None = None
+    financial_output: dict[str, Any] = Field(default_factory=dict)
+    legal_output: dict[str, Any] = Field(default_factory=dict)
+    market_output: dict[str, Any] = Field(default_factory=dict)
+    synthesis: dict[str, Any] = Field(default_factory=dict)
+    recommendation: str = ""
+    confidence: float = 0.0
+    escalate: bool = False
+    error: str | None = None
+
+
+class CreditDecisionProgress(CustomBaseModel):
+    """Progress update for CreditDecisionWorkflow."""
+
+    workflow_id: str
+    status: WorkflowStatus
+    current_phase: str = "pending"
+    phases_completed: list[str] = Field(default_factory=list)
+    phases_remaining: list[str] = Field(default_factory=list)
+    phase_progress: float = 0.0

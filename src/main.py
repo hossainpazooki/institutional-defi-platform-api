@@ -40,6 +40,7 @@ from src.technology.router import router as technology_router
 from src.token_compliance.router import router as token_compliance_router
 from src.trading.router import router as trading_router
 from src.verification.router import verification_router
+from src.credit.router import router as credit_router
 from src.workflows.router import router as workflows_router
 
 # ── Lifespan ────────────────────────────────────────────────────────
@@ -126,6 +127,7 @@ def create_app() -> FastAPI:
     app.include_router(production_router)
     app.include_router(ke_router)
     app.include_router(jpm_router)
+    app.include_router(credit_router)
 
     # ── Routers needing prefix at mount time ────────────────────────
     app.include_router(

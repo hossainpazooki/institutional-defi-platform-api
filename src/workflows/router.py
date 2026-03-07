@@ -22,6 +22,9 @@ from .schemas import (
     CounterfactualInput,
     CounterfactualOutput,
     CounterfactualProgress,
+    CreditDecisionParams,
+    CreditDecisionProgress,
+    CreditDecisionResult,
     DriftDetectionInput,
     DriftDetectionOutput,
     DriftDetectionProgress,
@@ -366,6 +369,74 @@ async def schedule_drift_detection(
             workflow_id=schedule_id,
             message=f"Drift detection scheduled with cron: {config.cron_expression}",
         )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+# =============================================================================
+# CreditDecisionWorkflow Endpoints
+# =============================================================================
+
+
+@router.post("/credit-decision/start", response_model=WorkflowStartResponse)
+async def start_credit_decision(
+    input: CreditDecisionParams,
+    client: WorkflowClient = Depends(get_workflow_client),
+) -> WorkflowStartResponse:
+    """Start a new credit decision workflow.
+
+    Runs document classification, parallel agent analysis, synthesis, and routing.
+    """
+    try:
+        workflow_id = await client.start_credit_decision(input)
+        return WorkflowStartResponse(
+            workflow_id=workflow_id,
+            message="Credit decision workflow started",
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+@router.get("/credit-decision/{workflow_id}/status", response_model=WorkflowInfo)
+async def get_credit_decision_status(
+    workflow_id: str,
+    client: WorkflowClient = Depends(get_workflow_client),
+) -> WorkflowInfo:
+    """Get credit decision workflow status."""
+    try:
+        return await client.get_workflow_status(workflow_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+@router.get("/credit-decision/{workflow_id}/progress", response_model=CreditDecisionProgress)
+async def get_credit_decision_progress(
+    workflow_id: str,
+    client: WorkflowClient = Depends(get_workflow_client),
+) -> CreditDecisionProgress:
+    """Get credit decision workflow progress.
+
+    Returns current phase and completion percentage.
+    """
+    try:
+        return await client.get_credit_decision_progress(workflow_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+@router.get("/credit-decision/{workflow_id}/result", response_model=CreditDecisionResult)
+async def get_credit_decision_result(
+    workflow_id: str,
+    client: WorkflowClient = Depends(get_workflow_client),
+) -> CreditDecisionResult:
+    """Get credit decision workflow result.
+
+    Waits for workflow completion if still running.
+    """
+    try:
+        return await client.get_credit_decision_result(workflow_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 

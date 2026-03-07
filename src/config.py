@@ -63,6 +63,10 @@ class Settings(BaseSettings):
     enable_vector_search: bool = False
     openai_api_key: str | None = None
 
+    # ── Credit Pipeline ────────────────────────────────────────────────
+    pydanticai_model: str = "claude-sonnet-4-20250514"
+    enable_credit_pipeline: bool = True
+
     # ── Paths ────────────────────────────────────────────────────────────
     rules_dir: str = "src/rules/data"
     data_dir: str = "data"

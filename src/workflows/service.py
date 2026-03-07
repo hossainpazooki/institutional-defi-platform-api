@@ -27,6 +27,7 @@ from temporalio.client import Client
 from temporalio.service import RPCError
 
 from .config import WorkflowConfig
+from .credit_decision import CreditDecisionWorkflow
 from .schemas import (
     ComplianceCheckInput,
     ComplianceCheckOutput,
@@ -34,6 +35,9 @@ from .schemas import (
     CounterfactualInput,
     CounterfactualOutput,
     CounterfactualProgress,
+    CreditDecisionParams,
+    CreditDecisionProgress,
+    CreditDecisionResult,
     DriftDetectionInput,
     DriftDetectionOutput,
     DriftDetectionProgress,
@@ -301,6 +305,65 @@ class WorkflowClient:
         workflow_id: str,
     ) -> CounterfactualOutput:
         """Get counterfactual analysis workflow result.
+
+        Args:
+            workflow_id: Workflow ID
+
+        Returns:
+            Workflow result
+        """
+        handle = self.client.get_workflow_handle(workflow_id)
+        return await handle.result()
+
+    # =========================================================================
+    # CreditDecisionWorkflow
+    # =========================================================================
+
+    async def start_credit_decision(
+        self,
+        input: CreditDecisionParams,
+        workflow_id: str | None = None,
+    ) -> str:
+        """Start a credit decision workflow.
+
+        Args:
+            input: Credit decision input parameters
+            workflow_id: Optional custom workflow ID
+
+        Returns:
+            Workflow ID
+        """
+        workflow_id = workflow_id or generate_workflow_id("credit-decision")
+
+        await self.client.start_workflow(
+            CreditDecisionWorkflow.run,
+            input,
+            id=workflow_id,
+            task_queue=self._task_queue,
+        )
+
+        return workflow_id
+
+    async def get_credit_decision_progress(
+        self,
+        workflow_id: str,
+    ) -> CreditDecisionProgress:
+        """Query credit decision workflow progress.
+
+        Args:
+            workflow_id: Workflow ID
+
+        Returns:
+            Current progress
+        """
+        handle = self.client.get_workflow_handle(workflow_id)
+        return await handle.query(CreditDecisionWorkflow.progress)
+
+    async def get_credit_decision_result(
+        self,
+        workflow_id: str,
+    ) -> CreditDecisionResult:
+        """Get credit decision workflow result.
 
         Args:
             workflow_id: Workflow ID
