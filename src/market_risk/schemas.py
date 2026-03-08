@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import StrEnum
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -178,7 +179,7 @@ class VaRCalculationResponse(BaseModel):
     var_usd: float
     cvar_pct: float
     cvar_usd: float
-    inputs: dict
+    inputs: dict[str, Any]
 
 
 # ---------------------------------------------------------------------------

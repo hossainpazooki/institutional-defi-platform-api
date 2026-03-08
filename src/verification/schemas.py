@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 
@@ -20,4 +22,4 @@ class VerifyRuleResponse(BaseModel):
     status: str
     confidence: float
     evidence_count: int
-    evidence: list[dict]
+    evidence: list[dict[str, Any]]

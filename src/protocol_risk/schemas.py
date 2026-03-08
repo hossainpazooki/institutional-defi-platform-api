@@ -10,6 +10,7 @@ Pydantic models for blockchain protocol risk scoring based on:
 from __future__ import annotations
 
 from enum import StrEnum
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -78,7 +79,7 @@ class ProtocolRiskAssessment(BaseModel):
     risk_factors: list[str] = Field(default_factory=list)
     strengths: list[str] = Field(default_factory=list)
     regulatory_notes: list[str] = Field(default_factory=list)
-    metrics_summary: dict = Field(default_factory=dict)
+    metrics_summary: dict[str, Any] = Field(default_factory=dict)
 
 
 class ProtocolRiskRequest(BaseModel):

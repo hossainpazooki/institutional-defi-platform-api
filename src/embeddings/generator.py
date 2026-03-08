@@ -15,7 +15,7 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from .models import EmbeddingRule, EmbeddingType, RuleEmbedding
 
@@ -43,7 +43,7 @@ def ml_available() -> bool:
     return _ml_available
 
 
-def get_encoder():
+def get_encoder() -> Any:
     """Get the shared sentence transformer encoder."""
     encoder = get_sentence_transformer()
     if encoder is None:
@@ -205,7 +205,7 @@ class EmbeddingGenerator:
         """Encode using sentence-transformers."""
         encoder = get_encoder()
         embedding = encoder.encode(text, convert_to_numpy=True)
-        return embedding.tolist()
+        return list(embedding.tolist())
 
     def _encode_hash(self, text: str) -> list[float]:
         """Fallback: Generate hash-based pseudo-embedding."""

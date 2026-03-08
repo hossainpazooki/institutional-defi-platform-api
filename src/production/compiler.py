@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 from datetime import UTC, datetime
+from typing import Any, Literal
 
 from src.ontology.jurisdiction import (
     JURISDICTION_AUTHORITIES,
@@ -174,12 +175,12 @@ class RuleCompiler:
 
         return list(set(keys))
 
-    def _extract_all_obligations(self, tree: DecisionNode | DecisionLeaf | None) -> list[dict]:
+    def _extract_all_obligations(self, tree: DecisionNode | DecisionLeaf | None) -> list[dict[str, Any]]:
         """Extract all unique obligations from decision tree."""
         if tree is None:
             return []
 
-        obligations: list[dict] = []
+        obligations: list[dict[str, Any]] = []
         seen_ids: set[str] = set()
 
         def traverse(node: DecisionNode | DecisionLeaf) -> None:
@@ -205,13 +206,13 @@ class RuleCompiler:
         traverse(tree)
         return obligations
 
-    def _flatten_conditions(self, condition_group: ConditionGroupSpec | None) -> tuple[list[CompiledCheck], str]:
+    def _flatten_conditions(self, condition_group: ConditionGroupSpec | None) -> tuple[list[CompiledCheck], Literal["all", "any"]]:
         """Flatten nested conditions to linear check sequence."""
         if not condition_group:
             return [], "all"
 
         checks: list[CompiledCheck] = []
-        mode = "all" if condition_group.all else "any"
+        mode: Literal["all", "any"] = "all" if condition_group.all else "any"
         conditions = condition_group.all or condition_group.any or []
 
         for item in conditions:
@@ -235,7 +236,7 @@ class RuleCompiler:
         check = CompiledCheck(
             index=self._check_index,
             field=cond.field,
-            op=op,
+            op=op,  # type: ignore[arg-type]
             value=cond.value,
             value_set=value_set,
         )
@@ -288,7 +289,7 @@ class RuleCompiler:
             check = CompiledCheck(
                 index=check_idx,
                 field=node.condition.field,
-                op=OPERATOR_MAP.get(node.condition.operator, node.condition.operator),
+                op=OPERATOR_MAP.get(node.condition.operator, node.condition.operator),  # type: ignore[arg-type]
                 value=node.condition.value,
             )
 

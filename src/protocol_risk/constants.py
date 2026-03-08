@@ -6,6 +6,8 @@ Includes chain risk profiles absorbed from Console's jpm_scenarios/constants.
 
 from __future__ import annotations
 
+from typing import Any
+
 from src.protocol_risk.schemas import ConsensusMechanism, SettlementFinality
 
 # Consensus mechanism base scores (out of 100)
@@ -27,7 +29,7 @@ FINALITY_ADJUSTMENTS: dict[SettlementFinality, float] = {
 }
 
 # Default protocol configurations for common chains
-PROTOCOL_DEFAULTS: dict[str, dict] = {
+PROTOCOL_DEFAULTS: dict[str, dict[str, Any]] = {
     "bitcoin": {
         "consensus": ConsensusMechanism.POW,
         "finality_type": SettlementFinality.PROBABILISTIC,
@@ -151,7 +153,7 @@ PROTOCOL_DEFAULTS: dict[str, dict] = {
 
 # Chain risk profiles from Console's jpm_scenarios/constants.
 # Used by jpm_scenarios domain for quick chain lookups.
-CHAIN_RISK_PROFILES: dict[str, dict] = {
+CHAIN_RISK_PROFILES: dict[str, dict[str, Any]] = {
     "ethereum": {
         "overall_score": 92,
         "decentralization_score": 95,

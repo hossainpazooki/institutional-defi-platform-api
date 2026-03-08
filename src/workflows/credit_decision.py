@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import asyncio
 from datetime import UTC, datetime, timedelta
+from typing import Any
 
 from temporalio import workflow
 from temporalio.common import RetryPolicy
@@ -70,13 +71,13 @@ class CreditDecisionWorkflow:
         self._completed_at: datetime | None = None
         self._current_phase = "initializing"
         self._phases_completed: list[str] = []
-        self._financial_output: dict = {}
-        self._legal_output: dict = {}
-        self._market_output: dict = {}
-        self._synthesis: dict = {}
+        self._financial_output: dict[str, Any] = {}
+        self._legal_output: dict[str, Any] = {}
+        self._market_output: dict[str, Any] = {}
+        self._synthesis: dict[str, Any] = {}
         self._error: str | None = None
 
-    @workflow.run
+    @workflow.run  # type: ignore[untyped-decorator]
     async def run(self, params: CreditDecisionParams) -> CreditDecisionResult:
         """Execute the credit decision workflow."""
         self._workflow_id = workflow.info().workflow_id
@@ -129,14 +130,16 @@ class CreditDecisionWorkflow:
             )
 
             # Fan-in: wait for all three agents
-            self._financial_output, self._legal_output, self._market_output = (
-                await asyncio.gather(financial_task, legal_task, market_task)
+            self._financial_output, self._legal_output, self._market_output = await asyncio.gather(
+                financial_task, legal_task, market_task
             )
-            self._phases_completed.extend([
-                "financial_analysis",
-                "legal_analysis",
-                "market_analysis",
-            ])
+            self._phases_completed.extend(
+                [
+                    "financial_analysis",
+                    "legal_analysis",
+                    "market_analysis",
+                ]
+            )
 
             # Phase 5: Synthesis — combine agent outputs
             self._current_phase = "synthesis"
@@ -202,7 +205,7 @@ class CreditDecisionWorkflow:
                 error=self._error,
             )
 
-    @workflow.query
+    @workflow.query  # type: ignore[untyped-decorator]
     def progress(self) -> CreditDecisionProgress:
         """Query current workflow progress."""
         remaining = [p for p in PHASES if p not in self._phases_completed]

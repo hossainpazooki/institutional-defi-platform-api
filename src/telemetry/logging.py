@@ -6,7 +6,7 @@ output for development. Configured via LOG_LEVEL and LOG_FORMAT env vars.
 
 import logging
 import sys
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, cast
 
 import structlog
 
@@ -61,7 +61,7 @@ def configure_logging(
 
 def get_logger(name: str | None = None) -> structlog.stdlib.BoundLogger:
     """Get a structured logger instance."""
-    return structlog.get_logger(name)
+    return cast("structlog.stdlib.BoundLogger", structlog.get_logger(name))
 
 
 # Convenience re-exports

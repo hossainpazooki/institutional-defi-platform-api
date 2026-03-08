@@ -31,7 +31,7 @@ class ProtocolRiskResult(CustomBaseModel):
     """Protocol/chain risk assessment result."""
 
     chain_id: str
-    profile: dict
+    profile: dict[str, Any]
     recommendations: list[str]
     computed_at: datetime
 
@@ -61,7 +61,7 @@ class ExplanationResult(CustomBaseModel):
     decision: str
     confidence: float
     explanation: str
-    citations: list[dict]
+    citations: list[dict[str, Any]]
     tier: str
 
 

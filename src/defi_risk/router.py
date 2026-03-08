@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from fastapi import APIRouter, HTTPException
 
 from . import service
@@ -43,13 +45,13 @@ async def score_protocol(request: DeFiScoreRequest) -> DeFiRiskScore:
 
 
 @defi_risk_router.get("/protocols")
-async def list_protocol_defaults() -> dict:
+async def list_protocol_defaults() -> dict[str, list[str]]:
     """List available protocol default configurations."""
     return {"protocols": service.list_protocol_defaults()}
 
 
 @defi_risk_router.get("/protocols/{protocol_id}")
-async def get_protocol_config(protocol_id: str) -> dict:
+async def get_protocol_config(protocol_id: str) -> dict[str, Any]:
     """Get default configuration for a known protocol."""
     config = service.get_protocol_defaults(protocol_id)
     if not config:
@@ -80,7 +82,7 @@ async def score_known_protocol(protocol_id: str) -> DeFiRiskScore:
 
 
 @defi_risk_router.get("/categories")
-async def list_categories() -> dict:
+async def list_categories() -> dict[str, list[str]]:
     """List DeFi protocol categories."""
     return {"categories": [c.value for c in DeFiCategory]}
 
@@ -103,12 +105,12 @@ async def get_tokenomics() -> TokenomicsResponse:
 
 
 @research_router.get("/trends")
-async def get_trends() -> dict:
+async def get_trends() -> dict[str, str]:
     """Get market trends analysis."""
     return {"status": "stub", "module": "research.trends"}
 
 
 @research_router.get("/governance")
-async def get_governance() -> dict:
+async def get_governance() -> dict[str, str]:
     """Get protocol governance updates."""
     return {"status": "stub", "module": "research.governance"}

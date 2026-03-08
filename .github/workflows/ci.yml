@@ -33,6 +33,21 @@ jobs:
       - name: Format check
         run: ruff format --check src tests
 
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Type check
+        run: mypy src/ --strict
+
   test:
     runs-on: ubuntu-latest
     services:
@@ -66,7 +81,7 @@ jobs:
           ENVIRONMENT: test
 
   docker-build:
-    needs: [lint, test]
+    needs: [lint, typecheck, test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -75,7 +90,7 @@ jobs:
         run: docker build -t institutional-defi-platform-api .
 
   docker-push:
-    needs: [lint, test]
+    needs: [lint, typecheck, test]
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
     runs-on: ubuntu-latest
     steps:

@@ -65,6 +65,9 @@ run_backend() {
 
     run_check "Backend: ruff format" \
         ruff format --check src tests
+
+    run_check "Backend: mypy" \
+        mypy src/ --strict
 }
 
 # ── Layer 2: Frontends ────────────────────────────────────────────
@@ -77,6 +80,7 @@ run_frontend() {
     # Regulatory Workbench (has vitest)
     if [ -d "$WORKBENCH" ]; then
         cd "$WORKBENCH"
+        run_check "Workbench: typecheck" npm run typecheck
         run_check "Workbench: lint" npm run lint
         run_check "Workbench: build" npm run build
         if grep -q '"test:run"' package.json 2>/dev/null; then
@@ -89,6 +93,7 @@ run_frontend() {
     # Crypto Risk Console
     if [ -d "$RISK_CONSOLE" ]; then
         cd "$RISK_CONSOLE"
+        run_check "Risk Console: typecheck" npm run typecheck
         run_check "Risk Console: lint" npm run lint
         run_check "Risk Console: build" npm run build
     else
@@ -98,9 +103,7 @@ run_frontend() {
     # Digital Assets Cross-Border
     if [ -d "$CROSS_BORDER" ]; then
         cd "$CROSS_BORDER"
-        if grep -q '"typecheck"' package.json 2>/dev/null; then
-            run_check "Cross-Border: typecheck" npm run typecheck
-        fi
+        run_check "Cross-Border: typecheck" npm run typecheck
         run_check "Cross-Border: lint" npm run lint
         run_check "Cross-Border: build" npm run build
     else

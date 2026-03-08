@@ -6,14 +6,16 @@ From Workbench rules/jurisdiction/pathway.py.
 
 from __future__ import annotations
 
+from typing import Any
+
 from .constants import STEP_DEPENDENCIES, STEP_TIMELINES
 
 
 def synthesize_pathway(
-    results: list[dict],
-    conflicts: list[dict],
-    equivalences: list[dict],
-) -> list[dict]:
+    results: list[dict[str, Any]],
+    conflicts: list[dict[str, Any]],
+    equivalences: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
     """Synthesize ordered compliance pathway from evaluation results.
 
     Generates step-by-step authorization roadmap:
@@ -21,7 +23,7 @@ def synthesize_pathway(
     2. Order by jurisdiction (issuer home before targets)
     3. Apply equivalence waivers where applicable
     """
-    steps = []
+    steps: list[dict[str, Any]] = []
     step_id = 1
 
     sorted_results = sorted(
@@ -77,7 +79,7 @@ def synthesize_pathway(
     return steps
 
 
-def aggregate_obligations(results: list[dict]) -> list[dict]:
+def aggregate_obligations(results: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Aggregate and deduplicate obligations across all jurisdictions."""
     seen: set[tuple[str, str]] = set()
     obligations = []
@@ -98,7 +100,7 @@ def aggregate_obligations(results: list[dict]) -> list[dict]:
     return sorted(obligations, key=lambda o: (o.get("jurisdiction", ""), o.get("id", "")))
 
 
-def estimate_timeline(pathway: list[dict]) -> str:
+def estimate_timeline(pathway: list[dict[str, Any]]) -> str:
     """Calculate overall timeline estimate from pathway."""
     if not pathway:
         return "N/A"
@@ -119,12 +121,12 @@ def estimate_timeline(pathway: list[dict]) -> str:
         return "6-12 months"
 
 
-def get_critical_path(pathway: list[dict]) -> list[dict]:
+def get_critical_path(pathway: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Identify the critical path through the compliance pathway."""
     if not pathway:
         return []
 
-    step_by_id = {s["step_id"]: s for s in pathway}
+    step_by_id: dict[int, dict[str, Any]] = {s["step_id"]: s for s in pathway}
     path_lengths: dict[int, int] = {}
 
     def get_path_length(step_id: int) -> int:
@@ -135,12 +137,13 @@ def get_critical_path(pathway: list[dict]) -> list[dict]:
         if not step:
             return 0
 
-        prereqs = step.get("prerequisites", [])
+        prereqs: list[int] = step.get("prerequisites", [])
+        timeline_days: int = int(step.get("timeline", {}).get("max_days", 30))
         if not prereqs:
-            length = step.get("timeline", {}).get("max_days", 30)
+            length = timeline_days
         else:
             max_prereq = max(get_path_length(p) for p in prereqs)
-            length = max_prereq + step.get("timeline", {}).get("max_days", 30)
+            length = max_prereq + timeline_days
 
         path_lengths[step_id] = length
         return length
@@ -151,17 +154,17 @@ def get_critical_path(pathway: list[dict]) -> list[dict]:
     if not path_lengths:
         return []
 
-    critical_end = max(path_lengths, key=path_lengths.get)
+    critical_end: int = max(path_lengths, key=lambda k: path_lengths[k])
 
-    critical_path = []
-    current = critical_end
+    critical_path: list[dict[str, Any]] = []
+    current: int | None = critical_end
 
-    while current:
-        step = step_by_id.get(current)
-        if not step:
+    while current is not None:
+        current_step = step_by_id.get(current)
+        if not current_step:
             break
-        critical_path.append(step)
-        prereqs = step.get("prerequisites", [])
-        current = max(prereqs, key=lambda p: path_lengths.get(p, 0)) if prereqs else None
+        critical_path.append(current_step)
+        prereqs_list: list[int] = current_step.get("prerequisites", [])
+        current = max(prereqs_list, key=lambda p: path_lengths.get(p, 0)) if prereqs_list else None
 
     return list(reversed(critical_path))

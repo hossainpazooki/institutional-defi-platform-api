@@ -17,11 +17,11 @@ from .trace import DecisionResult, ExecutionTrace
 
 # Operator implementations
 def _eval_eq(actual: Any, expected: Any) -> bool:
-    return actual == expected
+    return bool(actual == expected)
 
 
 def _eval_ne(actual: Any, expected: Any) -> bool:
-    return actual != expected
+    return bool(actual != expected)
 
 
 def _eval_in(actual: Any, expected: Any, value_set: set[str] | None = None) -> bool:
@@ -38,28 +38,28 @@ def _eval_not_in(actual: Any, expected: Any, value_set: set[str] | None = None) 
 
 def _eval_gt(actual: Any, expected: Any) -> bool:
     try:
-        return actual > expected
+        return bool(actual > expected)
     except TypeError:
         return False
 
 
 def _eval_lt(actual: Any, expected: Any) -> bool:
     try:
-        return actual < expected
+        return bool(actual < expected)
     except TypeError:
         return False
 
 
 def _eval_gte(actual: Any, expected: Any) -> bool:
     try:
-        return actual >= expected
+        return bool(actual >= expected)
     except TypeError:
         return False
 
 
 def _eval_lte(actual: Any, expected: Any) -> bool:
     try:
-        return actual <= expected
+        return bool(actual <= expected)
     except TypeError:
         return False
 
@@ -269,9 +269,9 @@ class RuleRuntime:
         else:
             candidates = self.find_applicable_rules(facts)
             for rule_id in candidates:
-                ir = self._cache.get(rule_id)
-                if ir:
-                    result = self.infer(ir, facts, include_trace)
+                cached_ir = self._cache.get(rule_id)
+                if cached_ir:
+                    result = self.infer(cached_ir, facts, include_trace)
                     if result.applicable:
                         results.append(result)
 
@@ -283,8 +283,8 @@ class RuleRuntime:
         op_func = OPERATORS.get(check.op, _eval_eq)
 
         if check.op in ("in", "not_in"):
-            return op_func(actual, check.value, check.value_set)
-        return op_func(actual, check.value)
+            return bool(op_func(actual, check.value, check.value_set))  # type: ignore[operator]
+        return bool(op_func(actual, check.value))  # type: ignore[operator]
 
     def _matches_mask(
         self,

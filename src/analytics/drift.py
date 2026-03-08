@@ -153,6 +153,7 @@ class DriftDetector:
 
         current = self.capture_metrics(rules)
         baseline = self._baseline
+        assert baseline is not None
 
         confidence_delta = current.avg_confidence - baseline.avg_confidence
         inconsistent_delta = current.inconsistent_count - baseline.inconsistent_count

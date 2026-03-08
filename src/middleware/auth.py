@@ -4,10 +4,13 @@ Provides optional API key authentication that can be enabled via environment
 variables. When disabled, all requests are allowed through.
 """
 
+from typing import Any
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import APIKeyHeader
 from starlette.requests import Request
 from starlette.responses import JSONResponse
+from starlette.types import ASGIApp, Receive, Scope, Send
 
 from src.config import get_settings
 
@@ -57,7 +60,7 @@ async def verify_api_key(
     return api_key
 
 
-def get_api_key_header():
+def get_api_key_header() -> Any:
     """Dependency for endpoints requiring API key authentication."""
     return Depends(verify_api_key)
 
@@ -71,10 +74,10 @@ class OptionalAuthMiddleware:
 
     SKIP_PATHS = {"/health", "/metrics", "/", "/docs", "/redoc", "/openapi.json"}
 
-    def __init__(self, app):
+    def __init__(self, app: ASGIApp) -> None:
         self.app = app
 
-    async def __call__(self, scope, receive, send):
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         if scope["type"] != "http":
             await self.app(scope, receive, send)
             return

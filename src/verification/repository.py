@@ -7,7 +7,7 @@ from typing import Any
 
 from sqlalchemy import text
 
-from src.database import get_session
+from src.database import get_db
 
 from .models import (
     ReviewRecord,
@@ -35,13 +35,13 @@ class VerificationRepository:
         evidence: list[dict[str, Any]] | None = None,
     ) -> VerificationResultRecord:
         """Save a verification result with optional evidence."""
-        with get_session() as conn:
+        with get_db() as conn:
             result = conn.execute(
                 text("SELECT id FROM verification_results WHERE rule_id = :rule_id"),
                 {"rule_id": rule_id},
             )
             existing = result.fetchone()
-            result_id = existing[0] if existing else _generate_uuid()
+            result_id: str = str(existing[0]) if existing else _generate_uuid()
 
             if existing:
                 conn.execute(
@@ -124,7 +124,7 @@ class VerificationRepository:
     def get_verification_result(
         self, rule_id: str
     ) -> tuple[VerificationResultRecord | None, list[VerificationEvidenceRecord]]:
-        with get_session() as conn:
+        with get_db() as conn:
             result = conn.execute(
                 text("SELECT * FROM verification_results WHERE rule_id = :rule_id"),
                 {"rule_id": rule_id},
@@ -133,7 +133,7 @@ class VerificationRepository:
             if not row:
                 return None, []
 
-            record = VerificationResultRecord.from_row(row._mapping)
+            record = VerificationResultRecord.from_row(dict(row._mapping))
 
             result = conn.execute(
                 text("""
@@ -142,17 +142,17 @@ class VerificationRepository:
                 """),
                 {"vid": record.id},
             )
-            evidence = [VerificationEvidenceRecord.from_row(ev._mapping) for ev in result.fetchall()]
+            evidence = [VerificationEvidenceRecord.from_row(dict(ev._mapping)) for ev in result.fetchall()]
             return record, evidence
 
     def get_all_verification_results(
         self,
     ) -> dict[str, tuple[VerificationResultRecord, list[VerificationEvidenceRecord]]]:
-        with get_session() as conn:
+        with get_db() as conn:
             result = conn.execute(text("SELECT * FROM verification_results ORDER BY rule_id"))
             results = {}
             for row in result.fetchall():
-                results[row._mapping["rule_id"]] = VerificationResultRecord.from_row(row._mapping)
+                results[dict(row._mapping)["rule_id"]] = VerificationResultRecord.from_row(dict(row._mapping))
 
             result = conn.execute(
                 text("""
@@ -165,33 +165,33 @@ class VerificationRepository:
 
             evidence_by_rule: dict[str, list[VerificationEvidenceRecord]] = {}
             for row in result.fetchall():
-                rid = row._mapping["rule_id"]
+                rid = dict(row._mapping)["rule_id"]
                 if rid not in evidence_by_rule:
                     evidence_by_rule[rid] = []
-                evidence_by_rule[rid].append(VerificationEvidenceRecord.from_row(row._mapping))
+                evidence_by_rule[rid].append(VerificationEvidenceRecord.from_row(dict(row._mapping)))
 
             return {rid: (rec, evidence_by_rule.get(rid, [])) for rid, rec in results.items()}
 
     def delete_verification_result(self, rule_id: str) -> bool:
-        with get_session() as conn:
+        with get_db() as conn:
             result = conn.execute(
                 text("DELETE FROM verification_results WHERE rule_id = :rule_id"),
                 {"rule_id": rule_id},
             )
             conn.commit()
-            return result.rowcount > 0
+            return bool(result.rowcount > 0)
 
     # =========================================================================
     # Statistics
     # =========================================================================
 
     def get_verification_stats(self) -> dict[str, int]:
-        with get_session() as conn:
+        with get_db() as conn:
             result = conn.execute(text("SELECT status, COUNT(*) as count FROM verification_results GROUP BY status"))
-            return {row[0]: row[1] for row in result.fetchall()}
+            return {str(row[0]): int(row[1]) for row in result.fetchall()}
 
     def get_evidence_stats(self) -> dict[str, dict[str, int]]:
-        with get_session() as conn:
+        with get_db() as conn:
             result = conn.execute(
                 text("""
                 SELECT tier, label, COUNT(*) as count
@@ -203,7 +203,7 @@ class VerificationRepository:
                 tier_key = f"tier_{row[0]}"
                 if tier_key not in stats:
                     stats[tier_key] = {}
-                stats[tier_key][row[1]] = row[2]
+                stats[tier_key][str(row[1])] = int(row[2])
             return stats
 
     # =========================================================================
@@ -225,7 +225,7 @@ class VerificationRepository:
             notes=notes,
             metadata=metadata,
         )
-        with get_session() as conn:
+        with get_db() as conn:
             conn.execute(
                 text("""
                 INSERT INTO reviews (
@@ -246,15 +246,15 @@ class VerificationRepository:
         return record
 
     def get_reviews_for_rule(self, rule_id: str) -> list[ReviewRecord]:
-        with get_session() as conn:
+        with get_db() as conn:
             result = conn.execute(
                 text("SELECT * FROM reviews WHERE rule_id = :rule_id ORDER BY created_at DESC"),
                 {"rule_id": rule_id},
             )
-            return [ReviewRecord.from_row(row._mapping) for row in result.fetchall()]
+            return [ReviewRecord.from_row(dict(row._mapping)) for row in result.fetchall()]
 
     def get_latest_review(self, rule_id: str) -> ReviewRecord | None:
-        with get_session() as conn:
+        with get_db() as conn:
             result = conn.execute(
                 text("""
                 SELECT * FROM reviews WHERE rule_id = :rule_id
@@ -263,12 +263,13 @@ class VerificationRepository:
                 {"rule_id": rule_id},
             )
             row = result.fetchone()
-            return ReviewRecord.from_row(row._mapping) if row else None
+            return ReviewRecord.from_row(dict(row._mapping)) if row else None
 
     def clear_all_verifications(self) -> int:
-        with get_session() as conn:
+        with get_db() as conn:
             result = conn.execute(text("SELECT COUNT(*) as count FROM verification_results"))
-            count = result.fetchone()[0]
+            row = result.fetchone()
+            count: int = int(row[0]) if row else 0
             conn.execute(text("DELETE FROM verification_evidence"))
             conn.execute(text("DELETE FROM verification_results"))
             conn.commit()

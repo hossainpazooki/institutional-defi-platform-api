@@ -7,6 +7,7 @@ generation for risk assessments, with tier-based detail levels.
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 
 from .config import DecoderConfig
 from .schemas import LLMCitation, LLMDecoderResponse, LLMExplainRequest, LLMTierInfo, LLMTiersResponse
@@ -117,7 +118,7 @@ class LLMDecoderService:
             ]
         )
 
-    def get_health(self) -> dict:
+    def get_health(self) -> dict[str, Any]:
         """Check LLM decoder health and API key status."""
         return {
             "status": "healthy",

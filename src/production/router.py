@@ -98,7 +98,7 @@ class CompileAllResponse(CustomBaseModel):
     total: int
     compiled: int
     failed: int
-    errors: list[dict]
+    errors: list[dict[str, Any]]
 
 
 class EvaluateRequest(CustomBaseModel):
@@ -114,8 +114,8 @@ class EvaluateResponse(CustomBaseModel):
     rule_id: str
     applicable: bool
     decision: str | None = None
-    obligations: list[dict] = Field(default_factory=list)
-    trace: list[dict] | None = None
+    obligations: list[dict[str, Any]] = Field(default_factory=list)
+    trace: list[dict[str, Any]] | None = None
 
 
 class BatchEvaluateRequest(CustomBaseModel):
@@ -150,8 +150,8 @@ class DatabaseStatsResponse(CustomBaseModel):
 class SystemConfigResponse(CustomBaseModel):
     """Response with system configuration (non-sensitive)."""
 
-    features: dict
-    observability: dict
+    features: dict[str, Any]
+    observability: dict[str, Any]
 
 
 # =============================================================================
@@ -185,7 +185,7 @@ async def migrate_rules(request: MigrationRequest) -> MigrationResponse:
 @router.get("/status", response_model=DatabaseStatsResponse)
 async def get_database_status() -> DatabaseStatsResponse:
     """Get current database status and statistics."""
-    from src.rules.migration import get_migration_status
+    from src.rules.migration import get_migration_status  # type: ignore[attr-defined]
 
     status = get_migration_status()
 
@@ -209,7 +209,7 @@ async def compile_rule_endpoint(rule_id: str, request: CompileRequest | None = N
     if request is None:
         request = CompileRequest()
 
-    from src.rules.migration import load_rules_from_db
+    from src.rules.migration import load_rules_from_db  # type: ignore[attr-defined]
     from src.rules.repository import RuleRepository
 
     repo = RuleRepository()
@@ -265,7 +265,7 @@ async def compile_all_rules(
     optimize: bool = Query(default=True),
 ) -> CompileAllResponse:
     """Compile all rules to IR."""
-    from src.rules.migration import load_rules_from_db
+    from src.rules.migration import load_rules_from_db  # type: ignore[attr-defined]
     from src.rules.repository import RuleRepository
 
     repo = RuleRepository()
@@ -275,7 +275,7 @@ async def compile_all_rules(
     runtime = get_runtime()
 
     compiled = 0
-    errors: list[dict] = []
+    errors: list[dict[str, Any]] = []
 
     for rule_id, rule in rules.items():
         try:
@@ -314,7 +314,7 @@ async def compile_all_rules(
 @router.post("/rules/{rule_id}/evaluate", response_model=EvaluateResponse)
 async def evaluate_rule(rule_id: str, request: EvaluateRequest) -> EvaluateResponse:
     """Evaluate a rule against facts using compiled IR."""
-    from src.rules.migration import load_rules_from_db
+    from src.rules.migration import load_rules_from_db  # type: ignore[attr-defined]
     from src.rules.repository import RuleRepository
 
     repo = RuleRepository()
@@ -424,14 +424,14 @@ async def evaluate_batch(request: BatchEvaluateRequest) -> BatchEvaluateResponse
 
 
 @router.get("/cache/stats")
-async def get_cache_stats() -> dict:
+async def get_cache_stats() -> dict[str, Any]:
     """Get IR cache statistics."""
     runtime = get_runtime()
     return runtime._cache.get_stats()
 
 
 @router.post("/cache/clear")
-async def clear_cache() -> dict:
+async def clear_cache() -> dict[str, Any]:
     """Clear the IR cache."""
     runtime = get_runtime()
     count = runtime._cache.invalidate_all()
@@ -439,7 +439,7 @@ async def clear_cache() -> dict:
 
 
 @router.post("/cache/preload")
-async def preload_cache() -> dict:
+async def preload_cache() -> dict[str, Any]:
     """Preload all compiled rules into cache."""
     from src.rules.repository import RuleRepository
 
@@ -472,14 +472,14 @@ async def preload_cache() -> dict:
 
 
 @router.get("/index/stats")
-async def get_index_stats() -> dict:
+async def get_index_stats() -> dict[str, Any]:
     """Get premise index statistics."""
     runtime = get_runtime()
     return runtime._premise_index.get_stats()
 
 
 @router.post("/index/rebuild")
-async def rebuild_index() -> dict:
+async def rebuild_index() -> dict[str, Any]:
     """Rebuild the premise index from database."""
     from src.rules.repository import RuleRepository
 
@@ -508,7 +508,7 @@ async def rebuild_index() -> dict:
 async def lookup_rules(
     field: str = Query(..., description="Field name"),
     value: str = Query(..., description="Field value"),
-) -> dict:
+) -> dict[str, Any]:
     """Look up rules by premise key."""
     from src.rules.repository import RuleRepository
 

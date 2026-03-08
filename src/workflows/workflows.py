@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import asyncio
 from datetime import UTC, datetime, timedelta
+from typing import Any
 
 from temporalio import workflow
 from temporalio.common import RetryPolicy
@@ -36,6 +37,7 @@ with workflow.unsafe.imports_passed_through():
         RuleVerificationOutput,
         RuleVerificationProgress,
         ScenarioResult,
+        ScenarioType,
         TierResult,
         VerificationTier,
         WorkflowStatus,
@@ -88,13 +90,13 @@ class ComplianceCheckWorkflow:
         self._total_jurisdictions = 0
         self._completed_jurisdictions = 0
         self._jurisdiction_results: list[JurisdictionResult] = []
-        self._equivalences: list[dict] = []
-        self._conflicts: list[dict] = []
+        self._equivalences: list[Any] = []
+        self._conflicts: list[Any] = []
         self._pathway: CompliancePathway | None = None
-        self._obligations: list[dict] = []
+        self._obligations: list[dict[str, Any]] = []
         self._error: str | None = None
 
-    @workflow.run
+    @workflow.run  # type: ignore[untyped-decorator]
     async def run(self, input: ComplianceCheckInput) -> ComplianceCheckOutput:
         """Execute the compliance check workflow."""
         self._workflow_id = workflow.info().workflow_id
@@ -282,7 +284,7 @@ class ComplianceCheckWorkflow:
             return JurisdictionStatus.COMPLIANT
         return JurisdictionStatus.REQUIRES_ACTION
 
-    @workflow.query
+    @workflow.query  # type: ignore[untyped-decorator]
     def progress(self) -> ComplianceCheckProgress:
         """Query current workflow progress."""
         phase_progress = 0.0
@@ -337,12 +339,12 @@ class RuleVerificationWorkflow:
         self._stop_reason: str | None = None
         self._error: str | None = None
 
-    @workflow.signal
+    @workflow.signal  # type: ignore[untyped-decorator]
     def skip_tier(self, tier: int) -> None:
         """Signal to skip a verification tier."""
         self._skip_tiers.add(VerificationTier(tier))
 
-    @workflow.run
+    @workflow.run  # type: ignore[untyped-decorator]
     async def run(self, input: RuleVerificationInput) -> RuleVerificationOutput:
         """Execute the rule verification workflow."""
         self._workflow_id = workflow.info().workflow_id
@@ -468,7 +470,7 @@ class RuleVerificationWorkflow:
                 error=self._error,
             )
 
-    @workflow.query
+    @workflow.query  # type: ignore[untyped-decorator]
     def progress(self) -> RuleVerificationProgress:
         """Query current workflow progress."""
         return RuleVerificationProgress(
@@ -514,7 +516,7 @@ class CounterfactualAnalysisWorkflow:
         self._delta_analyses: list[DeltaAnalysis] = []
         self._error: str | None = None
 
-    @workflow.run
+    @workflow.run  # type: ignore[untyped-decorator]
     async def run(self, input: CounterfactualInput) -> CounterfactualOutput:
         """Execute the counterfactual analysis workflow."""
         self._workflow_id = workflow.info().workflow_id
@@ -621,7 +623,7 @@ class CounterfactualAnalysisWorkflow:
                 baseline_result=self._baseline_result
                 or ScenarioResult(
                     scenario_id="baseline",
-                    scenario_type=input.scenarios[0].scenario_type if input.scenarios else "threshold",
+                    scenario_type=input.scenarios[0].scenario_type if input.scenarios else ScenarioType.THRESHOLD,
                     description="Baseline (failed)",
                     decision="error",
                     applicable=False,
@@ -636,7 +638,7 @@ class CounterfactualAnalysisWorkflow:
                 error=self._error,
             )
 
-    @workflow.query
+    @workflow.query  # type: ignore[untyped-decorator]
     def progress(self) -> CounterfactualProgress:
         """Query current workflow progress."""
         return CounterfactualProgress(
@@ -682,7 +684,7 @@ class DriftDetectionWorkflow:
         self._notifications_sent = 0
         self._error: str | None = None
 
-    @workflow.run
+    @workflow.run  # type: ignore[untyped-decorator]
     async def run(self, input: DriftDetectionInput) -> DriftDetectionOutput:
         """Execute the drift detection workflow."""
         self._workflow_id = workflow.info().workflow_id
@@ -778,7 +780,7 @@ class DriftDetectionWorkflow:
                 error=self._error,
             )
 
-    @workflow.query
+    @workflow.query  # type: ignore[untyped-decorator]
     def progress(self) -> DriftDetectionProgress:
         """Query current workflow progress."""
         return DriftDetectionProgress(

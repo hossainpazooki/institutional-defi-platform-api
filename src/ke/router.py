@@ -51,7 +51,7 @@ def get_ke_service() -> KEService:
 
 
 @router.post("/verify", response_model=VerifyRuleResponse)
-def verify_rule_endpoint(request: VerifyRuleRequest):
+def verify_rule_endpoint(request: VerifyRuleRequest) -> VerifyRuleResponse:
     """Verify consistency of a single rule."""
     svc = get_ke_service()
     result = svc.verify_rule(request.rule_id, source_text=request.source_text, tiers=request.tiers)
@@ -64,7 +64,7 @@ def verify_rule_endpoint(request: VerifyRuleRequest):
 def verify_all_rules(
     tiers: list[int] = Query(default=[0, 1]),
     save: bool = Query(default=False, description="Save results to rule files"),
-):
+) -> VerifyAllResponse:
     """Verify all loaded rules."""
     svc = get_ke_service()
     return VerifyAllResponse(**svc.verify_all_rules(tiers=tiers, save=save))
@@ -76,14 +76,14 @@ def verify_all_rules(
 
 
 @router.get("/analytics/summary", response_model=AnalyticsSummaryResponse)
-def get_analytics_summary():
+def get_analytics_summary() -> AnalyticsSummaryResponse:
     """Get summary statistics for all rules."""
     svc = get_ke_service()
     return AnalyticsSummaryResponse(**svc.get_analytics_summary())
 
 
 @router.get("/analytics/patterns", response_model=list[ErrorPatternResponse])
-def get_error_patterns(min_affected: int = Query(default=2)):
+def get_error_patterns(min_affected: int = Query(default=2)) -> list[ErrorPatternResponse]:
     """Detect error patterns across rules."""
     svc = get_ke_service()
     patterns = svc.get_error_patterns(min_affected=min_affected)
@@ -109,7 +109,7 @@ def get_error_matrix() -> dict[str, dict[str, int]]:
 
 
 @router.get("/analytics/review-queue", response_model=list[ReviewQueueItem])
-def get_review_queue(max_items: int = Query(default=50)):
+def get_review_queue(max_items: int = Query(default=50)) -> list[ReviewQueueItem]:
     """Get prioritized review queue."""
     svc = get_ke_service()
     queue = svc.get_review_queue(max_items=max_items)
@@ -131,14 +131,14 @@ def get_review_queue(max_items: int = Query(default=50)):
 
 
 @router.post("/drift/baseline")
-def set_drift_baseline() -> dict:
+def set_drift_baseline() -> dict[str, Any]:
     """Set current state as drift baseline."""
     svc = get_ke_service()
     return svc.set_drift_baseline()
 
 
 @router.get("/drift/detect", response_model=DriftReportResponse)
-def detect_drift():
+def detect_drift() -> DriftReportResponse:
     """Detect drift from baseline."""
     svc = get_ke_service()
     report = svc.detect_drift()
@@ -153,7 +153,7 @@ def detect_drift():
 
 
 @router.get("/drift/history")
-def get_drift_history(window: int = Query(default=10)) -> list[dict]:
+def get_drift_history(window: int = Query(default=10)) -> list[dict[str, Any]]:
     """Get metrics history."""
     svc = get_ke_service()
     history = svc.get_drift_history(window=window)
@@ -191,7 +191,7 @@ def get_rule_context(rule_id: str) -> dict[str, Any]:
 
 
 @router.get("/related/{rule_id}")
-def get_related_rules(rule_id: str, top_k: int = Query(default=5)) -> list[dict]:
+def get_related_rules(rule_id: str, top_k: int = Query(default=5)) -> list[dict[str, Any]]:
     """Get rules related to a given rule."""
     svc = get_ke_service()
     result = svc.get_related_rules(rule_id, top_k=top_k)
@@ -206,7 +206,7 @@ def get_related_rules(rule_id: str, top_k: int = Query(default=5)) -> list[dict]
 
 
 @router.post("/rules/{rule_id}/review", response_model=HumanReviewResponse)
-def submit_human_review(rule_id: str, request: HumanReviewRequest):
+def submit_human_review(rule_id: str, request: HumanReviewRequest) -> HumanReviewResponse:
     """Submit a human review (Tier 4) for a rule."""
     if request.label not in ("consistent", "inconsistent", "unknown"):
         raise HTTPException(
@@ -221,7 +221,7 @@ def submit_human_review(rule_id: str, request: HumanReviewRequest):
 
 
 @router.get("/rules/{rule_id}/reviews")
-def get_rule_reviews(rule_id: str) -> list[dict]:
+def get_rule_reviews(rule_id: str) -> list[dict[str, Any]]:
     """Get all human reviews for a rule."""
     svc = get_ke_service()
     result = svc.get_rule_reviews(rule_id)
@@ -236,14 +236,14 @@ def get_rule_reviews(rule_id: str) -> list[dict]:
 
 
 @router.get("/charts/supertree-status")
-def get_supertree_status() -> dict:
+def get_supertree_status() -> dict[str, Any]:
     """Check if Supertree visualization is available."""
     svc = get_ke_service()
     return svc.get_supertree_status()
 
 
 @router.get("/charts/rulebook-outline", response_model=ChartDataResponse)
-def get_rulebook_outline_chart():
+def get_rulebook_outline_chart() -> ChartDataResponse:
     """Get rulebook outline tree data."""
     svc = get_ke_service()
     return ChartDataResponse(
@@ -254,7 +254,7 @@ def get_rulebook_outline_chart():
 
 
 @router.get("/charts/rulebook-outline/html", response_model=ChartHtmlResponse)
-def get_rulebook_outline_html():
+def get_rulebook_outline_html() -> ChartHtmlResponse:
     """Get rulebook outline as rendered HTML."""
     svc = get_ke_service()
     return ChartHtmlResponse(
@@ -265,7 +265,7 @@ def get_rulebook_outline_html():
 
 
 @router.get("/charts/ontology", response_model=ChartDataResponse)
-def get_ontology_chart():
+def get_ontology_chart() -> ChartDataResponse:
     """Get ontology tree data."""
     svc = get_ke_service()
     return ChartDataResponse(
@@ -276,7 +276,7 @@ def get_ontology_chart():
 
 
 @router.get("/charts/ontology/html", response_model=ChartHtmlResponse)
-def get_ontology_html():
+def get_ontology_html() -> ChartHtmlResponse:
     """Get ontology tree as rendered HTML."""
     svc = get_ke_service()
     return ChartHtmlResponse(
@@ -287,7 +287,7 @@ def get_ontology_html():
 
 
 @router.get("/charts/corpus-links", response_model=ChartDataResponse)
-def get_corpus_links_chart():
+def get_corpus_links_chart() -> ChartDataResponse:
     """Get corpus-to-rule links tree data."""
     svc = get_ke_service()
     return ChartDataResponse(
@@ -298,7 +298,7 @@ def get_corpus_links_chart():
 
 
 @router.get("/charts/corpus-links/html", response_model=ChartHtmlResponse)
-def get_corpus_links_html():
+def get_corpus_links_html() -> ChartHtmlResponse:
     """Get corpus-to-rule links as rendered HTML."""
     svc = get_ke_service()
     return ChartHtmlResponse(
@@ -309,7 +309,7 @@ def get_corpus_links_html():
 
 
 @router.get("/charts/decision-tree/{rule_id}", response_model=ChartDataResponse)
-def get_decision_tree_chart(rule_id: str):
+def get_decision_tree_chart(rule_id: str) -> ChartDataResponse:
     """Get decision tree structure for a rule."""
     svc = get_ke_service()
     result = svc.get_decision_tree(rule_id)
@@ -325,7 +325,7 @@ def get_decision_tree_chart(rule_id: str):
 
 
 @router.post("/charts/decision-trace/{rule_id}", response_model=ChartDataResponse)
-def get_decision_trace_chart(rule_id: str, request: EvaluateForTraceRequest):
+def get_decision_trace_chart(rule_id: str, request: EvaluateForTraceRequest) -> ChartDataResponse:
     """Evaluate a rule and return decision trace tree data."""
     svc = get_ke_service()
     result = svc.get_decision_trace(rule_id, request.scenario)
@@ -339,7 +339,7 @@ def get_decision_trace_chart(rule_id: str, request: EvaluateForTraceRequest):
 
 
 @router.post("/charts/decision-trace/{rule_id}/html", response_model=ChartHtmlResponse)
-def get_decision_trace_html(rule_id: str, request: EvaluateForTraceRequest):
+def get_decision_trace_html(rule_id: str, request: EvaluateForTraceRequest) -> ChartHtmlResponse:
     """Evaluate a rule and return decision trace as HTML."""
     svc = get_ke_service()
     html = svc.render_decision_trace(rule_id, request.scenario)

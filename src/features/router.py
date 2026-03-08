@@ -20,7 +20,7 @@ _service = FeatureStoreService()
 async def list_entities(
     source: str | None = Query(None, description="Filter by source"),
     limit: int = Query(100, le=1000),
-):
+) -> EntitiesResponse:
     """List all entities in the Feature Store."""
     return await _service.list_entities(source=source, limit=limit)
 
@@ -32,7 +32,7 @@ async def get_features(
     feature_names: str | None = Query(None, description="Comma-separated feature names"),
     source: str | None = Query(None, description="Filter by source"),
     limit: int = Query(1000, le=10000),
-):
+) -> FeatureSnapshot:
     """Get historical features for an entity within a time window."""
     return await _service.get_features(
         entity_id=entity_id,
@@ -47,7 +47,7 @@ async def get_features(
 async def get_latest_features(
     entity_id: str,
     feature_names: str | None = Query(None, description="Comma-separated feature names"),
-):
+) -> LatestFeaturesResponse:
     """Get the most recent value for each feature of an entity."""
     return await _service.get_latest_features(
         entity_id=entity_id,

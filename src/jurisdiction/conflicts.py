@@ -6,12 +6,14 @@ From Workbench rules/jurisdiction/conflicts.py.
 
 from __future__ import annotations
 
+from typing import Any
+
 from src.ontology.jurisdiction import ConflictSeverity, ConflictType
 
 from .constants import EXCLUSIVE_OBLIGATION_PAIRS
 
 
-def detect_conflicts(jurisdiction_results: list[dict]) -> list[dict]:
+def detect_conflicts(jurisdiction_results: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Detect conflicts between jurisdiction evaluation results.
 
     Checks for:
@@ -43,7 +45,7 @@ def detect_conflicts(jurisdiction_results: list[dict]) -> list[dict]:
     return conflicts
 
 
-def _check_decision_conflict(result_a: dict, result_b: dict) -> dict | None:
+def _check_decision_conflict(result_a: dict[str, Any], result_b: dict[str, Any]) -> dict[str, Any] | None:
     """Check if jurisdictions have conflicting overall decisions."""
     status_a = result_a.get("status")
     status_b = result_b.get("status")
@@ -64,7 +66,7 @@ def _check_decision_conflict(result_a: dict, result_b: dict) -> dict | None:
     return None
 
 
-def _check_obligation_conflicts(result_a: dict, result_b: dict) -> list[dict]:
+def _check_obligation_conflicts(result_a: dict[str, Any], result_b: dict[str, Any]) -> list[dict[str, Any]]:
     """Check for conflicting obligations between jurisdictions."""
     conflicts = []
 
@@ -91,13 +93,14 @@ def _check_obligation_conflicts(result_a: dict, result_b: dict) -> list[dict]:
     return conflicts
 
 
-def _check_classification_divergence(result_a: dict, result_b: dict) -> dict | None:
+def _check_classification_divergence(result_a: dict[str, Any], result_b: dict[str, Any]) -> dict[str, Any] | None:
     """Check if same instrument is classified differently across jurisdictions."""
 
-    def get_classification(result: dict) -> str | None:
+    def get_classification(result: dict[str, Any]) -> str | None:
         for dec in result.get("decisions", []):
-            if "classification" in dec.get("rule_id", "").lower():
-                return dec.get("decision")
+            decision = dec.get("decision")
+            if "classification" in dec.get("rule_id", "").lower() and isinstance(decision, str):
+                return decision
         return None
 
     class_a = get_classification(result_a)
@@ -118,11 +121,11 @@ def _check_classification_divergence(result_a: dict, result_b: dict) -> dict | N
     return None
 
 
-def check_timeline_conflicts(obligations: list[dict]) -> list[dict]:
+def check_timeline_conflicts(obligations: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Check for conflicting timelines in obligations."""
     conflicts = []
 
-    by_type: dict[str, list[dict]] = {}
+    by_type: dict[str, list[dict[str, Any]]] = {}
     for obl in obligations:
         obl_id = obl.get("id", "")
         base_type = obl_id.split("_")[0] if "_" in obl_id else obl_id

@@ -199,7 +199,7 @@ async def navigate(request: NavigateRequest) -> NavigateResponse:
 
 
 @navigate_router.get("/jurisdictions")
-async def list_jurisdictions() -> dict:
+async def list_jurisdictions() -> dict[str, Any]:
     """List all supported jurisdictions."""
     from src.database import get_db
 
@@ -226,7 +226,7 @@ async def list_jurisdictions() -> dict:
 
 
 @navigate_router.get("/regimes")
-async def list_regimes() -> dict:
+async def list_regimes() -> dict[str, Any]:
     """List all regulatory regimes."""
     from src.database import get_db
 
@@ -263,7 +263,7 @@ async def list_regimes() -> dict:
 
 
 @navigate_router.get("/equivalences")
-async def list_equivalences() -> dict:
+async def list_equivalences() -> dict[str, Any]:
     """List all equivalence determinations."""
     from src.database import get_db
 
@@ -299,7 +299,7 @@ async def list_equivalences() -> dict:
 
 
 @compliance_router.get("/jurisdictions", response_model=JurisdictionsResponse)
-async def get_compliance_jurisdictions():
+async def get_compliance_jurisdictions() -> JurisdictionsResponse:
     """Get regulatory status by jurisdiction."""
     return JurisdictionsResponse(
         jurisdictions=[
@@ -357,7 +357,7 @@ async def get_compliance_jurisdictions():
 
 
 @compliance_router.get("/sanctions", response_model=SanctionsResponse)
-async def get_sanctions_status():
+async def get_sanctions_status() -> SanctionsResponse:
     """Get sanctions screening status."""
     return SanctionsResponse(
         results=[
@@ -377,19 +377,19 @@ async def get_sanctions_status():
 
 
 @compliance_router.post("/sanctions/check")
-async def check_address():
+async def check_address() -> dict[str, str]:
     """Check an address against sanction lists."""
     return {"status": "stub", "module": "compliance.sanctions.check"}
 
 
 @compliance_router.get("/alerts")
-async def get_compliance_alerts():
+async def get_compliance_alerts() -> dict[str, str]:
     """Get compliance alerts."""
     return {"status": "stub", "module": "compliance.alerts"}
 
 
 @compliance_router.get("/reports")
-async def get_compliance_reports():
+async def get_compliance_reports() -> dict[str, str]:
     """Get compliance reports."""
     return {"status": "stub", "module": "compliance.reports"}
 
@@ -399,7 +399,7 @@ async def get_compliance_reports():
 # =============================================================================
 
 
-def _analyze_token_compliance(request: NavigateRequest, audit_trail: list[dict]) -> dict | None:
+def _analyze_token_compliance(request: NavigateRequest, audit_trail: list[dict[str, Any]]) -> dict[str, Any] | None:
     """Run token compliance analysis if token_standard is provided."""
     try:
         from src.token_compliance.schemas import TokenStandard
@@ -413,7 +413,7 @@ def _analyze_token_compliance(request: NavigateRequest, audit_trail: list[dict])
             "spl": TokenStandard.SPL,
             "trc-20": TokenStandard.TRC_20,
         }
-        standard_key = request.token_standard.lower()
+        standard_key = request.token_standard.lower() if request.token_standard else ""
         token_standard_enum = token_standard_map.get(standard_key, TokenStandard.ERC_20)
 
         is_stablecoin = request.instrument_type in ["stablecoin", "payment_stablecoin"]
@@ -442,7 +442,7 @@ def _analyze_token_compliance(request: NavigateRequest, audit_trail: list[dict])
             has_reserve_attestation=request.facts.get("has_reserve_attestation", False),
             attestation_frequency_days=request.facts.get("attestation_frequency_days", 30),
         )
-        result = {
+        result: dict[str, Any] = {
             "standard": compliance_result.standard.value,
             "classification": compliance_result.classification.value,
             "requires_sec_registration": compliance_result.requires_sec_registration,
@@ -458,15 +458,15 @@ def _analyze_token_compliance(request: NavigateRequest, audit_trail: list[dict])
                 "is_security": compliance_result.howey_analysis.is_security,
                 "investment_of_money": compliance_result.howey_analysis.investment_of_money,
                 "common_enterprise": compliance_result.howey_analysis.common_enterprise,
-                "expectation_of_profit": compliance_result.howey_analysis.expectation_of_profit,
+                "expectation_of_profits": compliance_result.howey_analysis.expectation_of_profits,
                 "efforts_of_others": compliance_result.howey_analysis.efforts_of_others,
                 "analysis_notes": compliance_result.howey_analysis.analysis_notes,
             }
         if compliance_result.genius_analysis:
             result["genius_analysis"] = {
-                "is_compliant_stablecoin": compliance_result.genius_analysis.is_compliant_stablecoin,
-                "reserve_requirements_met": compliance_result.genius_analysis.reserve_requirements_met,
-                "issuer_requirements": compliance_result.genius_analysis.issuer_requirements,
+                "is_payment_stablecoin": compliance_result.genius_analysis.is_payment_stablecoin,
+                "compliance_status": compliance_result.genius_analysis.compliance_status,
+                "meets_genius_requirements": compliance_result.genius_analysis.meets_genius_requirements,
             }
         audit_trail.append(
             {
@@ -493,17 +493,19 @@ def _analyze_token_compliance(request: NavigateRequest, audit_trail: list[dict])
         return None
 
 
-def _assess_protocol_risk(request: NavigateRequest, audit_trail: list[dict]) -> dict | None:
+def _assess_protocol_risk(request: NavigateRequest, audit_trail: list[dict[str, Any]]) -> dict[str, Any] | None:
     """Run protocol risk assessment if underlying_chain is provided."""
     try:
         from src.protocol_risk.constants import PROTOCOL_DEFAULTS
         from src.protocol_risk.service import assess_protocol_risk, get_protocol_defaults
 
-        chain_key = request.underlying_chain.lower()
+        chain_key = request.underlying_chain.lower() if request.underlying_chain else ""
         if chain_key not in PROTOCOL_DEFAULTS:
             return None
 
         defaults = get_protocol_defaults(chain_key)
+        if defaults is None:
+            return None
         assessment = assess_protocol_risk(protocol_id=chain_key, **defaults)
         result = {
             "protocol_id": assessment.protocol_id,
@@ -541,7 +543,7 @@ def _assess_protocol_risk(request: NavigateRequest, audit_trail: list[dict]) -> 
         return None
 
 
-def _score_defi_risk(request: NavigateRequest, audit_trail: list[dict]) -> dict | None:
+def _score_defi_risk(request: NavigateRequest, audit_trail: list[dict[str, Any]]) -> dict[str, Any] | None:
     """Run DeFi risk scoring if defi_protocol is provided."""
     try:
         from src.defi_risk.constants import DEFI_PROTOCOL_DEFAULTS
@@ -553,7 +555,7 @@ def _score_defi_risk(request: NavigateRequest, audit_trail: list[dict]) -> dict 
         )
         from src.defi_risk.service import score_defi_protocol
 
-        protocol_key = request.defi_protocol.lower()
+        protocol_key = request.defi_protocol.lower() if request.defi_protocol else ""
         if protocol_key not in DEFI_PROTOCOL_DEFAULTS:
             return None
 

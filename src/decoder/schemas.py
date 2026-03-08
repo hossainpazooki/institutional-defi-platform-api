@@ -139,9 +139,9 @@ class LLMExplainRequest(CustomBaseModel):
     """Request for LLM-based explanation generation."""
 
     scenario: str
-    results: dict
+    results: dict[str, Any]
     tier: str = "anchored"  # "canonical", "anchored", "guided", "exploratory"
-    context: dict | None = None
+    context: dict[str, Any] | None = None
 
 
 class LLMDecoderResponse(CustomBaseModel):

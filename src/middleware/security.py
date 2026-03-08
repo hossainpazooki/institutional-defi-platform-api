@@ -5,6 +5,7 @@ web vulnerabilities like clickjacking, XSS, and MIME-type sniffing.
 """
 
 from collections.abc import Callable
+from typing import Any, cast
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
@@ -16,7 +17,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
     def __init__(
         self,
-        app: Callable,
+        app: Callable[..., Any],
         csp_policy: str | None = None,
         include_csp: bool = True,
     ) -> None:
@@ -39,8 +40,8 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             ]
         )
 
-    async def dispatch(self, request: Request, call_next: Callable) -> Response:
-        response = await call_next(request)
+    async def dispatch(self, request: Request, call_next: Callable[..., Any]) -> Response:
+        response = cast("Response", await call_next(request))
 
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"

@@ -71,6 +71,10 @@ dev = [
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",
     "ruff>=0.3.0",
+    "mypy>=1.11.0",
+    "mypy-extensions>=1.0.0",
+    "types-PyYAML>=6.0.0",
+    "types-networkx>=3.0",
 ]
 all = [
     "institutional-defi-platform-api[blockchain,llm,ml,credit,temporal,telemetry,dev]",
@@ -87,6 +91,49 @@ include = ["src*"]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+
+[tool.mypy]
+strict = true
+plugins = ["pydantic.mypy"]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+show_error_codes = true
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_untyped_fields = true
+
+# Optional dependencies without type stubs — ignore missing imports
+[[tool.mypy.overrides]]
+module = [
+    "chromadb", "chromadb.*",
+    "sentence_transformers", "sentence_transformers.*",
+    "transformers", "transformers.*",
+    "torch", "torch.*",
+    "sklearn", "sklearn.*",
+    "node2vec", "node2vec.*",
+    "umap", "umap.*",
+    "rank_bm25", "rank_bm25.*",
+    "openai", "openai.*",
+    "anthropic", "anthropic.*",
+    "temporalio", "temporalio.*",
+    "pydantic_ai", "pydantic_ai.*",
+    "llama_index", "llama_index.*",
+    "prometheus_client", "prometheus_client.*",
+    "opentelemetry", "opentelemetry.*",
+    "celery", "celery.*",
+    "web3", "web3.*",
+    "slowapi", "slowapi.*",
+]
+ignore_missing_imports = true
 
 [tool.coverage.run]
 source = ["src"]

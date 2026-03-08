@@ -90,7 +90,7 @@ class RuleEventRepository:
                     """),
                     {"rule_id": rule_id},
                 )
-            return [RuleEventRecord.from_row(row._mapping) for row in result.fetchall()]
+            return [RuleEventRecord.from_row(dict(row._mapping)) for row in result.fetchall()]
 
     def get_events_by_type(self, event_type: str | RuleEventType, limit: int = 100) -> list[RuleEventRecord]:
         """Get all events of a specific type."""
@@ -107,7 +107,7 @@ class RuleEventRepository:
                 """),
                 {"event_type": event_type, "limit": limit},
             )
-            return [RuleEventRecord.from_row(row._mapping) for row in result.fetchall()]
+            return [RuleEventRecord.from_row(dict(row._mapping)) for row in result.fetchall()]
 
     def get_events_after_sequence(self, sequence_number: int, limit: int = 100) -> list[RuleEventRecord]:
         """Get all events after a specific sequence number."""
@@ -121,14 +121,14 @@ class RuleEventRepository:
                 """),
                 {"sequence_number": sequence_number, "limit": limit},
             )
-            return [RuleEventRecord.from_row(row._mapping) for row in result.fetchall()]
+            return [RuleEventRecord.from_row(dict(row._mapping)) for row in result.fetchall()]
 
     def get_next_sequence_number(self) -> int:
         """Get the next sequence number for events."""
         with get_db() as conn:
             result = conn.execute(text("SELECT MAX(sequence_number) as max_seq FROM rule_events"))
             row = result.fetchone()
-            return (row[0] or 0) + 1
+            return (int(row[0]) if row and row[0] is not None else 0) + 1
 
     def get_latest_event(self, rule_id: str) -> RuleEventRecord | None:
         """Get the most recent event for a rule."""
@@ -144,7 +144,7 @@ class RuleEventRepository:
             )
             row = result.fetchone()
             if row:
-                return RuleEventRecord.from_row(row._mapping)
+                return RuleEventRecord.from_row(dict(row._mapping))
             return None
 
     def count_events(self, rule_id: str | None = None) -> int:
@@ -157,7 +157,8 @@ class RuleEventRepository:
                 )
             else:
                 result = conn.execute(text("SELECT COUNT(*) as count FROM rule_events"))
-            return result.fetchone()[0]
+            row = result.fetchone()
+            return int(row[0]) if row else 0
 
     def get_event_summary(self) -> dict[str, int]:
         """Get a summary of events by type."""
@@ -170,4 +171,4 @@ class RuleEventRepository:
                 ORDER BY event_type
                 """)
             )
-            return {row[0]: row[1] for row in result.fetchall()}
+            return {str(row[0]): int(row[1]) for row in result.fetchall()}

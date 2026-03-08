@@ -6,6 +6,8 @@ Domain-level schemas (rules, verification, analytics) live in their own domains.
 
 from __future__ import annotations
 
+from typing import Any
+
 from pydantic import Field
 
 from src.models import CustomBaseModel
@@ -30,7 +32,7 @@ class VerifyRuleResponse(CustomBaseModel):
     status: str
     confidence: float
     evidence_count: int
-    evidence: list[dict]
+    evidence: list[dict[str, Any]]
 
 
 class VerifyAllResponse(CustomBaseModel):
@@ -40,7 +42,7 @@ class VerifyAllResponse(CustomBaseModel):
     verified: int
     needs_review: int
     inconsistent: int
-    results: list[dict]
+    results: list[dict[str, Any]]
 
 
 # =============================================================================
@@ -132,7 +134,7 @@ class ChartDataResponse(CustomBaseModel):
     """Response containing tree data for visualization."""
 
     chart_type: str
-    data: dict
+    data: dict[str, Any]
     supertree_available: bool
 
 
@@ -147,4 +149,4 @@ class ChartHtmlResponse(CustomBaseModel):
 class EvaluateForTraceRequest(CustomBaseModel):
     """Request to evaluate a rule and get decision trace."""
 
-    scenario: dict = Field(..., description="Scenario attributes as key-value pairs")
+    scenario: dict[str, Any] = Field(..., description="Scenario attributes as key-value pairs")

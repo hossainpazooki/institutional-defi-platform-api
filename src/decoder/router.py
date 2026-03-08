@@ -10,6 +10,7 @@ Combines decoder and counterfactual endpoints for:
 from __future__ import annotations
 
 import contextlib
+from typing import Any
 
 from fastapi import APIRouter, HTTPException
 
@@ -177,7 +178,7 @@ async def list_templates() -> list[TemplateInfo]:
 
 
 @router.get("/templates/{template_id}")
-async def get_template(template_id: str) -> dict:
+async def get_template(template_id: str) -> dict[str, Any]:
     """Get details of a specific template."""
     decoder = get_decoder()
     template = decoder.templates.get(template_id)
@@ -204,7 +205,7 @@ async def get_template(template_id: str) -> dict:
 
 
 @router.get("/tiers")
-async def list_tiers() -> list[dict]:
+async def list_tiers() -> list[dict[str, str]]:
     """List available explanation tiers."""
     return [
         {
@@ -250,7 +251,7 @@ async def llm_list_tiers() -> LLMTiersResponse:
 
 
 @router.get("/llm/health")
-async def llm_decoder_health() -> dict:
+async def llm_decoder_health() -> dict[str, Any]:
     """Check LLM decoder health and API key status."""
     llm_decoder = get_llm_decoder()
     return llm_decoder.get_health()
@@ -418,7 +419,7 @@ async def compare_inline(request: InlineCompareRequest) -> ComparisonMatrix:
 
 
 @counterfactual_router.get("/scenario-types")
-async def list_scenario_types() -> list[dict]:
+async def list_scenario_types() -> list[dict[str, Any]]:
     """List available counterfactual scenario types."""
     return [
         {

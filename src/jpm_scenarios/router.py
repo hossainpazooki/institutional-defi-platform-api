@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from fastapi import APIRouter, HTTPException, Query
 
 from src.jpm_scenarios.schemas import (
@@ -24,7 +26,7 @@ def _get_service() -> JPMScenarioService:
 
 
 @router.get("/scenarios", response_model=ScenariosResponse)
-async def list_scenarios():
+async def list_scenarios() -> ScenariosResponse:
     """List all available JPM tokenization scenarios.
 
     Returns pre-configured scenarios for institutional tokenization use cases.
@@ -33,16 +35,16 @@ async def list_scenarios():
 
 
 @router.get("/scenarios/{scenario_id}")
-async def get_scenario(scenario_id: str):
+async def get_scenario(scenario_id: str) -> dict[str, Any]:
     """Get details of a specific scenario."""
     result = _get_service().get_scenario(scenario_id)
     if result is None:
         raise HTTPException(status_code=404, detail=f"Scenario not found: {scenario_id}")
-    return result
+    return dict(result)
 
 
 @router.post("/scenarios/{scenario_id}/run", response_model=ScenarioRunResult)
-async def run_scenario(scenario_id: str):
+async def run_scenario(scenario_id: str) -> ScenarioRunResult:
     """Execute a JPM scenario through the full risk pipeline.
 
     Steps:
@@ -64,7 +66,7 @@ async def run_scenario(scenario_id: str):
 async def generate_memo(
     scenario_id: str,
     format: str = Query("markdown", pattern="^(markdown|pdf)$"),
-):
+) -> MemoResponse:
     """Generate an audit-ready memo for a scenario.
 
     Supported formats:

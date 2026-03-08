@@ -201,7 +201,7 @@ def analyze_token_compliance(
     if requires_sec:
         recommended_actions.append("Consult securities counsel for registration options")
         recommended_actions.append("Consider Regulation D or Regulation A+ exemptions")
-    if genius_applicable and genius_result.compliance_status != "compliant":
+    if genius_applicable and genius_result is not None and genius_result.compliance_status != "compliant":
         recommended_actions.append("Work with qualified issuer to achieve GENIUS Act compliance")
 
     return TokenComplianceResult(

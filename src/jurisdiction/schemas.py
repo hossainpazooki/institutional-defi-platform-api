@@ -88,21 +88,21 @@ class NavigateResponse(CustomBaseModel):
         description="Overall status: actionable, blocked, requires_review",
     )
     applicable_jurisdictions: list[JurisdictionRoleResponse]
-    jurisdiction_results: list[dict]
-    conflicts: list[dict]
-    pathway: list[dict]
-    cumulative_obligations: list[dict]
+    jurisdiction_results: list[dict[str, Any]]
+    conflicts: list[dict[str, Any]]
+    pathway: list[dict[str, Any]]
+    cumulative_obligations: list[dict[str, Any]]
     estimated_timeline: str
-    audit_trail: list[dict]
-    token_compliance: dict | None = Field(
+    audit_trail: list[dict[str, Any]]
+    token_compliance: dict[str, Any] | None = Field(
         None,
         description="Token standard compliance analysis (Howey test, GENIUS Act)",
     )
-    protocol_risk: dict | None = Field(
+    protocol_risk: dict[str, Any] | None = Field(
         None,
         description="Underlying blockchain protocol risk assessment",
     )
-    defi_risk: dict | None = Field(
+    defi_risk: dict[str, Any] | None = Field(
         None,
         description="DeFi protocol risk score if integrated",
     )

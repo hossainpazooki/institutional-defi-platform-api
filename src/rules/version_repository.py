@@ -40,7 +40,7 @@ class RuleVersionRepository:
                 {"rule_id": rule_id},
             )
             row = result.fetchone()
-            next_version = (row[0] or 0) + 1
+            next_version: int = (int(row[0]) if row and row[0] is not None else 0) + 1
 
             if next_version > 1:
                 conn.execute(
@@ -108,7 +108,7 @@ class RuleVersionRepository:
             )
             row = result.fetchone()
             if row:
-                return RuleVersionRecord.from_row(row._mapping)
+                return RuleVersionRecord.from_row(dict(row._mapping))
             return None
 
     def get_latest_version(self, rule_id: str) -> RuleVersionRecord | None:
@@ -125,7 +125,7 @@ class RuleVersionRepository:
             )
             row = result.fetchone()
             if row:
-                return RuleVersionRecord.from_row(row._mapping)
+                return RuleVersionRecord.from_row(dict(row._mapping))
             return None
 
     def get_version_at_timestamp(self, rule_id: str, timestamp: str) -> RuleVersionRecord | None:
@@ -144,7 +144,7 @@ class RuleVersionRepository:
             )
             row = result.fetchone()
             if row:
-                return RuleVersionRecord.from_row(row._mapping)
+                return RuleVersionRecord.from_row(dict(row._mapping))
 
             result = conn.execute(
                 text("""
@@ -157,7 +157,7 @@ class RuleVersionRepository:
             )
             row = result.fetchone()
             if row:
-                return RuleVersionRecord.from_row(row._mapping)
+                return RuleVersionRecord.from_row(dict(row._mapping))
             return None
 
     def get_version_history(self, rule_id: str, limit: int = 100) -> list[RuleVersionRecord]:
@@ -172,7 +172,7 @@ class RuleVersionRepository:
                 """),
                 {"rule_id": rule_id, "limit": limit},
             )
-            return [RuleVersionRecord.from_row(row._mapping) for row in result.fetchall()]
+            return [RuleVersionRecord.from_row(dict(row._mapping)) for row in result.fetchall()]
 
     def get_versions_by_hash(self, content_hash: str) -> list[RuleVersionRecord]:
         """Get all versions with a specific content hash."""
@@ -181,13 +181,13 @@ class RuleVersionRepository:
                 text("SELECT * FROM rule_versions WHERE content_hash = :content_hash ORDER BY rule_id, version"),
                 {"content_hash": content_hash},
             )
-            return [RuleVersionRecord.from_row(row._mapping) for row in result.fetchall()]
+            return [RuleVersionRecord.from_row(dict(row._mapping)) for row in result.fetchall()]
 
     def get_all_rule_ids(self) -> list[str]:
         """Get all unique rule IDs with versions."""
         with get_db() as conn:
             result = conn.execute(text("SELECT DISTINCT rule_id FROM rule_versions ORDER BY rule_id"))
-            return [row[0] for row in result.fetchall()]
+            return [str(row[0]) for row in result.fetchall()]
 
     def count_versions(self, rule_id: str | None = None) -> int:
         """Count versions."""
@@ -199,4 +199,5 @@ class RuleVersionRepository:
                 )
             else:
                 result = conn.execute(text("SELECT COUNT(*) as count FROM rule_versions"))
-            return result.fetchone()[0]
+            row = result.fetchone()
+            return int(row[0]) if row else 0

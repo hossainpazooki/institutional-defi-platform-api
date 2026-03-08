@@ -91,7 +91,7 @@ class KEService:
     # Verification
     # =========================================================================
 
-    def verify_rule(self, rule_id: str, source_text: str | None = None, tiers: list[int] | None = None) -> dict:
+    def verify_rule(self, rule_id: str, source_text: str | None = None, tiers: list[int] | None = None) -> dict[str, Any] | None:
         """Verify a single rule's consistency."""
         tiers = tiers or [0, 1]
         rule = self.rule_loader.get_rule(rule_id)
@@ -116,7 +116,7 @@ class KEService:
             ],
         }
 
-    def verify_all_rules(self, tiers: list[int] | None = None, save: bool = False) -> dict:
+    def verify_all_rules(self, tiers: list[int] | None = None, save: bool = False) -> dict[str, Any]:
         """Verify all loaded rules."""
         tiers = tiers or [0, 1]
         rules = self.rule_loader.get_all_rules()
@@ -146,11 +146,11 @@ class KEService:
     # Analytics
     # =========================================================================
 
-    def get_analytics_summary(self) -> dict:
+    def get_analytics_summary(self) -> dict[str, Any]:
         """Get summary statistics for all rules."""
         return self.analyzer.get_summary_stats()
 
-    def get_error_patterns(self, min_affected: int = 2) -> list:
+    def get_error_patterns(self, min_affected: int = 2) -> list[Any]:
         """Detect error patterns across rules."""
         return self.analyzer.detect_patterns(min_affected=min_affected)
 
@@ -158,7 +158,7 @@ class KEService:
         """Get error confusion matrix."""
         return self.analyzer.build_error_matrix()
 
-    def get_review_queue(self, max_items: int = 50) -> list:
+    def get_review_queue(self, max_items: int = 50) -> list[Any]:
         """Get prioritized review queue."""
         return self.analyzer.build_review_queue(max_items=max_items)
 
@@ -166,7 +166,7 @@ class KEService:
     # Drift Detection
     # =========================================================================
 
-    def set_drift_baseline(self) -> dict:
+    def set_drift_baseline(self) -> dict[str, Any]:
         """Set current state as drift baseline."""
         metrics = self.drift_detector.set_baseline()
         return {
@@ -180,7 +180,7 @@ class KEService:
         """Detect drift from baseline."""
         return self.drift_detector.detect_drift()
 
-    def get_drift_history(self, window: int = 10) -> list:
+    def get_drift_history(self, window: int = 10) -> list[Any]:
         """Get metrics history."""
         return self.drift_detector.get_history()[-window:]
 
@@ -192,7 +192,7 @@ class KEService:
     # Rule Context
     # =========================================================================
 
-    def get_rule_context(self, rule_id: str) -> dict | None:
+    def get_rule_context(self, rule_id: str) -> dict[str, Any] | None:
         """Get source context for a rule."""
         rule = self.rule_loader.get_rule(rule_id)
         if rule is None:
@@ -208,7 +208,7 @@ class KEService:
             "related_rules": context.related_rules,
         }
 
-    def get_related_rules(self, rule_id: str, top_k: int = 5) -> list[dict] | None:
+    def get_related_rules(self, rule_id: str, top_k: int = 5) -> list[dict[str, Any]] | None:
         """Get rules related to a given rule."""
         rule = self.rule_loader.get_rule(rule_id)
         if rule is None:
@@ -234,7 +234,7 @@ class KEService:
     # Human Review
     # =========================================================================
 
-    def submit_human_review(self, rule_id: str, label: str, notes: str, reviewer_id: str) -> dict | None:
+    def submit_human_review(self, rule_id: str, label: str, notes: str, reviewer_id: str) -> dict[str, Any] | None:
         """Submit a human review (Tier 4) for a rule."""
         rule = self.rule_loader.get_rule(rule_id)
         if rule is None:
@@ -288,7 +288,7 @@ class KEService:
             "message": f"Human review submitted. Status updated to {new_status.value}.",
         }
 
-    def get_rule_reviews(self, rule_id: str) -> list[dict] | None:
+    def get_rule_reviews(self, rule_id: str) -> list[dict[str, Any]] | None:
         """Get all human reviews for a rule."""
         rule = self.rule_loader.get_rule(rule_id)
         if rule is None:
@@ -314,7 +314,7 @@ class KEService:
     # Charts
     # =========================================================================
 
-    def get_supertree_status(self) -> dict:
+    def get_supertree_status(self) -> dict[str, Any]:
         """Check if Supertree visualization is available."""
         available = is_supertree_available()
         return {
@@ -326,7 +326,7 @@ class KEService:
             ),
         }
 
-    def get_rulebook_outline(self) -> dict:
+    def get_rulebook_outline(self) -> dict[str, Any]:
         """Get rulebook outline tree data."""
         rules = self.rule_loader.get_all_rules()
         return build_rulebook_outline(rules)
@@ -337,7 +337,7 @@ class KEService:
         tree_data = build_rulebook_outline(rules)
         return render_rulebook_outline_html(tree_data)
 
-    def get_ontology_tree(self) -> dict:
+    def get_ontology_tree(self) -> dict[str, Any]:
         """Get ontology tree data."""
         return build_ontology_tree()
 
@@ -346,7 +346,7 @@ class KEService:
         tree_data = build_ontology_tree()
         return render_ontology_tree_html(tree_data)
 
-    def get_corpus_links(self) -> dict:
+    def get_corpus_links(self) -> dict[str, Any]:
         """Get corpus-to-rule links tree data."""
         rules = self.rule_loader.get_all_rules()
         return build_corpus_rule_links(rules)
@@ -357,7 +357,7 @@ class KEService:
         tree_data = build_corpus_rule_links(rules)
         return render_corpus_links_html(tree_data)
 
-    def get_decision_tree(self, rule_id: str) -> dict | None:
+    def get_decision_tree(self, rule_id: str) -> dict[str, Any] | None:
         """Get decision tree structure for a rule."""
         rule = self.rule_loader.get_rule(rule_id)
         if rule is None:
@@ -366,7 +366,7 @@ class KEService:
             return {"error": "no_decision_tree"}
         return build_decision_tree_structure(rule.decision_tree)
 
-    def get_decision_trace(self, rule_id: str, scenario_dict: dict) -> dict | None:
+    def get_decision_trace(self, rule_id: str, scenario_dict: dict[str, Any]) -> dict[str, Any] | None:
         """Evaluate rule and return decision trace tree data."""
         rule = self.rule_loader.get_rule(rule_id)
         if rule is None:
@@ -382,7 +382,7 @@ class KEService:
             rule_id=rule_id,
         )
 
-    def render_decision_trace(self, rule_id: str, scenario_dict: dict) -> str | None:
+    def render_decision_trace(self, rule_id: str, scenario_dict: dict[str, Any]) -> str | None:
         """Evaluate rule and return decision trace as HTML."""
         tree_data = self.get_decision_trace(rule_id, scenario_dict)
         if tree_data is None:

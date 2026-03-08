@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 from datetime import UTC, datetime
+from typing import Any
 
 from .schemas import (
     ClassificationResult,
@@ -21,7 +22,7 @@ _applications: dict[str, CreditApplication] = {}
 _documents: dict[str, DocumentUpload] = {}
 _classifications: dict[str, ClassificationResult] = {}
 _results: dict[str, SynthesisOutput] = {}
-_queue: list[dict] = []
+_queue: list[dict[str, Any]] = []
 _decisions: dict[str, HITLDecision] = {}
 _statuses: dict[str, PipelineStatus] = {}
 
@@ -76,7 +77,7 @@ class CreditPipelineService:
         text_lower = raw_text.lower()
         best_type = "other"
         best_score = 0.0
-        extracted: dict = {}
+        extracted: dict[str, Any] = {}
 
         for doc_type, keywords in _DOC_TYPE_KEYWORDS.items():
             matches = sum(1 for kw in keywords if kw in text_lower)
@@ -96,7 +97,7 @@ class CreditPipelineService:
 
         return ClassificationResult(
             document_id=doc_id,
-            predicted_type=best_type,
+            predicted_type=best_type,  # type: ignore[arg-type]
             confidence=confidence,
             extracted_fields=extracted,
         )
@@ -167,10 +168,7 @@ class CreditPipelineService:
         if status:
             status.phase = "synthesis" if not synthesis.escalate else "pending_review"
             status.phases_completed.extend(["agent_analysis", "synthesis"])
-            status.phases_remaining = [
-                p for p in status.phases_remaining
-                if p not in ("agent_analysis", "synthesis")
-            ]
+            status.phases_remaining = [p for p in status.phases_remaining if p not in ("agent_analysis", "synthesis")]
             if synthesis.escalate:
                 status.phases_remaining = ["hitl_review", "decision"]
             else:
@@ -178,21 +176,21 @@ class CreditPipelineService:
                 status.completed_at = datetime.now(UTC)
 
         if synthesis.escalate:
-            _queue.append({
-                "app_id": app_id,
-                "borrower_name": app.borrower_name,
-                "deal_amount_usd": app.deal_amount_usd,
-                "recommendation": synthesis.recommendation,
-                "confidence": synthesis.confidence,
-                "escalation_reason": synthesis.escalation_reason,
-                "queued_at": datetime.now(UTC).isoformat(),
-            })
+            _queue.append(
+                {
+                    "app_id": app_id,
+                    "borrower_name": app.borrower_name,
+                    "deal_amount_usd": app.deal_amount_usd,
+                    "recommendation": synthesis.recommendation,
+                    "confidence": synthesis.confidence,
+                    "escalation_reason": synthesis.escalation_reason,
+                    "queued_at": datetime.now(UTC).isoformat(),
+                }
+            )
 
         return synthesis
 
-    def route_decision(
-        self, synthesis: SynthesisOutput, deal_amount: float
-    ) -> SynthesisOutput:
+    def route_decision(self, synthesis: SynthesisOutput, deal_amount: float) -> SynthesisOutput:
         """Route decision: escalate if confidence < 0.75 or deal > $100M."""
         escalate = synthesis.confidence < 0.75 or deal_amount > 100_000_000
         reasons = []
@@ -223,11 +221,11 @@ class CreditPipelineService:
 class HITLService:
     """HITL review queue management."""
 
-    def get_queue(self) -> list[dict]:
+    def get_queue(self) -> list[dict[str, Any]]:
         """Get all items in the review queue."""
         return list(_queue)
 
-    def submit_review(self, app_id: str, decision: HITLDecision) -> dict:
+    def submit_review(self, app_id: str, decision: HITLDecision) -> dict[str, str]:
         """Submit a human review decision."""
         _decisions[app_id] = decision
 

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from .constants import ARTICLE_PATTERNS, DEFAULT_TEMPLATES, FRAMEWORK_METADATA, RISK_LEVELS
 from .schemas import (
@@ -36,12 +36,12 @@ if TYPE_CHECKING:
 class CitationInjector:
     """Retrieves and enriches regulatory citations."""
 
-    def __init__(self, retriever=None) -> None:
+    def __init__(self, retriever: Any = None) -> None:
         """Initialize with optional RAG retriever."""
         self._retriever = retriever
 
     @property
-    def retriever(self):
+    def retriever(self) -> Any:
         """Lazy-load RAG retriever."""
         if self._retriever is None:
             try:
@@ -80,7 +80,7 @@ class CitationInjector:
 
     def get_citation_by_reference(self, framework: str, reference: str) -> Citation | None:
         """Get a specific citation by reference."""
-        meta = FRAMEWORK_METADATA.get(framework, {})
+        meta = cast("dict[str, Any]", FRAMEWORK_METADATA.get(framework, {}))
         citation = Citation(
             framework=framework,
             reference=reference,
@@ -106,7 +106,7 @@ class CitationInjector:
                 query_parts.append(activity_type)
             query = " ".join(query_parts)
 
-            results = self.retriever.search(query, top_k=max_results)
+            results: list[dict[str, Any]] = self.retriever.search(query, top_k=max_results)
             for result in results:
                 citation = Citation(
                     framework=framework,
@@ -115,7 +115,7 @@ class CitationInjector:
                     text=result.get("text", result.get("content", "")),
                     url=result.get("url"),
                     relevance_score=result.get("score", 0.0),
-                    relevance=self._score_to_relevance(result.get("score", 0.0)),
+                    relevance=self._score_to_relevance(result.get("score", 0.0)),  # type: ignore[arg-type]
                 )
                 citations.append(citation)
         except Exception:
@@ -126,7 +126,7 @@ class CitationInjector:
         self, rule_id: str, framework: str, activity_type: str | None, max_results: int
     ) -> list[Citation]:
         """Get citations based on known patterns."""
-        citations = []
+        citations: list[Citation] = []
         patterns = ARTICLE_PATTERNS.get(framework, {})
         categories = self._extract_categories(rule_id, activity_type)
 
@@ -135,7 +135,7 @@ class CitationInjector:
                 for ref in patterns[category]:
                     if len(citations) >= max_results:
                         break
-                    meta = FRAMEWORK_METADATA.get(framework, {})
+                    meta = cast("dict[str, Any]", FRAMEWORK_METADATA.get(framework, {}))
                     citation = Citation(
                         framework=framework,
                         reference=ref,
@@ -184,7 +184,7 @@ class CitationInjector:
 
     def _enrich_citation(self, citation: Citation) -> Citation:
         """Enrich citation with framework metadata."""
-        meta = FRAMEWORK_METADATA.get(citation.framework, {})
+        meta = cast("dict[str, Any]", FRAMEWORK_METADATA.get(citation.framework, {}))
 
         if not citation.full_reference or citation.full_reference == citation.reference:
             reg_id = meta.get("regulation_id", citation.framework)
@@ -276,7 +276,7 @@ class TemplateRegistry:
     ) -> dict[str, str]:
         """Render a template with variables."""
         sections = template.tiers.get(tier, [])
-        result = {}
+        result: dict[str, str] = {}
 
         for section in sections:
             rendered = section.template
@@ -520,7 +520,7 @@ class DecoderService:
                 status=status,
                 confidence=self._calculate_confidence(decision),
                 primary_framework=framework,
-                risk_level=risk_level,
+                risk_level=risk_level,  # type: ignore[arg-type]
             ),
             explanation=explanation,
             citations=citations,
@@ -658,7 +658,7 @@ class DecoderService:
         }
         return limits.get(tier, 3)
 
-    def _render_explanation(self, decision: DecisionResult, template, tier: ExplanationTier) -> Explanation:
+    def _render_explanation(self, decision: DecisionResult, template: ExplanationTemplate | None, tier: ExplanationTier) -> Explanation:
         """Render explanation using template and tier."""
         status = self._determine_status(decision)
         framework = self._extract_framework(decision)
@@ -882,7 +882,7 @@ class CounterfactualEngine:
             citations=citations,
         )
 
-    def analyze_by_id(self, request) -> CounterfactualResponse:
+    def analyze_by_id(self, request: Any) -> CounterfactualResponse:
         """Analyze counterfactual by decision ID."""
         return CounterfactualResponse(
             baseline_decision_id=request.baseline_decision_id,
@@ -913,7 +913,7 @@ class CounterfactualEngine:
             insights=insights,
         )
 
-    def compare_by_id(self, request) -> ComparisonMatrix:
+    def compare_by_id(self, request: Any) -> ComparisonMatrix:
         """Compare scenarios by baseline decision ID."""
         return ComparisonMatrix(
             baseline=OutcomeSummary(status="UNKNOWN", framework="Unknown"),
@@ -954,7 +954,7 @@ class CounterfactualEngine:
 
         conditions = [o.description or o.id for o in decision.obligations if o.description or o.id]
 
-        return OutcomeSummary(status=status, framework=framework, risk_level=risk_level, conditions=conditions)
+        return OutcomeSummary(status=status, framework=framework, risk_level=risk_level, conditions=conditions)  # type: ignore[arg-type]
 
     def _evaluate_scenario(self, baseline_decision: DecisionResult, scenario: Scenario) -> OutcomeSummary:
         """Evaluate a counterfactual scenario."""

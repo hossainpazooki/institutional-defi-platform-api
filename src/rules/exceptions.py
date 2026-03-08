@@ -7,7 +7,7 @@ class RuleNotFoundError(EntityNotFoundError):
     """Raised when a rule is not found."""
 
     def __init__(self, rule_id: str) -> None:
-        super().__init__(f"Rule not found: {rule_id}")
+        super().__init__("Rule", rule_id)
         self.rule_id = rule_id
 
 

@@ -11,7 +11,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from .service import RetrievalResult, Retriever, chunk_by_section, chunk_text
 
@@ -66,7 +66,7 @@ class RuleContextRetriever:
         self,
         document_id: str,
         text: str,
-        metadata: dict | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> int:
         """Index a legal document for retrieval.
 

@@ -10,13 +10,10 @@ import math
 import re
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
+from typing import Any
 
+from src.config import get_sentence_transformer
 from src.rules.service import ConsistencyEvidence, Rule
-
-if TYPE_CHECKING:
-    from sentence_transformers import SentenceTransformer
-
 
 # =============================================================================
 # Availability Check
@@ -72,27 +69,15 @@ class EmbeddingChecker:
     MODEL_NAME = "all-MiniLM-L6-v2"
     EMBEDDING_DIM = 384
 
-    _model: SentenceTransformer | None = None
-    _model_loaded: bool = False
-
     def __init__(self, use_ml: bool | None = None):
         if use_ml is None:
             self.use_ml = embedding_available()
         else:
             self.use_ml = use_ml and embedding_available()
 
-    @classmethod
-    def _get_model(cls) -> SentenceTransformer | None:
-        if not cls._model_loaded:
-            if embedding_available():
-                try:
-                    from sentence_transformers import SentenceTransformer
-
-                    cls._model = SentenceTransformer(cls.MODEL_NAME)
-                except Exception:
-                    cls._model = None
-            cls._model_loaded = True
-        return cls._model
+    @staticmethod
+    def _get_model() -> Any:
+        return get_sentence_transformer()
 
     # -------------------------------------------------------------------------
     # Public Check Methods

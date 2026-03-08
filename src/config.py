@@ -8,7 +8,7 @@ Domain-specific settings live in src/{domain}/config.py.
 """
 
 from functools import lru_cache
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -95,13 +95,13 @@ def ml_available() -> bool:
         return False
 
 
-_sentence_transformer = None
-_sentence_transformer_checked = False
+_sentence_transformer: Any = None
+_sentence_transformer_checked: bool = False
 
 SENTENCE_TRANSFORMER_MODEL = "all-MiniLM-L6-v2"
 
 
-def get_sentence_transformer():
+def get_sentence_transformer() -> Any:
     """Get or create a shared SentenceTransformer instance.
 
     Returns the cached model, or None if sentence-transformers is not installed.

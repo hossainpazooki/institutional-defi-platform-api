@@ -11,8 +11,13 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any, Protocol
 
 import yaml
+
+
+class _Indexable(Protocol):
+    def add_documents(self, documents: list[dict[str, Any]]) -> None: ...
 
 # Default path to legal corpus directory
 # Path from src/rag/ -> src/ -> project root -> data/legal/
@@ -225,7 +230,7 @@ def get_available_document_ids(
     ]
 
 
-def chunk_legal_document(doc: LegalDocument) -> list[dict]:
+def chunk_legal_document(doc: LegalDocument) -> list[dict[str, Any]]:
     """Chunk a legal document by article/section for indexing.
 
     Args:
@@ -276,7 +281,7 @@ def chunk_legal_document(doc: LegalDocument) -> list[dict]:
     return chunks
 
 
-def index_legal_corpus(index, corpus_dir: Path | None = None) -> int:
+def index_legal_corpus(index: _Indexable, corpus_dir: Path | None = None) -> int:
     """Index all legal documents into a BM25Index or Retriever.
 
     Args:
@@ -288,7 +293,7 @@ def index_legal_corpus(index, corpus_dir: Path | None = None) -> int:
     """
     docs = load_all_legal_documents(corpus_dir)
 
-    all_chunks: list[dict] = []
+    all_chunks: list[dict[str, Any]] = []
     for doc in docs:
         chunks = chunk_legal_document(doc)
         all_chunks.extend(chunks)

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
+from typing import Any
 
 from src.features.schemas import (
     EntitiesResponse,
@@ -109,7 +110,7 @@ class FeatureStoreService:
         if source:
             entity_features = {k: v for k, v in entity_features.items() if v.source == source}
 
-        features_dict: dict[str, list[dict]] = {}
+        features_dict: dict[str, list[dict[str, Any]]] = {}
         for name, feature in entity_features.items():
             features_dict[name] = [
                 {

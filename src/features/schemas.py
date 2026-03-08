@@ -21,7 +21,7 @@ class FeatureSnapshot(BaseModel):
     """Response model for feature queries."""
 
     entity_id: str
-    features: dict[str, list[dict]]  # feature_name -> list of {value, ts, confidence}
+    features: dict[str, list[dict[str, Any]]]  # feature_name -> list of {value, ts, confidence}
     window_start: datetime
     window_end: datetime
     total_points: int
@@ -50,4 +50,4 @@ class FeatureWriteRequest(BaseModel):
     value: Any
     source: str
     confidence: float | None = None
-    metadata: dict | None = None
+    metadata: dict[str, Any] | None = None

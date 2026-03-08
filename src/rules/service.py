@@ -343,7 +343,7 @@ class RuleLoader:
 
         return rules
 
-    def _parse_rule(self, data: dict) -> Rule:
+    def _parse_rule(self, data: dict[str, Any]) -> Rule:
         """Parse a rule from dictionary data."""
         if "applies_if" in data and data["applies_if"]:
             data["applies_if"] = self._parse_condition_group(data["applies_if"])
@@ -356,7 +356,7 @@ class RuleLoader:
 
         return Rule(**data)
 
-    def _parse_consistency(self, data: dict) -> ConsistencyBlock:
+    def _parse_consistency(self, data: dict[str, Any]) -> ConsistencyBlock:
         """Parse a consistency block."""
         summary_data = data.get("summary", {})
         summary = ConsistencySummary(
@@ -384,7 +384,7 @@ class RuleLoader:
 
         return ConsistencyBlock(summary=summary, evidence=evidence)
 
-    def _parse_condition_group(self, data: dict) -> ConditionGroupSpec:
+    def _parse_condition_group(self, data: dict[str, Any]) -> ConditionGroupSpec:
         """Parse a condition group."""
         result = {}
         if "all" in data:
@@ -393,13 +393,13 @@ class RuleLoader:
             result["any"] = [self._parse_condition_or_group(c) for c in data["any"]]
         return ConditionGroupSpec(**result)
 
-    def _parse_condition_or_group(self, data: dict) -> ConditionSpec | ConditionGroupSpec:
+    def _parse_condition_or_group(self, data: dict[str, Any]) -> ConditionSpec | ConditionGroupSpec:
         """Parse either a condition or a condition group."""
         if "field" in data:
             return ConditionSpec(**data)
         return self._parse_condition_group(data)
 
-    def _parse_decision_node(self, data: dict) -> DecisionNode | DecisionLeaf:
+    def _parse_decision_node(self, data: dict[str, Any]) -> DecisionNode | DecisionLeaf:
         """Parse a decision tree node or leaf."""
         if "result" in data:
             obligations = []
@@ -485,11 +485,11 @@ class RuleLoader:
         self._rules[rule.rule_id] = rule
         return path
 
-    def _rule_to_dict(self, rule: Rule) -> dict:
+    def _rule_to_dict(self, rule: Rule) -> dict[str, Any]:
         """Convert a Rule to a dictionary suitable for YAML serialization."""
         return rule.model_dump(mode="json", exclude_none=True, exclude_unset=True)
 
-    def update_rule(self, rule_id: str, updates: dict) -> Rule:
+    def update_rule(self, rule_id: str, updates: dict[str, Any]) -> Rule:
         """Update a rule with new values and save."""
         rule = self.get_rule(rule_id)
         if not rule:
@@ -607,7 +607,7 @@ class DecisionEngine:
         )
 
     def _evaluate_condition_group(
-        self, group: ConditionGroupSpec, context: dict, prefix: str
+        self, group: ConditionGroupSpec, context: dict[str, Any], prefix: str
     ) -> tuple[bool, list[TraceStep]]:
         """Evaluate a condition group (all/any)."""
         trace = []
@@ -642,7 +642,7 @@ class DecisionEngine:
 
         return True, trace
 
-    def _evaluate_condition(self, cond: ConditionSpec, context: dict, node_id: str) -> tuple[bool, TraceStep]:
+    def _evaluate_condition(self, cond: ConditionSpec, context: dict[str, Any], node_id: str) -> tuple[bool, TraceStep]:
         """Evaluate a single condition."""
         field = cond.field
         op = cond.operator
@@ -680,10 +680,10 @@ class DecisionEngine:
         return result, step
 
     def _evaluate_decision_tree(
-        self, node: DecisionNode | DecisionLeaf, context: dict, source: SourceRef | None
+        self, node: DecisionNode | DecisionLeaf, context: dict[str, Any], source: SourceRef | None
     ) -> tuple[str, list[ObligationResult], list[TraceStep]]:
         """Evaluate a decision tree."""
-        trace = []
+        trace: list[TraceStep] = []
 
         # Leaf node
         if isinstance(node, DecisionLeaf):

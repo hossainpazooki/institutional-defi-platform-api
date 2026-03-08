@@ -524,7 +524,7 @@ def render_mermaid(graph: TreeGraph, show_consistency: bool = True) -> str:
     return graph.to_mermaid(show_consistency=show_consistency)
 
 
-def extract_trace_path(trace: list) -> tuple[set[str], set[tuple[str, str]]]:
+def extract_trace_path(trace: list[Any]) -> tuple[set[str], set[tuple[str, str]]]:
     """Extract highlighted nodes and edges from a decision trace."""
     highlight_nodes: set[str] = set()
     highlight_edges: set[tuple[str, str]] = set()
@@ -557,7 +557,7 @@ def extract_trace_path(trace: list) -> tuple[set[str], set[tuple[str, str]]]:
 # ============================================================================
 
 
-def build_rulebook_outline(rules: list[Rule]) -> dict:
+def build_rulebook_outline(rules: list[Rule]) -> dict[str, Any]:
     """Build a tree structure representing the rulebook outline."""
     legal_docs = []
     try:
@@ -706,7 +706,7 @@ def build_decision_trace_tree(
     trace: list[Any],
     decision: str | None = None,
     rule_id: str | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """Build a tree structure from a decision trace."""
     if not trace:
         return {
@@ -737,12 +737,12 @@ def build_decision_trace_tree(
     }
 
 
-def build_ontology_tree() -> dict:
+def build_ontology_tree() -> dict[str, Any]:
     """Build a tree structure representing the regulatory ontology."""
     from src.ontology.instrument import ActivityType, InstrumentType
     from src.ontology.types import ActorType, ProvisionType
 
-    def enum_to_children(enum_class: Any) -> list[dict]:
+    def enum_to_children(enum_class: Any) -> list[dict[str, Any]]:
         return [{"title": e.value, "name": e.name} for e in enum_class]
 
     return {
@@ -772,12 +772,12 @@ def build_ontology_tree() -> dict:
     }
 
 
-def build_corpus_rule_links(rules: list[Rule]) -> dict:
+def build_corpus_rule_links(rules: list[Rule]) -> dict[str, Any]:
     """Build a tree showing corpus-to-rule mappings."""
     if not rules:
         return {"title": "Corpus-Rule Links", "children": []}
 
-    legal_docs_metadata: dict[str, dict] = {}
+    legal_docs_metadata: dict[str, dict[str, Any]] = {}
     try:
         from src.rag.corpus_loader import load_all_legal_documents
 
@@ -844,7 +844,7 @@ def build_corpus_rule_links(rules: list[Rule]) -> dict:
     }
 
 
-def build_legal_corpus_coverage(rules: list[Rule]) -> dict:
+def build_legal_corpus_coverage(rules: list[Rule]) -> dict[str, Any]:
     """Build a tree showing legal corpus coverage status."""
     legal_docs = []
     try:
@@ -932,7 +932,7 @@ def build_legal_corpus_coverage(rules: list[Rule]) -> dict:
     }
 
 
-def build_decision_tree_structure(node: Any) -> dict | None:
+def build_decision_tree_structure(node: Any) -> dict[str, Any] | None:
     """Build a tree structure from a rule's decision tree."""
     if node is None:
         return None
@@ -1006,7 +1006,7 @@ def _escape(text: Any) -> str:
     return html.escape(str(text)) if text is not None else ""
 
 
-def _render_tree_node(node: dict, depth: int = 0) -> str:
+def _render_tree_node(node: dict[str, Any], depth: int = 0) -> str:
     """Recursively render a tree node as HTML."""
     title = _escape(node.get("title", "Node"))
     children = node.get("children", [])
@@ -1047,7 +1047,7 @@ def _render_tree_node(node: dict, depth: int = 0) -> str:
         """
 
 
-def _render_tree_html(tree_data: dict, chart_title: str) -> str:
+def _render_tree_html(tree_data: dict[str, Any], chart_title: str) -> str:
     """Render a complete tree as interactive HTML."""
     tree_content = _render_tree_node(tree_data)
 
@@ -1075,7 +1075,7 @@ def _render_tree_html(tree_data: dict, chart_title: str) -> str:
     """
 
 
-def render_rulebook_outline_html(tree_data: dict) -> str:
+def render_rulebook_outline_html(tree_data: dict[str, Any]) -> str:
     """Render the rulebook outline tree as HTML."""
     try:
         return _render_tree_html(tree_data, tree_data.get("title", "Rulebook Outline"))
@@ -1083,7 +1083,7 @@ def render_rulebook_outline_html(tree_data: dict) -> str:
         return f'<div style="color: red; padding: 20px;">Error rendering chart: {_escape(str(e))}</div>'
 
 
-def render_decision_trace_html(tree_data: dict) -> str:
+def render_decision_trace_html(tree_data: dict[str, Any]) -> str:
     """Render the decision trace tree as HTML."""
     try:
         return _render_tree_html(tree_data, tree_data.get("title", "Decision Trace"))
@@ -1091,7 +1091,7 @@ def render_decision_trace_html(tree_data: dict) -> str:
         return f'<div style="color: red; padding: 20px;">Error rendering chart: {_escape(str(e))}</div>'
 
 
-def render_ontology_tree_html(tree_data: dict) -> str:
+def render_ontology_tree_html(tree_data: dict[str, Any]) -> str:
     """Render the ontology browser tree as HTML."""
     try:
         return _render_tree_html(tree_data, tree_data.get("title", "Regulatory Ontology"))
@@ -1099,7 +1099,7 @@ def render_ontology_tree_html(tree_data: dict) -> str:
         return f'<div style="color: red; padding: 20px;">Error rendering chart: {_escape(str(e))}</div>'
 
 
-def render_corpus_links_html(tree_data: dict) -> str:
+def render_corpus_links_html(tree_data: dict[str, Any]) -> str:
     """Render the corpus-to-rule links tree as HTML."""
     try:
         return _render_tree_html(tree_data, tree_data.get("title", "Corpus-Rule Links"))

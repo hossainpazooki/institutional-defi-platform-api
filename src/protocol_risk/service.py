@@ -9,6 +9,8 @@ Business logic for protocol risk scoring based on:
 
 from __future__ import annotations
 
+from typing import Any
+
 from src.protocol_risk.constants import (
     CONSENSUS_BASE_SCORES,
     FINALITY_ADJUSTMENTS,
@@ -23,7 +25,7 @@ from src.protocol_risk.schemas import (
 )
 
 
-def get_protocol_defaults(protocol_id: str) -> dict | None:
+def get_protocol_defaults(protocol_id: str) -> dict[str, Any] | None:
     """Get default configuration for a known protocol."""
     return PROTOCOL_DEFAULTS.get(protocol_id.lower())
 

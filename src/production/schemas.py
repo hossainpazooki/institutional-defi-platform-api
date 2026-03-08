@@ -65,7 +65,7 @@ class CompiledCheck(CustomBaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    def model_dump(self, *args: Any, **kwargs: Any) -> dict:
+    def model_dump(self, *args: Any, **kwargs: Any) -> dict[str, Any]:
         """Override to convert set to list for JSON serialization."""
         data = super().model_dump(*args, **kwargs)
         if data.get("value_set") is not None:
@@ -154,7 +154,7 @@ class RuleIR(CustomBaseModel):
     priority: int = 0
 
     # Pre-extracted Obligations
-    all_obligations: list[dict] = Field(default_factory=list)
+    all_obligations: list[dict[str, Any]] = Field(default_factory=list)
 
     # Metadata
     compiled_at: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())
@@ -200,7 +200,7 @@ class CompileResponse(CustomBaseModel):
 
     compiled_count: int
     skipped_count: int = 0
-    errors: list[dict] = Field(default_factory=list)
+    errors: list[dict[str, Any]] = Field(default_factory=list)
     compiled_rules: list[str] = Field(default_factory=list)
 
 
@@ -215,6 +215,6 @@ class EvaluateRequest(CustomBaseModel):
 class EvaluateResponse(CustomBaseModel):
     """Result of compiled rule evaluation."""
 
-    results: list[dict]
-    trace: list[dict] = Field(default_factory=list)
+    results: list[dict[str, Any]]
+    trace: list[dict[str, Any]] = Field(default_factory=list)
     evaluation_time_ms: float = 0.0

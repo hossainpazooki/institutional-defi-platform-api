@@ -97,9 +97,9 @@ class RuleDetailResponse(BaseModel):
     effective_from: str | None
     effective_to: str | None
     tags: list[str]
-    source: dict | None
-    applies_if: dict | None
-    decision_tree: dict | None
+    source: dict[str, Any] | None
+    applies_if: dict[str, Any] | None
+    decision_tree: dict[str, Any] | None
     interpretation_notes: str | None
 
 

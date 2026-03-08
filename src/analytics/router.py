@@ -46,7 +46,7 @@ router = APIRouter(prefix="/analytics", tags=["Analytics"])
 _analytics_service: RuleAnalyticsService | None = None
 
 
-def _get_rule_loader():
+def _get_rule_loader() -> Any:
     """Get or create the rule loader."""
     from src.config import get_settings
     from src.rules.service import RuleLoader

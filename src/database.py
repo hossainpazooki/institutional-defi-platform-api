@@ -12,9 +12,10 @@ Design decisions:
 - Explicit index naming convention via SQLAlchemy MetaData
 """
 
-from collections.abc import Generator
+from collections.abc import Iterator
+from contextlib import contextmanager
 
-from sqlalchemy import MetaData, text
+from sqlalchemy import Connection, Engine, MetaData, text
 from sqlmodel import Session, SQLModel, create_engine
 
 from src.config import get_settings
@@ -33,7 +34,7 @@ metadata = MetaData(naming_convention=convention)
 # Apply naming convention to SQLModel's default metadata
 SQLModel.metadata.naming_convention = convention
 
-_engine = None
+_engine: Engine | None = None
 
 
 def _normalize_url(url: str) -> str:
@@ -46,7 +47,7 @@ def _normalize_url(url: str) -> str:
     return url
 
 
-def get_engine():
+def get_engine() -> Engine:
     """Get SQLAlchemy engine with connection pooling.
 
     Engine is created lazily and cached as a module-level singleton.
@@ -73,13 +74,14 @@ def reset_engine() -> None:
     _engine = None
 
 
-def get_session() -> Generator[Session, None, None]:
+def get_session() -> Iterator[Session]:
     """Yield a SQLModel session for FastAPI dependency injection."""
     with Session(get_engine()) as session:
         yield session
 
 
-def get_db():
+@contextmanager
+def get_db() -> Iterator[Connection]:
     """Get a raw SQLAlchemy connection via context manager.
 
     Used by repository classes for direct SQL operations::
@@ -87,15 +89,9 @@ def get_db():
         with get_db() as conn:
             result = conn.execute(text("SELECT * FROM rules"))
     """
-    from contextlib import contextmanager
-
-    @contextmanager
-    def _connection():
-        engine = get_engine()
-        with engine.connect() as conn:
-            yield conn
-
-    return _connection()
+    engine = get_engine()
+    with engine.connect() as conn:
+        yield conn
 
 
 def init_timescaledb_hypertable(table_name: str, time_column: str = "ts") -> None:

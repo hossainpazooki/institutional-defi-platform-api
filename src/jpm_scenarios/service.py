@@ -228,7 +228,7 @@ def _get_compliance_requirements(jurisdictions: list[str]) -> list[str]:
     return reqs
 
 
-def _get_scenario_recommendations(scenario_id: str, config: dict) -> list[str]:
+def _get_scenario_recommendations(scenario_id: str, config: ScenarioConfig) -> list[str]:
     """Get scenario-specific recommendations."""
     recs = _get_chain_recommendations(config["chain"])
 

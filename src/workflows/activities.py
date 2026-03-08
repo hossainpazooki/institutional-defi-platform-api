@@ -33,7 +33,7 @@ from .schemas import (
 # =============================================================================
 
 
-@activity.defn
+@activity.defn  # type: ignore[untyped-decorator]
 async def resolve_jurisdictions_activity(
     issuer_jurisdiction: str,
     target_jurisdictions: list[str],
@@ -61,7 +61,7 @@ async def resolve_jurisdictions_activity(
     ]
 
 
-@activity.defn
+@activity.defn  # type: ignore[untyped-decorator]
 async def get_equivalences_activity(
     from_jurisdiction: str,
     to_jurisdictions: list[str],
@@ -90,7 +90,7 @@ async def get_equivalences_activity(
     ]
 
 
-@activity.defn
+@activity.defn  # type: ignore[untyped-decorator]
 async def evaluate_jurisdiction_activity(
     jurisdiction: str,
     regime_id: str,
@@ -121,7 +121,7 @@ async def evaluate_jurisdiction_activity(
     )
 
 
-@activity.defn
+@activity.defn  # type: ignore[untyped-decorator]
 async def detect_conflicts_activity(
     jurisdiction_results: list[dict[str, Any]],
 ) -> list[ConflictResult]:
@@ -146,7 +146,7 @@ async def detect_conflicts_activity(
     ]
 
 
-@activity.defn
+@activity.defn  # type: ignore[untyped-decorator]
 async def synthesize_pathway_activity(
     results: list[dict[str, Any]],
     conflicts: list[dict[str, Any]],
@@ -197,7 +197,7 @@ async def synthesize_pathway_activity(
     )
 
 
-@activity.defn
+@activity.defn  # type: ignore[untyped-decorator]
 async def aggregate_obligations_activity(
     results: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
@@ -215,7 +215,7 @@ async def aggregate_obligations_activity(
 # =============================================================================
 
 
-@activity.defn
+@activity.defn  # type: ignore[untyped-decorator]
 async def load_rule_activity(rule_id: str) -> dict[str, Any]:
     """Load a rule by ID.
 
@@ -246,7 +246,7 @@ async def load_rule_activity(rule_id: str) -> dict[str, Any]:
     }
 
 
-@activity.defn
+@activity.defn  # type: ignore[untyped-decorator]
 async def verify_tier_0_activity(rule_id: str) -> TierResult:
     """Run Tier 0 (Schema) verification checks.
 
@@ -300,7 +300,7 @@ async def verify_tier_0_activity(rule_id: str) -> TierResult:
     )
 
 
-@activity.defn
+@activity.defn  # type: ignore[untyped-decorator]
 async def verify_tier_1_activity(rule_id: str, source_text: str | None = None) -> TierResult:
     """Run Tier 1 (Lexical) verification checks.
 
@@ -354,7 +354,7 @@ async def verify_tier_1_activity(rule_id: str, source_text: str | None = None) -
     )
 
 
-@activity.defn
+@activity.defn  # type: ignore[untyped-decorator]
 async def verify_tier_2_activity(rule_id: str, source_text: str | None = None) -> TierResult:
     """Run Tier 2 (Semantic Similarity) verification checks.
 
@@ -412,7 +412,7 @@ async def verify_tier_2_activity(rule_id: str, source_text: str | None = None) -
     )
 
 
-@activity.defn
+@activity.defn  # type: ignore[untyped-decorator]
 async def verify_tier_3_activity(rule_id: str, source_text: str | None = None) -> TierResult:
     """Run Tier 3 (NLI Entailment) verification checks.
 
@@ -470,7 +470,7 @@ async def verify_tier_3_activity(rule_id: str, source_text: str | None = None) -
     )
 
 
-@activity.defn
+@activity.defn  # type: ignore[untyped-decorator]
 async def verify_tier_4_activity(rule_id: str) -> TierResult:
     """Run Tier 4 (Cross-Rule Consistency) verification checks.
 
@@ -534,7 +534,7 @@ async def verify_tier_4_activity(rule_id: str) -> TierResult:
 # =============================================================================
 
 
-@activity.defn
+@activity.defn  # type: ignore[untyped-decorator]
 async def evaluate_baseline_activity(
     rule_id: str,
     facts: dict[str, Any],
@@ -583,7 +583,7 @@ async def evaluate_baseline_activity(
     )
 
 
-@activity.defn
+@activity.defn  # type: ignore[untyped-decorator]
 async def analyze_counterfactual_activity(
     rule_id: str,
     baseline_facts: dict[str, Any],
@@ -650,7 +650,7 @@ async def analyze_counterfactual_activity(
     )
 
 
-@activity.defn
+@activity.defn  # type: ignore[untyped-decorator]
 async def compute_delta_activity(
     baseline_result: dict[str, Any],
     counterfactual_result: dict[str, Any],
@@ -680,7 +680,7 @@ async def compute_delta_activity(
 # =============================================================================
 
 
-@activity.defn
+@activity.defn  # type: ignore[untyped-decorator]
 async def get_all_rule_ids_activity() -> list[str]:
     """Get all rule IDs from the rule loader."""
     from src.rules.service import RuleLoader
@@ -692,7 +692,7 @@ async def get_all_rule_ids_activity() -> list[str]:
     return [r.rule_id for r in rules]
 
 
-@activity.defn
+@activity.defn  # type: ignore[untyped-decorator]
 async def check_rule_drift_activity(rule_id: str) -> RuleDriftResult:
     """Check a single rule for drift.
 
@@ -765,7 +765,7 @@ async def check_rule_drift_activity(rule_id: str) -> RuleDriftResult:
     )
 
 
-@activity.defn
+@activity.defn  # type: ignore[untyped-decorator]
 async def notify_drift_detected_activity(
     drift_results: list[dict[str, Any]],
 ) -> int:

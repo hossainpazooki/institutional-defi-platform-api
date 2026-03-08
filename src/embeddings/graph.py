@@ -27,11 +27,11 @@ class GraphEmbeddingService:
 
     def __init__(self, session: Session | None = None):
         self.session = session
-        self._nx = None
-        self._np = None
+        self._nx: Any = None
+        self._np: Any = None
 
     @property
-    def nx(self):
+    def nx(self) -> Any:
         """Lazy-load networkx."""
         if self._nx is None:
             try:
@@ -45,7 +45,7 @@ class GraphEmbeddingService:
         return self._nx
 
     @property
-    def np(self):
+    def np(self) -> Any:
         """Lazy-load numpy."""
         if self._np is None:
             try:
@@ -270,12 +270,14 @@ class GraphEmbeddingService:
 
         query_vector = query_embedding.get_vector_as_numpy()
 
-        stmt = select(GraphEmbedding, EmbeddingRule).join(EmbeddingRule).where(EmbeddingRule.rule_id != query_rule_id)
-        results = self.session.exec(stmt).all()
+        stmt2: Any = select(GraphEmbedding, EmbeddingRule).join(EmbeddingRule).where(EmbeddingRule.rule_id != query_rule_id)
+        results = self.session.exec(stmt2).all()
 
-        similarities = []
-        for emb, rule in results:
+        similarities: list[dict[str, object]] = []
+        for row in results:
             try:
+                emb: Any = row[0]
+                rule: Any = row[1]
                 other_vector = emb.get_vector_as_numpy()
                 similarity = self._cosine_similarity(query_vector, other_vector)
                 similarities.append(
@@ -290,7 +292,7 @@ class GraphEmbeddingService:
             except Exception:
                 continue
 
-        similarities.sort(key=lambda x: x["similarity_score"], reverse=True)
+        similarities.sort(key=lambda x: float(x["similarity_score"]), reverse=True)  # type: ignore[arg-type]
         return similarities[:top_k]
 
     def compare_graphs(
@@ -307,20 +309,20 @@ class GraphEmbeddingService:
         np = self.np
         nx = self.nx
 
-        stmt = select(EmbeddingRule).where(EmbeddingRule.rule_id == rule_id_a)
-        rule_a = self.session.exec(stmt).first()
+        stmt_a = select(EmbeddingRule).where(EmbeddingRule.rule_id == rule_id_a)
+        rule_a = self.session.exec(stmt_a).first()
         if not rule_a:
             raise ValueError(f"Rule not found: {rule_id_a}")
 
-        stmt = select(EmbeddingRule).where(EmbeddingRule.rule_id == rule_id_b)
-        rule_b = self.session.exec(stmt).first()
+        stmt_b = select(EmbeddingRule).where(EmbeddingRule.rule_id == rule_id_b)
+        rule_b = self.session.exec(stmt_b).first()
         if not rule_b:
             raise ValueError(f"Rule not found: {rule_id_b}")
 
         graph_a = self.rule_to_graph(rule_a)
         graph_b = self.rule_to_graph(rule_b)
 
-        result = {
+        result: dict[str, Any] = {
             "rule_a": {
                 "rule_id": rule_id_a,
                 "num_nodes": graph_a.number_of_nodes(),
@@ -333,8 +335,8 @@ class GraphEmbeddingService:
             },
         }
 
-        def get_node_types(g):
-            types = {}
+        def get_node_types(g: Any) -> dict[str, int]:
+            types: dict[str, int] = {}
             for _, data in g.nodes(data=True):
                 ntype = data.get("node_type", "unknown")
                 types[ntype] = types.get(ntype, 0) + 1
@@ -392,8 +394,8 @@ class GraphEmbeddingService:
 
         nx = self.nx
 
-        stmt = select(EmbeddingRule).where(EmbeddingRule.rule_id == rule_id)
-        rule = self.session.exec(stmt).first()
+        stmt_rule = select(EmbeddingRule).where(EmbeddingRule.rule_id == rule_id)
+        rule = self.session.exec(stmt_rule).first()
         if not rule:
             raise ValueError(f"Rule not found: {rule_id}")
 
@@ -448,15 +450,15 @@ class GraphEmbeddingService:
 
         nx = self.nx
 
-        stmt = select(EmbeddingRule).where(EmbeddingRule.rule_id == rule_id)
-        rule = self.session.exec(stmt).first()
+        stmt_viz = select(EmbeddingRule).where(EmbeddingRule.rule_id == rule_id)
+        rule = self.session.exec(stmt_viz).first()
         if not rule:
             raise ValueError(f"Rule not found: {rule_id}")
 
         graph = self.rule_to_graph(rule)
 
         if format == "json":
-            return nx.node_link_data(graph)
+            return dict(nx.node_link_data(graph))
 
         elif format == "dot":
             try:
@@ -492,7 +494,7 @@ class GraphEmbeddingService:
         np = self.np
         nx = self.nx
 
-        stmt = select(EmbeddingRule).where(EmbeddingRule.rule_id.in_(rule_ids)) if rule_ids else select(EmbeddingRule)
+        stmt = select(EmbeddingRule).where(EmbeddingRule.rule_id.in_(rule_ids)) if rule_ids else select(EmbeddingRule)  # type: ignore[attr-defined]
 
         rules = self.session.exec(stmt).all()
 
@@ -501,6 +503,7 @@ class GraphEmbeddingService:
 
         for rule in rules:
             try:
+                assert rule.id is not None
                 graph = self.rule_to_graph(rule)
                 embedding = self.generate_graph_embedding(graph)
 

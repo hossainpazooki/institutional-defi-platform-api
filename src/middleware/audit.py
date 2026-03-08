@@ -9,7 +9,7 @@ import uuid
 from collections.abc import Callable
 from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Any
+from typing import Any, cast
 
 from pydantic import BaseModel, Field
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -141,7 +141,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
 
     def __init__(
         self,
-        app: Callable,
+        app: Callable[..., Any],
         enabled: bool = True,
         sensitive_paths: list[str] | None = None,
     ) -> None:
@@ -169,11 +169,11 @@ class AuditMiddleware(BaseHTTPMiddleware):
         api_key = request.headers.get("x-api-key")
         return mask_api_key(api_key)
 
-    async def dispatch(self, request: Request, call_next: Callable) -> Response:
+    async def dispatch(self, request: Request, call_next: Callable[..., Any]) -> Response:
         path = request.url.path
 
         if not self._should_audit(path):
-            return await call_next(request)
+            return cast("Response", await call_next(request))
 
         request_id = generate_request_id()
         bind_contextvars(request_id=request_id)
@@ -200,7 +200,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
 
         start_time = time.perf_counter()
         try:
-            response = await call_next(request)
+            response = cast("Response", await call_next(request))
         except Exception:
             duration_ms = (time.perf_counter() - start_time) * 1000
             error_event = AuditEvent(

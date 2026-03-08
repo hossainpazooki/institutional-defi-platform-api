@@ -11,16 +11,16 @@ import contextlib
 from typing import Any
 
 from src.ontology.jurisdiction import JurisdictionCode
+from src.rules.service import RuleLoader
 
-_rule_loader = None
+_rule_loader: RuleLoader | None = None
 
 
-def _get_rule_loader():
+def _get_rule_loader() -> RuleLoader:
     """Get or create the global rule loader."""
     global _rule_loader
     if _rule_loader is None:
         from src.config import get_settings
-        from src.rules.service import RuleLoader
 
         settings = get_settings()
         _rule_loader = RuleLoader(settings.rules_dir)
@@ -33,7 +33,7 @@ async def evaluate_jurisdiction(
     jurisdiction: str | JurisdictionCode,
     regime_id: str,
     facts: dict[str, Any],
-) -> dict:
+) -> dict[str, Any]:
     """Evaluate facts against all applicable rules in a jurisdiction."""
     from src.ontology.scenario import Scenario
     from src.rules.service import DecisionEngine
@@ -131,7 +131,7 @@ async def evaluate_jurisdiction(
 async def evaluate_multiple_jurisdictions(
     jurisdictions: list[tuple[str, str]],
     facts: dict[str, Any],
-) -> list[dict]:
+) -> list[dict[str, Any]]:
     """Evaluate facts across multiple jurisdictions in parallel."""
     tasks = [evaluate_jurisdiction(jurisdiction, regime_id, facts) for jurisdiction, regime_id in jurisdictions]
 
@@ -142,6 +142,6 @@ def evaluate_jurisdiction_sync(
     jurisdiction: str | JurisdictionCode,
     regime_id: str,
     facts: dict[str, Any],
-) -> dict:
+) -> dict[str, Any]:
     """Synchronous wrapper for evaluate_jurisdiction."""
     return asyncio.run(evaluate_jurisdiction(jurisdiction, regime_id, facts))

@@ -9,6 +9,7 @@ Unified institutional DeFi platform API — merged from three source projects:
 1. Sequential file operations — one edit/write at a time, wait for completion
 2. Never assume file contents — read before writing, verify after changes
 3. Run tests after every batch of changes
+3a. Run `mypy src/ --strict` after making code changes — type errors are CI-blocking
 4. Do not provide meta-commentary on your own thinking process unless requested
 5. When compacting, preserve: file list, import patterns, test commands, and current task state
 6. Autocompact at 50% context usage — proactively run /compact when context reaches ~50% to avoid hitting limits mid-task

@@ -119,7 +119,7 @@ class RuleRepository:
             )
             row = result.fetchone()
             if row:
-                return RuleRecord.from_row(row._mapping)
+                return RuleRecord.from_row(dict(row._mapping))
             return None
 
     def get_all_rules(self, active_only: bool = True) -> list[RuleRecord]:
@@ -129,7 +129,7 @@ class RuleRepository:
                 result = conn.execute(text("SELECT * FROM rules WHERE is_active = 1 ORDER BY rule_id"))
             else:
                 result = conn.execute(text("SELECT * FROM rules ORDER BY rule_id"))
-            return [RuleRecord.from_row(row._mapping) for row in result.fetchall()]
+            return [RuleRecord.from_row(dict(row._mapping)) for row in result.fetchall()]
 
     def delete_rule(self, rule_id: str, soft: bool = True) -> bool:
         """Delete a rule (soft delete by default)."""
@@ -183,7 +183,7 @@ class RuleRepository:
             )
             row = result.fetchone()
             if row:
-                return row[0]
+                return str(row[0])
             return None
 
     def get_rules_needing_compilation(self) -> list[str]:
@@ -196,7 +196,7 @@ class RuleRepository:
                 ORDER BY rule_id
                 """)
             )
-            return [row[0] for row in result.fetchall()]
+            return [str(row[0]) for row in result.fetchall()]
 
     # =========================================================================
     # Premise Index Operations
@@ -239,7 +239,7 @@ class RuleRepository:
                 """),
                 {"premise_key": premise_key},
             )
-            return [row[0] for row in result.fetchall()]
+            return [str(row[0]) for row in result.fetchall()]
 
     def get_rules_by_premises(self, premise_keys: list[str]) -> list[str]:
         """Get rule IDs that match ALL premise keys (intersection)."""
@@ -262,13 +262,13 @@ class RuleRepository:
                 """),
                 {**key_params, "num_keys": len(premise_keys)},
             )
-            return [row[0] for row in result.fetchall()]
+            return [str(row[0]) for row in result.fetchall()]
 
     def get_all_premise_keys(self) -> list[str]:
         """Get all unique premise keys in the index."""
         with get_db() as conn:
             result = conn.execute(text("SELECT DISTINCT premise_key FROM rule_premise_index ORDER BY premise_key"))
-            return [row[0] for row in result.fetchall()]
+            return [str(row[0]) for row in result.fetchall()]
 
     # =========================================================================
     # Query Operations
@@ -285,7 +285,7 @@ class RuleRepository:
                 """),
                 {"document_id": document_id},
             )
-            return [RuleRecord.from_row(row._mapping) for row in result.fetchall()]
+            return [RuleRecord.from_row(dict(row._mapping)) for row in result.fetchall()]
 
     def count_rules(self, active_only: bool = True) -> int:
         """Count total rules."""
@@ -294,7 +294,8 @@ class RuleRepository:
                 result = conn.execute(text("SELECT COUNT(*) as count FROM rules WHERE is_active = 1"))
             else:
                 result = conn.execute(text("SELECT COUNT(*) as count FROM rules"))
-            return result.fetchone()[0]
+            row = result.fetchone()
+            return int(row[0]) if row else 0
 
     def count_compiled_rules(self) -> int:
         """Count rules with compiled IR."""
@@ -302,4 +303,5 @@ class RuleRepository:
             result = conn.execute(
                 text("SELECT COUNT(*) as count FROM rules WHERE is_active = 1 AND rule_ir IS NOT NULL")
             )
-            return result.fetchone()[0]
+            row = result.fetchone()
+            return int(row[0]) if row else 0

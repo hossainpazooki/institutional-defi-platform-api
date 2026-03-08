@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from src.rules.service import (
@@ -34,7 +34,7 @@ from src.rules.service import ConsistencyEvidence
 class ContradictionResult:
     has_contradiction: bool
     contradicting_rule_ids: list[str] = field(default_factory=list)
-    contradiction_pairs: list[dict] = field(default_factory=list)
+    contradiction_pairs: list[dict[str, Any]] = field(default_factory=list)
     severity: str = "none"
     details: str = ""
 
@@ -42,7 +42,7 @@ class ContradictionResult:
 @dataclass
 class HierarchyResult:
     is_consistent: bool
-    violations: list[dict] = field(default_factory=list)
+    violations: list[dict[str, Any]] = field(default_factory=list)
     specificity_scores: dict[str, int] = field(default_factory=dict)
     details: str = ""
 
@@ -50,8 +50,8 @@ class HierarchyResult:
 @dataclass
 class TemporalResult:
     is_consistent: bool
-    overlapping_conflicts: list[dict] = field(default_factory=list)
-    timeline_gaps: list[dict] = field(default_factory=list)
+    overlapping_conflicts: list[dict[str, Any]] = field(default_factory=list)
+    timeline_gaps: list[dict[str, Any]] = field(default_factory=list)
     details: str = ""
 
 
@@ -101,7 +101,7 @@ class CrossRuleChecker:
             )
 
         primary_outcomes = self._extract_outcomes(rule)
-        contradictions: list[dict] = []
+        contradictions: list[dict[str, Any]] = []
         contradicting_ids: list[str] = []
 
         for other in self.related_rules:
@@ -180,7 +180,7 @@ class CrossRuleChecker:
 
         primary_specificity = self._calculate_specificity(rule)
         primary_outcomes = self._extract_outcomes(rule)
-        violations: list[dict] = []
+        violations: list[dict[str, Any]] = []
 
         for other in self.related_rules:
             if other.rule_id == rule.rule_id:
@@ -243,7 +243,7 @@ class CrossRuleChecker:
             )
 
         primary_outcomes = self._extract_outcomes(rule)
-        overlapping_conflicts: list[dict] = []
+        overlapping_conflicts: list[dict[str, Any]] = []
 
         for other in self.related_rules:
             if other.rule_id == rule.rule_id:

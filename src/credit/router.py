@@ -1,5 +1,7 @@
 """Routes for credit decisioning pipeline."""
 
+from typing import Any
+
 from fastapi import APIRouter, HTTPException
 
 from .schemas import (
@@ -69,12 +71,12 @@ async def get_result(app_id: str) -> SynthesisOutput:
 
 
 @router.post("/applications/{app_id}/review")
-async def submit_review(app_id: str, decision: HITLDecision) -> dict:
+async def submit_review(app_id: str, decision: HITLDecision) -> dict[str, str]:
     """Submit a human-in-the-loop review decision."""
     return _hitl.submit_review(app_id, decision)
 
 
 @router.get("/queue")
-async def get_queue() -> list[dict]:
+async def get_queue() -> list[dict[str, Any]]:
     """Get the HITL review queue."""
     return _hitl.get_queue()

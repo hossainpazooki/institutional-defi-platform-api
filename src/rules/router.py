@@ -1,8 +1,15 @@
 """Routes for regulatory decisions and rule inspection."""
 
+from __future__ import annotations
+
 import json
+from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, HTTPException, Query
+
+if TYPE_CHECKING:
+    from src.rules.event_repository import RuleEventRepository
+    from src.rules.version_repository import RuleVersionRepository
 
 from src.ontology.scenario import Scenario
 from src.rules.dependencies import get_engine, get_loader, reset_loader
@@ -121,7 +128,7 @@ def _generate_summary(responses: list[DecisionResponse]) -> str | None:
 
 
 @decide_router.post("/reload")
-async def reload_rules() -> dict:
+async def reload_rules() -> dict[str, Any]:
     """Reload rules from disk."""
     reset_loader()
 
@@ -208,7 +215,7 @@ async def get_rule(rule_id: str) -> RuleDetailResponse:
 
 
 @rules_router.get("/tags/all")
-async def list_tags() -> dict:
+async def list_tags() -> dict[str, Any]:
     """List all unique tags across rules."""
     loader = get_loader()
     rules = loader.get_all_rules()
@@ -225,13 +232,13 @@ async def list_tags() -> dict:
 # =============================================================================
 
 
-def _get_version_repo():
+def _get_version_repo() -> RuleVersionRepository:
     from src.rules.version_repository import RuleVersionRepository
 
     return RuleVersionRepository()
 
 
-def _get_event_repo():
+def _get_event_repo() -> RuleEventRepository:
     from src.rules.event_repository import RuleEventRepository
 
     return RuleEventRepository()

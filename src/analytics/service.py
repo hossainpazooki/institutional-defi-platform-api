@@ -13,12 +13,13 @@ from __future__ import annotations
 import contextlib
 import math
 from collections import defaultdict
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 from src.embeddings.graph_store import GraphStore
 from src.embeddings.models import EmbeddingType
+from src.embeddings.schemas import StoreEmbeddingType
 from src.embeddings.store import EmbeddingStore
 
 from .schemas import (
@@ -139,7 +140,8 @@ class RuleAnalyticsService:
         )
 
         for emb_type in types_to_fetch:
-            records = self._embedding_store.get_by_rule(rule_id, emb_type)
+            store_type = StoreEmbeddingType(emb_type.value)
+            records = self._embedding_store.get_by_rule(rule_id, store_type)
             if records:
                 result[emb_type.value] = records[0].vector
 
@@ -168,11 +170,11 @@ class RuleAnalyticsService:
         if not rule:
             return []
 
-        entities = set()
-        self._collect_entities_recursive(rule.decision_tree, entities)
+        entities: set[str] = set()
+        self._collect_entities_recursive(rule.decision_tree, entities)  # type: ignore[arg-type]
         return sorted(entities)
 
-    def _collect_entities_recursive(self, node: dict, entities: set) -> None:
+    def _collect_entities_recursive(self, node: dict[str, Any], entities: set[str]) -> None:
         """Recursively collect entity names from decision tree."""
         if not isinstance(node, dict):
             return
@@ -351,13 +353,14 @@ class RuleAnalyticsService:
             )
 
         # Collect all embeddings of specified type
-        emb_type = EmbeddingType(embedding_type)
+        EmbeddingType(embedding_type)
+        store_emb_type = StoreEmbeddingType(embedding_type)
         all_rule_ids = rule_ids if rule_ids else self._embedding_store.list_rules()
         vectors = []
         valid_rule_ids = []
 
         for rule_id in all_rule_ids:
-            records = self._embedding_store.get_by_rule(rule_id, emb_type)
+            records = self._embedding_store.get_by_rule(rule_id, store_emb_type)
             if records:
                 vectors.append(records[0].vector)
                 valid_rule_ids.append(rule_id)
@@ -927,13 +930,14 @@ class RuleAnalyticsService:
             )
 
         # Collect embeddings
-        emb_type = EmbeddingType(embedding_type)
+        EmbeddingType(embedding_type)
+        store_emb_type2 = StoreEmbeddingType(embedding_type)
         all_rule_ids = rule_ids if rule_ids else self._embedding_store.list_rules()
         vectors = []
         valid_rule_ids = []
 
         for rule_id in all_rule_ids:
-            records = self._embedding_store.get_by_rule(rule_id, emb_type)
+            records = self._embedding_store.get_by_rule(rule_id, store_emb_type2)
             if records:
                 vectors.append(records[0].vector)
                 valid_rule_ids.append(rule_id)

@@ -12,6 +12,7 @@ Also includes Console research stubs for protocol info and tokenomics.
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from typing import Any
 
 from .constants import DEFI_PROTOCOL_DEFAULTS, REPUTABLE_AUDITORS
 from .schemas import (
@@ -442,7 +443,7 @@ def score_defi_protocol(
     )
 
 
-def get_protocol_defaults(protocol_id: str) -> dict | None:
+def get_protocol_defaults(protocol_id: str) -> dict[str, Any] | None:
     """Get default configuration for a known protocol."""
     return DEFI_PROTOCOL_DEFAULTS.get(protocol_id.lower())
 

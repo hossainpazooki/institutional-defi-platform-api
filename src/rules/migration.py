@@ -11,6 +11,8 @@ from src.rules.service import ConditionGroupSpec, ConditionSpec, Rule, RuleLoade
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from src.rules.repository import RuleRepository
+
 
 def extract_premise_keys(condition_group: ConditionGroupSpec | None) -> list[str]:
     """Extract premise keys from a condition group for O(1) lookup index."""
@@ -118,7 +120,7 @@ def _rule_to_yaml(rule: Rule) -> str:
     return yaml.dump(data, default_flow_style=False, allow_unicode=True, sort_keys=False)
 
 
-def sync_rule_to_db(rule: Rule, rule_repo=None) -> bool:
+def sync_rule_to_db(rule: Rule, rule_repo: RuleRepository | None = None) -> bool:
     """Sync a single rule to the database."""
     from src.rules.repository import RuleRepository
 

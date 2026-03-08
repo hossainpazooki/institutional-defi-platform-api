@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import uuid
 from contextlib import asynccontextmanager
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 try:
     import temporalio.client
@@ -65,6 +65,7 @@ if _TEMPORAL_AVAILABLE:
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
+    from types import TracebackType
 
 
 def generate_workflow_id(prefix: str) -> str:
@@ -103,9 +104,7 @@ class WorkflowClient:
     async def connect(self) -> None:
         """Connect to Temporal server."""
         if not _TEMPORAL_AVAILABLE:
-            raise RuntimeError(
-                "temporalio is not installed. Install with: pip install -e '.[temporal]'"
-            )
+            raise RuntimeError("temporalio is not installed. Install with: pip install -e '.[temporal]'")
         if self._client is None:
             self._client = await Client.connect(
                 self._host,
@@ -121,7 +120,7 @@ class WorkflowClient:
         await self.connect()
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+    async def __aexit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None) -> None:
         await self.close()
 
     @property
@@ -173,7 +172,7 @@ class WorkflowClient:
             Current progress
         """
         handle = self.client.get_workflow_handle(workflow_id)
-        return await handle.query(ComplianceCheckWorkflow.progress)
+        return cast("ComplianceCheckProgress", await handle.query(ComplianceCheckWorkflow.progress))
 
     async def get_compliance_check_result(
         self,
@@ -192,7 +191,7 @@ class WorkflowClient:
             Workflow result
         """
         handle = self.client.get_workflow_handle(workflow_id)
-        return await handle.result()
+        return cast("ComplianceCheckOutput", await handle.result())
 
     # =========================================================================
     # RuleVerificationWorkflow
@@ -236,7 +235,7 @@ class WorkflowClient:
             Current progress
         """
         handle = self.client.get_workflow_handle(workflow_id)
-        return await handle.query(RuleVerificationWorkflow.progress)
+        return cast("RuleVerificationProgress", await handle.query(RuleVerificationWorkflow.progress))
 
     async def get_verification_result(
         self,
@@ -251,7 +250,7 @@ class WorkflowClient:
             Workflow result
         """
         handle = self.client.get_workflow_handle(workflow_id)
-        return await handle.result()
+        return cast("RuleVerificationOutput", await handle.result())
 
     async def skip_verification_tier(
         self,
@@ -309,7 +308,7 @@ class WorkflowClient:
             Current progress
         """
         handle = self.client.get_workflow_handle(workflow_id)
-        return await handle.query(CounterfactualAnalysisWorkflow.progress)
+        return cast("CounterfactualProgress", await handle.query(CounterfactualAnalysisWorkflow.progress))
 
     async def get_counterfactual_result(
         self,
@@ -324,7 +323,7 @@ class WorkflowClient:
             Workflow result
         """
         handle = self.client.get_workflow_handle(workflow_id)
-        return await handle.result()
+        return cast("CounterfactualOutput", await handle.result())
 
     # =========================================================================
     # CreditDecisionWorkflow
@@ -368,7 +367,7 @@ class WorkflowClient:
             Current progress
         """
         handle = self.client.get_workflow_handle(workflow_id)
-        return await handle.query(CreditDecisionWorkflow.progress)
+        return cast("CreditDecisionProgress", await handle.query(CreditDecisionWorkflow.progress))
 
     async def get_credit_decision_result(
         self,
@@ -383,7 +382,7 @@ class WorkflowClient:
             Workflow result
         """
         handle = self.client.get_workflow_handle(workflow_id)
-        return await handle.result()
+        return cast("CreditDecisionResult", await handle.result())
 
     # =========================================================================
     # DriftDetectionWorkflow
@@ -427,7 +426,7 @@ class WorkflowClient:
             Current progress
         """
         handle = self.client.get_workflow_handle(workflow_id)
-        return await handle.query(DriftDetectionWorkflow.progress)
+        return cast("DriftDetectionProgress", await handle.query(DriftDetectionWorkflow.progress))
 
     async def get_drift_detection_result(
         self,
@@ -442,7 +441,7 @@ class WorkflowClient:
             Workflow result
         """
         handle = self.client.get_workflow_handle(workflow_id)
-        return await handle.result()
+        return cast("DriftDetectionOutput", await handle.result())
 
     async def schedule_drift_detection(
         self,

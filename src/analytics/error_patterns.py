@@ -9,6 +9,7 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
+from typing import Any
 
 from src.rules.service import (
     ConsistencyEvidence,
@@ -246,8 +247,8 @@ class ErrorPatternAnalyzer:
                 ConsistencyStatus.VERIFIED: 0,
             }
 
-            priority = status_priority.get(summary.status, 50)
-            priority += (1 - summary.confidence) * 20
+            priority_score: float = float(status_priority.get(summary.status, 50))
+            priority_score += (1 - summary.confidence) * 20
 
             issues = []
             for ev in evidence:
@@ -264,7 +265,7 @@ class ErrorPatternAnalyzer:
                 queue.append(
                     ReviewQueueItem(
                         rule_id=rule.rule_id,
-                        priority=priority,
+                        priority=priority_score,
                         status=summary.status,
                         confidence=summary.confidence,
                         last_verified=summary.last_verified,
@@ -278,7 +279,7 @@ class ErrorPatternAnalyzer:
     def get_summary_stats(
         self,
         rules: list[Rule] | None = None,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """Get summary statistics across all rules."""
         if rules is None:
             if self._rule_loader is None:

@@ -25,8 +25,8 @@ class CreditRAGService:
     ) -> None:
         self._embed_model_name = embed_model or "BAAI/bge-small-en-v1.5"
         self._pg_connection_string = pg_connection_string
-        self._li_index = None
-        self._bm25_fallback = None
+        self._li_index: Any = None
+        self._bm25_fallback: Any = None
         self._use_llama_index = False
 
         self._init_backend()
@@ -79,9 +79,7 @@ class CreditRAGService:
             doc = Document(text=text, metadata=metadata, doc_id=doc_id)
             self._li_index.insert(doc)
         elif self._bm25_fallback is not None:
-            self._bm25_fallback.add_documents([
-                {"id": doc_id, "text": text, "metadata": metadata}
-            ])
+            self._bm25_fallback.add_documents([{"id": doc_id, "text": text, "metadata": metadata}])
 
     def search(
         self,

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 from datetime import UTC, datetime
+from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query
 
@@ -135,7 +136,7 @@ DEMO_PRICE_DATA: dict[str, list[float]] = {
     "USDC": [1.0] * 30,
 }
 
-DEMO_LIQUIDITY: dict[str, dict] = {
+DEMO_LIQUIDITY: dict[str, dict[str, int]] = {
     "BTC": {"spread_bps": 5, "depth_usd": 50_000_000, "volume_usd": 25_000_000_000},
     "ETH": {"spread_bps": 8, "depth_usd": 30_000_000, "volume_usd": 15_000_000_000},
     "SOL": {"spread_bps": 15, "depth_usd": 10_000_000, "volume_usd": 2_000_000_000},
@@ -326,7 +327,7 @@ async def calculate_var_endpoint(request: VaRCalculationRequest) -> VaRCalculati
 
 
 @risk_router.get("/supported-assets")
-async def list_supported_assets() -> dict:
+async def list_supported_assets() -> dict[str, Any]:
     """List all supported assets for risk analysis."""
     return {
         "assets": list(DEMO_PRICE_DATA.keys()),
@@ -358,18 +359,18 @@ async def get_correlations() -> CorrelationResponse:
 
 
 @quant_router.get("/volatility")
-async def get_volatility() -> dict:
+async def get_volatility() -> dict[str, str]:
     """Get volatility metrics."""
     return {"status": "stub", "module": "quant.volatility"}
 
 
 @quant_router.get("/greeks")
-async def get_greeks() -> dict:
+async def get_greeks() -> dict[str, str]:
     """Get options Greeks exposure."""
     return {"status": "stub", "module": "quant.greeks"}
 
 
 @quant_router.get("/liquidity")
-async def get_liquidity() -> dict:
+async def get_liquidity() -> dict[str, str]:
     """Get liquidity risk metrics."""
     return {"status": "stub", "module": "quant.liquidity"}

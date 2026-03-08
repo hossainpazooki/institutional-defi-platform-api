@@ -6,6 +6,8 @@ and target markets. From Workbench rules/jurisdiction/resolver.py.
 
 from __future__ import annotations
 
+from typing import Any
+
 from sqlalchemy import text
 
 from src.database import get_db
@@ -60,7 +62,7 @@ def _get_regime_for_jurisdiction(
 def get_equivalences(
     from_jurisdiction: str,
     to_jurisdictions: list[str],
-) -> list[dict]:
+) -> list[dict[str, Any]]:
     """Get equivalence determinations between jurisdictions."""
     if not to_jurisdictions:
         return []
@@ -129,7 +131,7 @@ def get_equivalences(
     return equivalences
 
 
-def get_jurisdiction_info(code: str) -> dict | None:
+def get_jurisdiction_info(code: str) -> dict[str, Any] | None:
     """Get jurisdiction information from database."""
     try:
         with get_db() as conn:
@@ -154,7 +156,7 @@ def get_jurisdiction_info(code: str) -> dict | None:
     return None
 
 
-def get_regime_info(regime_id: str) -> dict | None:
+def get_regime_info(regime_id: str) -> dict[str, Any] | None:
     """Get regulatory regime information from database."""
     try:
         with get_db() as conn:

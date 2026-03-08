@@ -7,12 +7,14 @@ health/readiness endpoints.
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
+from typing import TYPE_CHECKING, Any
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.analytics.router import router as analytics_router
 from src.config import get_settings
+from src.credit.router import router as credit_router
 from src.decoder.router import counterfactual_router
 from src.decoder.router import router as decoder_router
 from src.defi_risk.router import defi_risk_router, research_router
@@ -40,14 +42,16 @@ from src.technology.router import router as technology_router
 from src.token_compliance.router import router as token_compliance_router
 from src.trading.router import router as trading_router
 from src.verification.router import verification_router
-from src.credit.router import router as credit_router
 from src.workflows.router import router as workflows_router
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncIterator
 
 # ── Lifespan ────────────────────────────────────────────────────────
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Application lifespan — startup / shutdown hooks."""
     # Startup: eagerly validate settings
     settings = get_settings()
@@ -159,7 +163,7 @@ def create_app() -> FastAPI:
     # ── Root & Health endpoints ──────────────────────────────────────
 
     @app.get("/", tags=["Health"])
-    async def root():
+    async def root() -> dict[str, Any]:
         return {
             "name": settings.app_name,
             "environment": settings.environment,
@@ -167,7 +171,7 @@ def create_app() -> FastAPI:
         }
 
     @app.get("/health", tags=["Health"])
-    async def health_check():
+    async def health_check() -> dict[str, str]:
         return {
             "status": "healthy",
             "service": settings.app_name,

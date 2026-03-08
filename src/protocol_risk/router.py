@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from fastapi import APIRouter, HTTPException
 
 from src.protocol_risk import service
@@ -37,13 +39,13 @@ async def assess_protocol_risk(request: ProtocolRiskRequest) -> ProtocolRiskAsse
 
 
 @router.get("/protocols")
-async def list_protocol_defaults() -> dict:
+async def list_protocol_defaults() -> dict[str, list[str]]:
     """List available protocol default configurations."""
     return {"protocols": service.list_protocol_defaults()}
 
 
 @router.get("/protocols/{protocol_id}")
-async def get_protocol_config(protocol_id: str) -> dict:
+async def get_protocol_config(protocol_id: str) -> dict[str, Any]:
     """Get default configuration for a known protocol."""
     config = service.get_protocol_defaults(protocol_id)
     if not config:
@@ -85,6 +87,6 @@ async def assess_known_protocol(protocol_id: str) -> ProtocolRiskAssessment:
 
 
 @router.get("/consensus-types")
-async def list_consensus_types() -> dict:
+async def list_consensus_types() -> dict[str, list[str]]:
     """List available consensus mechanism types."""
     return {"consensus_types": service.list_consensus_types()}

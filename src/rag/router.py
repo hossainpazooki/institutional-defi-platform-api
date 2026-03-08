@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from fastapi import APIRouter, HTTPException
 
 from .schemas import AskRequest, AskResponse, SourceCitation
@@ -71,7 +73,7 @@ async def ask_question(request: AskRequest) -> AskResponse:
 
 
 @router.post("/index")
-async def index_document(document: dict) -> dict:
+async def index_document(document: dict[str, Any]) -> dict[str, Any]:
     """Index a document for retrieval."""
     retriever = get_retriever()
 
@@ -91,7 +93,7 @@ async def index_document(document: dict) -> dict:
 
 
 @router.get("/status")
-async def get_status() -> dict:
+async def get_status() -> dict[str, Any]:
     """Get the status of the RAG system."""
     retriever = get_retriever()
 

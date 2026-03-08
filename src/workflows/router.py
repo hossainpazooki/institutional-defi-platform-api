@@ -206,7 +206,7 @@ async def skip_verification_tier(
     workflow_id: str,
     request: SkipTierRequest,
     client: WorkflowClient = Depends(get_workflow_client),
-) -> dict:
+) -> dict[str, str]:
     """Signal a running verification workflow to skip a tier.
 
     Must be called before the tier starts execution.
@@ -450,7 +450,7 @@ async def get_credit_decision_result(
 async def cancel_workflow(
     workflow_id: str,
     client: WorkflowClient = Depends(get_workflow_client),
-) -> dict:
+) -> dict[str, str]:
     """Cancel a running workflow.
 
     Sends a cancellation request to the workflow. The workflow may perform
@@ -470,7 +470,7 @@ async def terminate_workflow(
     workflow_id: str,
     reason: str = "Terminated by user",
     client: WorkflowClient = Depends(get_workflow_client),
-) -> dict:
+) -> dict[str, str]:
     """Terminate a running workflow immediately.
 
     Forces immediate termination without cleanup.

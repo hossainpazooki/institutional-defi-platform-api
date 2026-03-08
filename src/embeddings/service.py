@@ -12,7 +12,7 @@ from __future__ import annotations
 import json
 import math
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import func
 from sqlmodel import Session, select
@@ -57,6 +57,7 @@ class EmbeddingRuleService:
         )
         self.session.add(rule)
         self.session.flush()
+        assert rule.id is not None
 
         for cond_data in rule_data.conditions:
             condition = EmbeddingCondition(
@@ -101,6 +102,7 @@ class EmbeddingRuleService:
         for emb in rule.embeddings:
             self.session.delete(emb)
         self.session.flush()
+        assert rule.id is not None
 
         generated = self.generator.generate_all(rule)
         records = create_embedding_records(rule.id, generated)
@@ -125,13 +127,14 @@ class EmbeddingRuleService:
         return self.session.exec(statement).first()
 
     def get_rules(self, skip: int = 0, limit: int = 100) -> list[EmbeddingRule]:
-        statement = select(EmbeddingRule).offset(skip).limit(limit).order_by(EmbeddingRule.created_at.desc())
+        statement = select(EmbeddingRule).offset(skip).limit(limit).order_by(EmbeddingRule.created_at.desc())  # type: ignore[attr-defined]
         return list(self.session.exec(statement).all())
 
     def update_rule(self, rule_id: str, rule_data: RuleUpdate) -> EmbeddingRule | None:
         rule = self.get_rule_by_rule_id(rule_id)
         if not rule:
             return None
+        assert rule.id is not None
 
         if rule_data.name is not None:
             rule.name = rule_data.name
@@ -205,7 +208,7 @@ class EmbeddingRuleService:
         embedding_types: list[str] | None = None,
         limit: int = 10,
         min_score: float = 0.0,
-    ) -> list[dict]:
+    ) -> list[dict[str, object]]:
         """Search for rules similar to a query."""
         if embedding_types is None:
             embedding_types = [e.value for e in EmbeddingType]
@@ -215,7 +218,7 @@ class EmbeddingRuleService:
         statement = (
             select(RuleEmbedding, EmbeddingRule)
             .join(EmbeddingRule)
-            .where(RuleEmbedding.embedding_type.in_(embedding_types))
+            .where(RuleEmbedding.embedding_type.in_(embedding_types))  # type: ignore[attr-defined]
             .where(EmbeddingRule.is_active == True)  # noqa: E712
         )
         results = self.session.exec(statement).all()
@@ -236,7 +239,7 @@ class EmbeddingRuleService:
                     }
                 )
 
-        scored_results.sort(key=lambda x: x["score"], reverse=True)
+        scored_results.sort(key=lambda x: float(x["score"]), reverse=True)  # type: ignore[arg-type]
         return scored_results[:limit]
 
     @staticmethod
@@ -254,13 +257,13 @@ class EmbeddingRuleService:
 
         return dot_product / (magnitude1 * magnitude2)
 
-    def get_embedding_stats(self) -> dict:
+    def get_embedding_stats(self) -> dict[str, Any]:
         """Get statistics about stored embeddings."""
-        stats: dict = {"total": 0, "by_type": {}}
+        stats: dict[str, Any] = {"total": 0, "by_type": {}}
 
         for emb_type in EmbeddingType:
             count = self.session.exec(
-                select(func.count(RuleEmbedding.id)).where(RuleEmbedding.embedding_type == emb_type.value)
+                select(func.count(RuleEmbedding.id)).where(RuleEmbedding.embedding_type == emb_type.value)  # type: ignore[arg-type]
             ).one()
             stats["by_type"][emb_type.value] = count
             stats["total"] += count

@@ -24,11 +24,13 @@ MODEL = "anthropic:claude-sonnet-4-20250514"
 # Mock tool implementations (return realistic sample data)
 # ---------------------------------------------------------------------------
 
+
 def _get_var_metrics(portfolio_id: str = "default") -> dict[str, Any]:
     """Wraps src.market_risk VaR calculation with mock fallback."""
     try:
         from src.market_risk.service import calculate_var
-        return {"var_95": calculate_var([0.01, -0.02, 0.005], 0.95)}
+
+        return {"var_95": calculate_var([0.01, -0.02, 0.005], 0.95)}  # type: ignore[arg-type]
     except Exception:
         return {
             "var_95": 0.042,
@@ -54,6 +56,7 @@ def _retrieve_legal_docs(query: str) -> list[dict[str, Any]]:
     """Wraps src.rag.service.Retriever with mock fallback."""
     try:
         from src.rag.service import Retriever
+
         retriever = Retriever(use_vectors=False)
         results = retriever.search(query, top_k=3)
         return [{"text": r.text, "score": r.score} for r in results]
@@ -97,7 +100,8 @@ def _get_sector_data(industry: str) -> dict[str, Any]:
 # Agent factory — builds agents lazily
 # ---------------------------------------------------------------------------
 
-def _build_agents() -> tuple:
+
+def _build_agents() -> tuple[Any, ...]:
     """Build and return (financial_agent, legal_agent, market_agent, synthesis_agent).
 
     Returns None tuple members if pydantic_ai is not installed.
@@ -119,12 +123,12 @@ def _build_agents() -> tuple:
         ),
     )
 
-    @financial_agent.tool_plain
+    @financial_agent.tool_plain  # type: ignore[untyped-decorator]
     def get_var_metrics(portfolio_id: str = "default") -> dict[str, Any]:
         """Retrieve VaR metrics for risk context."""
         return _get_var_metrics(portfolio_id)
 
-    @financial_agent.tool_plain
+    @financial_agent.tool_plain  # type: ignore[untyped-decorator]
     def analyze_financials(borrower_name: str) -> dict[str, Any]:
         """Analyze borrower financial statements."""
         return _analyze_financials(borrower_name)
@@ -139,12 +143,12 @@ def _build_agents() -> tuple:
         ),
     )
 
-    @legal_agent.tool_plain
+    @legal_agent.tool_plain  # type: ignore[untyped-decorator]
     def retrieve_legal_docs(query: str) -> list[dict[str, Any]]:
         """Search the legal document corpus."""
         return _retrieve_legal_docs(query)
 
-    @legal_agent.tool_plain
+    @legal_agent.tool_plain  # type: ignore[untyped-decorator]
     def check_covenants(doc_id: str) -> dict[str, Any]:
         """Check covenant compliance for a document."""
         return _check_covenants(doc_id)
@@ -159,12 +163,12 @@ def _build_agents() -> tuple:
         ),
     )
 
-    @market_agent.tool_plain
+    @market_agent.tool_plain  # type: ignore[untyped-decorator]
     def get_comparables(industry: str) -> list[dict[str, Any]]:
         """Get comparable credits in the sector."""
         return _get_comparables(industry)
 
-    @market_agent.tool_plain
+    @market_agent.tool_plain  # type: ignore[untyped-decorator]
     def get_sector_data(industry: str) -> dict[str, Any]:
         """Get sector-level risk data."""
         return _get_sector_data(industry)
@@ -184,10 +188,10 @@ def _build_agents() -> tuple:
 
 
 # Module-level lazy singleton
-_agents: tuple | None = None
+_agents: tuple[Any, ...] | None = None
 
 
-def get_agents():
+def get_agents() -> tuple[Any, ...]:
     """Get or build the agent tuple."""
     global _agents
     if _agents is None:
@@ -198,6 +202,7 @@ def get_agents():
 # ---------------------------------------------------------------------------
 # Mock agent runner (used when pydantic_ai is not installed)
 # ---------------------------------------------------------------------------
+
 
 def mock_financial_output(borrower_name: str) -> FinancialAgentOutput:
     """Generate mock financial analysis output."""

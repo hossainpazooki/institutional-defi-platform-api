@@ -27,7 +27,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'INPUT=$(cat); FILE=$(echo \"$INPUT\" | jq -r \".tool_input.file_path // empty\"); if [ -n \"$FILE\" ] && [[ \"$FILE\" == *.py ]]; then ruff check \"$FILE\" 2>&1 || true; fi'",
+            "command": "bash -c 'INPUT=$(cat); FILE=$(echo \"$INPUT\" | jq -r \".tool_input.file_path // empty\"); if [ -n \"$FILE\" ] && [[ \"$FILE\" == *.py ]]; then ruff check \"$FILE\" 2>&1 || true; echo \"---mypy---\"; mypy \"$FILE\" --strict --no-error-summary 2>&1 || true; fi'",
             "timeout": 30
           }
         ]

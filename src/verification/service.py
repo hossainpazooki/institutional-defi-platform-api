@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import re
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from src.rules.service import (
     ConsistencyBlock,
@@ -197,7 +197,7 @@ def check_decision_tree_valid(rule: Rule) -> ConsistencyEvidence:
             rule_element="decision_tree",
         )
 
-    def has_result(node: object) -> bool:
+    def has_result(node: Any) -> bool:
         if hasattr(node, "result"):
             return bool(node.result)
         if hasattr(node, "true_branch") or hasattr(node, "false_branch"):
@@ -539,7 +539,7 @@ def check_exception_coverage(rule: Rule, source_text: str | None = None) -> Cons
 def _extract_results(rule: Rule) -> list[str]:
     results: list[str] = []
 
-    def traverse(node: object) -> None:
+    def traverse(node: Any) -> None:
         if node is None:
             return
         if hasattr(node, "result") and node.result:
@@ -567,7 +567,7 @@ def _find_deontic_span(text: str, max_len: int = 60) -> str | None:
 def _extract_actors_from_rule(rule: Rule) -> list[str]:
     actors: list[str] = []
 
-    def check_condition(cond: object) -> None:
+    def check_condition(cond: Any) -> None:
         if hasattr(cond, "field"):
             field_lower = cond.field.lower()
             if ("actor" in field_lower or "type" in field_lower) and cond.value:
@@ -590,7 +590,7 @@ def _extract_actors_from_rule(rule: Rule) -> list[str]:
 def _extract_instruments_from_rule(rule: Rule) -> list[str]:
     instruments: list[str] = []
 
-    def check_condition(cond: object) -> None:
+    def check_condition(cond: Any) -> None:
         if hasattr(cond, "field"):
             field_lower = cond.field.lower()
             if ("instrument" in field_lower or "token" in field_lower) and cond.value:
@@ -623,7 +623,7 @@ def _extract_keywords_from_rule(rule: Rule) -> list[str]:
 
 
 def _rule_has_negation(rule: Rule) -> bool:
-    def check_condition(cond: object) -> bool:
+    def check_condition(cond: Any) -> bool:
         if hasattr(cond, "operator") and cond.operator in ("!=", "not_in", "not"):
             return True
         if hasattr(cond, "all") and cond.all and any(check_condition(c) for c in cond.all):
@@ -633,7 +633,7 @@ def _rule_has_negation(rule: Rule) -> bool:
     if rule.applies_if and check_condition(rule.applies_if):
         return True
 
-    def check_tree(node: object) -> bool:
+    def check_tree(node: Any) -> bool:
         if node is None:
             return False
         if (
@@ -653,7 +653,7 @@ def _rule_has_negation(rule: Rule) -> bool:
 def _count_branches(rule: Rule) -> int:
     count = 0
 
-    def traverse(node: object) -> None:
+    def traverse(node: Any) -> None:
         nonlocal count
         if node is None:
             return
@@ -715,12 +715,12 @@ class ConsistencyEngine:
     def __init__(
         self,
         document_registry: dict[str, str] | None = None,
-        retriever: object = None,
+        retriever: Any = None,
     ):
-        self.document_registry = document_registry or {}
-        self.retriever = retriever
+        self.document_registry: dict[str, str] = document_registry or {}
+        self.retriever: Any = retriever
 
-        self._tier0_checks: list[Callable] = [
+        self._tier0_checks: list[Callable[..., ConsistencyEvidence]] = [
             check_schema_valid,
             lambda r: check_required_fields(r),
             lambda r: check_source_exists(r, self.document_registry),
@@ -728,7 +728,7 @@ class ConsistencyEngine:
             check_id_format,
             check_decision_tree_valid,
         ]
-        self._tier1_checks: list[Callable] = [
+        self._tier1_checks: list[Callable[..., ConsistencyEvidence]] = [
             check_deontic_alignment,
             check_actor_mentioned,
             check_instrument_mentioned,

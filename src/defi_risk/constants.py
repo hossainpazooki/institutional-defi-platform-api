@@ -1,5 +1,7 @@
 """DeFi risk scoring constants."""
 
+from typing import Any
+
 from .schemas import DeFiCategory, GovernanceType, OracleProvider
 
 # Reputable auditors with weight
@@ -18,7 +20,7 @@ REPUTABLE_AUDITORS: dict[str, float] = {
 }
 
 # Default configurations for major DeFi protocols
-DEFI_PROTOCOL_DEFAULTS: dict[str, dict] = {
+DEFI_PROTOCOL_DEFAULTS: dict[str, dict[str, Any]] = {
     "aave_v3": {
         "category": DeFiCategory.LENDING,
         "smart_contract": {

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from fastapi import APIRouter
 
 from src.token_compliance import service
@@ -52,6 +54,6 @@ async def analyze_token_compliance(request: TokenComplianceRequest) -> TokenComp
 
 
 @router.get("/standards")
-async def list_token_standards() -> dict:
+async def list_token_standards() -> dict[str, Any]:
     """List supported token standards."""
     return {"standards": service.list_token_standards()}

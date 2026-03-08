@@ -171,7 +171,7 @@ def _parse_article_reference(query: str) -> tuple[str, str | None] | None:
         match = pattern.match(query)
         if match:
             article = match.group(1)
-            paragraph = match.group(2) if match.lastindex >= 2 else None
+            paragraph = match.group(2) if match.lastindex is not None and match.lastindex >= 2 else None
             return (article, paragraph)
 
     return None

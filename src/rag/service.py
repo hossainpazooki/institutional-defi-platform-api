@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+from typing import Any
 
 from rank_bm25 import BM25Okapi
 
@@ -24,7 +25,7 @@ class Chunk:
     chunk_index: int
     start_char: int
     end_char: int
-    metadata: dict
+    metadata: dict[str, Any]
 
 
 def chunk_text(
@@ -32,7 +33,7 @@ def chunk_text(
     document_id: str,
     chunk_size: int = 500,
     chunk_overlap: int = 50,
-    metadata: dict | None = None,
+    metadata: dict[str, Any] | None = None,
 ) -> list[Chunk]:
     """Split text into overlapping chunks.
 
@@ -98,7 +99,7 @@ def chunk_by_section(
     text: str,
     document_id: str,
     section_pattern: str = r"\n(?=Article \d+)",
-    metadata: dict | None = None,
+    metadata: dict[str, Any] | None = None,
 ) -> list[Chunk]:
     """Split text by section headers (e.g., articles).
 
@@ -164,7 +165,7 @@ class BM25Document:
     id: str
     text: str
     tokens: list[str]
-    metadata: dict
+    metadata: dict[str, Any]
 
 
 class BM25Index:
@@ -174,7 +175,7 @@ class BM25Index:
         self._documents: list[BM25Document] = []
         self._index: BM25Okapi | None = None
 
-    def add_documents(self, documents: list[dict]) -> None:
+    def add_documents(self, documents: list[dict[str, Any]]) -> None:
         """Add documents to the index.
 
         Args:
@@ -248,7 +249,7 @@ class RetrievalResult:
     text: str
     score: float
     document_id: str
-    metadata: dict
+    metadata: dict[str, Any]
     retrieval_method: str  # "bm25", "vector", or "hybrid"
 
 
@@ -278,11 +279,15 @@ class Retriever:
         """Initialize vector store if ML dependencies available."""
         try:
             import chromadb
-            from sentence_transformers import SentenceTransformer
 
-            self._embedder = SentenceTransformer("all-MiniLM-L6-v2")
+            from src.config import get_sentence_transformer
+
+            encoder = get_sentence_transformer()
+            if encoder is None:
+                return
+            self._embedder = encoder
             self._vector_store = chromadb.Client()
-            self._collection = self._vector_store.create_collection(
+            self._collection = self._vector_store.create_collection(  # type: ignore[attr-defined]
                 name="documents",
                 metadata={"hnsw:space": "cosine"},
             )
@@ -328,7 +333,7 @@ class Retriever:
                 ],
             )
 
-    def add_documents(self, documents: list[dict]) -> None:
+    def add_documents(self, documents: list[dict[str, Any]]) -> None:
         """Add raw documents (will be chunked internally).
 
         Args:
@@ -461,7 +466,7 @@ class AnswerGenerator:
         question: str,
         context: list[RetrievalResult],
         max_tokens: int = 500,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """Generate an answer from the question and context.
 
         Args:
@@ -507,7 +512,7 @@ class AnswerGenerator:
             parts.append(f"[{i}] {source}:\n{result.text}\n")
         return "\n".join(parts)
 
-    def _extract_sources(self, context: list[RetrievalResult]) -> list[dict]:
+    def _extract_sources(self, context: list[RetrievalResult]) -> list[dict[str, Any]]:
         """Extract source citations from context."""
         sources = []
         for result in context:
@@ -546,7 +551,7 @@ class AnswerGenerator:
         user_prompt = f"Context:\n{context}\n\nQuestion: {question}\n\nAnswer based on the context above:"
 
         try:
-            response = self._client.chat.completions.create(
+            response = self._client.chat.completions.create(  # type: ignore[attr-defined]
                 model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": system_prompt},
@@ -555,6 +560,6 @@ class AnswerGenerator:
                 max_tokens=max_tokens,
                 temperature=0.1,
             )
-            return response.choices[0].message.content
+            return str(response.choices[0].message.content)
         except Exception as e:
             return f"Error generating answer: {e!s}"
