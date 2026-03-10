@@ -5,6 +5,7 @@
 #   ./scripts/test-all.sh backend  # backend only
 #   ./scripts/test-all.sh frontend # all 3 frontends
 #   ./scripts/test-all.sh infra    # terraform + kustomize
+#   ./scripts/test-all.sh deploy   # post-deploy verification (needs DEPLOY_URL)
 #   ./scripts/test-all.sh contract # API contract check
 
 set -euo pipefail
@@ -143,6 +144,26 @@ run_infra() {
     fi
 }
 
+# ── Layer 4: Deployment Verification ─────────────────────────────
+
+run_deploy() {
+    echo -e "\n${CYAN}────────────────────────────────────────${NC}"
+    echo -e "${CYAN}  LAYER 4: Deployment Verification${NC}"
+    echo -e "${CYAN}────────────────────────────────────────${NC}"
+
+    local script="$API/scripts/verify-deployment.sh"
+    if [ -f "$script" ]; then
+        if [ -n "${DEPLOY_URL:-}" ]; then
+            run_check "Deploy: full-stack verification" \
+                bash "$script" "$DEPLOY_URL"
+        else
+            skip_check "Deploy verification" "DEPLOY_URL not set"
+        fi
+    else
+        skip_check "Deploy verification" "scripts/verify-deployment.sh not found"
+    fi
+}
+
 # ── Layer 5: Contract Check ───────────────────────────────────────
 
 run_contract() {
@@ -191,15 +212,17 @@ case "$TARGET" in
     backend)  run_backend ;;
     frontend) run_frontend ;;
     infra)    run_infra ;;
+    deploy)   run_deploy ;;
     contract) run_contract ;;
     all)
         run_backend
         run_frontend
         run_infra
+        run_deploy
         run_contract
         ;;
     *)
-        echo "Usage: $0 {all|backend|frontend|infra|contract}"
+        echo "Usage: $0 {all|backend|frontend|infra|deploy|contract}"
         exit 1
         ;;
 esac

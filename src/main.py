@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Any
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 
 from src.analytics.router import router as analytics_router
 from src.config import get_settings
@@ -177,6 +178,67 @@ def create_app() -> FastAPI:
             "service": settings.app_name,
             "environment": settings.environment,
         }
+
+    @app.get("/health/deep", tags=["Health"])
+    async def deep_health_check() -> dict[str, Any]:
+        """Deep health check — verifies database and cache connectivity."""
+        checks: dict[str, dict[str, str]] = {}
+
+        # Database
+        try:
+            from src.database import get_engine
+
+            engine = get_engine()
+            with engine.connect() as conn:
+                conn.execute(text("SELECT 1"))
+            checks["database"] = {"status": "healthy"}
+        except Exception as e:
+            checks["database"] = {"status": "unhealthy", "error": str(e)}
+
+        # Redis
+        try:
+            import redis as redis_lib
+
+            r = redis_lib.from_url(settings.redis_url, socket_connect_timeout=2)
+            r.ping()
+            checks["redis"] = {"status": "healthy"}
+        except Exception as e:
+            checks["redis"] = {"status": "unhealthy", "error": str(e)}
+
+        # Temporal (optional)
+        try:
+            from temporalio.client import Client as _TemporalClient  # noqa: F401
+
+            checks["temporal"] = {"status": "configured"}
+        except ImportError:
+            checks["temporal"] = {"status": "not_installed"}
+
+        overall = (
+            "healthy"
+            if all(
+                c.get("status") == "healthy"
+                for k, c in checks.items()
+                if k != "temporal"
+            )
+            else "degraded"
+        )
+
+        return {
+            "status": overall,
+            "service": settings.app_name,
+            "environment": settings.environment,
+            "checks": checks,
+        }
+
+    @app.get("/ready", tags=["Health"])
+    async def readiness_check() -> dict[str, str]:
+        """K8s readiness probe — checks database is reachable."""
+        from src.database import get_engine
+
+        engine = get_engine()
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        return {"status": "ready"}
 
     return app
 

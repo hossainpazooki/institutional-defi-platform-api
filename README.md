@@ -18,6 +18,7 @@ Unified backend for institutional digital asset compliance, risk analytics, and 
 | **Trading** | Exposure, PnL, funding rate monitoring |
 | **Feature Store** | TimescaleDB-backed risk feature snapshots with time-travel queries |
 | **JPM Scenarios** | Pre-/post-trade scenario evaluation with memo generation |
+| **Credit Decisioning** | PydanticAI agent pipeline with LlamaIndex RAG, document classification, HITL review |
 | **Workflows** | Temporal-orchestrated compliance checks, verification runs, drift detection |
 
 ## Architecture
@@ -45,6 +46,10 @@ flowchart LR
         Features[features/]
     end
 
+    subgraph Credit["Credit Decisioning"]
+        CreditPipeline[credit/]
+    end
+
     subgraph Infra["Infrastructure"]
         Workflows[workflows/]
         KE[ke/]
@@ -58,6 +63,7 @@ flowchart LR
     KE --> Rules
     KE --> Verification
     KE --> Analytics
+    CreditPipeline --> PG
 
     subgraph Data["Data Layer"]
         PG[(PostgreSQL + TimescaleDB)]
@@ -75,7 +81,7 @@ flowchart LR
 
 ```bash
 # Start infrastructure
-docker-compose up -d
+docker compose up -d
 
 # Install and run
 pip install -e ".[dev]"
@@ -116,6 +122,7 @@ src/
 ├── jpm_scenarios/             # Institutional scenario evaluation
 ├── workflows/                 # Temporal workflow orchestration
 ├── production/                # Compiled IR execution, premise indexing
+├── credit/                    # Credit decisioning — PydanticAI agents, LlamaIndex RAG, HITL
 └── ke/                        # Knowledge engineering workbench
 ```
 
@@ -143,6 +150,7 @@ src/
 | `/jpm` | JPM Scenarios | Scenario runs, memo generation |
 | `/workflows` | Workflows | Temporal workflow management |
 | `/v2` | Production | Compiled rule evaluation |
+| `/credit` | Credit Decisioning | Applications, analysis, HITL review queue |
 | `/ke` | KE Workbench | Orchestrated rule management |
 
 ## Jurisdictions
@@ -186,6 +194,9 @@ pytest tests/ -x
 ruff check src tests
 ruff format src tests
 
+# Type check (strict — CI-blocking)
+mypy src/ --strict
+
 # Database migrations
 alembic upgrade head
 ```
@@ -198,6 +209,7 @@ Install only what you need:
 pip install -e ".[ml]"          # sentence-transformers, chromadb
 pip install -e ".[llm]"         # anthropic SDK
 pip install -e ".[blockchain]"  # web3
+pip install -e ".[credit]"      # pydantic-ai, llama-index
 pip install -e ".[temporal]"    # temporalio
 pip install -e ".[telemetry]"   # opentelemetry, prometheus
 pip install -e ".[all]"         # everything
@@ -207,7 +219,7 @@ pip install -e ".[all]"         # everything
 
 ```bash
 # Full stack
-docker-compose up -d
+docker compose up -d
 
 # Services: PostgreSQL+TimescaleDB (:5432), Redis (:6379), Temporal (:7233), Temporal UI (:8233)
 ```
@@ -228,37 +240,19 @@ Copy `.env.example` to `.env`. Key variables:
 
 ## CI/CD Pipeline
 
-### Continuous Integration
-
 Every push and pull request runs the CI workflow (`.github/workflows/ci.yml`):
 
 1. **Lint** — Ruff check and format verification
-2. **Test** — Full test suite against PostgreSQL 16 (457 tests)
-3. **Build** — Docker image build validation for both API and worker
+2. **Type check** — `mypy src/ --strict` (strict mode)
+3. **Test** — Full test suite against PostgreSQL 16 (458 tests)
+4. **Docker build** — Image build validation
+5. **Docker push** — On merge to `main`/`master`, builds and pushes API + worker images to ECR, then triggers deploy in the infra repo
 
-### Continuous Deployment
-
-| Workflow | Trigger | Target | Key Features |
-|----------|---------|--------|-------------|
-| `cd-staging.yml` | Push to `main` | Dev namespace | Auto build/push to ECR, Trivy scan, deploy, smoke test, Slack notify |
-| `cd-production.yml` | Manual (`vX.Y.Z` tag) | Prod namespace | Semver validation, GitHub environment approval gate, auto-rollback on failure, GitHub Release creation |
-| `security-scan.yml` | Weekly + manual | N/A | pip-audit, Bandit + Semgrep SAST, Gitleaks, Trivy container scan, Checkov IaC scan |
-
-Required GitHub secrets: `AWS_ACCOUNT_ID`, `AWS_CD_ROLE_ARN`, `SLACK_WEBHOOK_URL`
-
-### Production Deploy
-
-```bash
-# Tag a release
-git tag v1.0.0 && git push origin v1.0.0
-
-# Trigger production deploy (requires environment approval)
-gh workflow run cd-production.yml -f image_tag=v1.0.0
-```
+Required GitHub secrets: `AWS_BUILDER_ROLE_ARN`, `INFRA_DISPATCH_TOKEN`
 
 ## EKS Deployment
 
-Infrastructure is defined as code across two directories:
+Infrastructure is in the separate [`institutional-defi-platform-infra`](../institutional-defi-platform-infra) repo:
 
 | Directory | Contents |
 |-----------|----------|
@@ -300,8 +294,8 @@ Infrastructure is defined as code across two directories:
 ### Quick Start (EKS)
 
 ```bash
-# 1. Provision infrastructure
-cd terraform
+# 1. Provision infrastructure (from infra repo)
+cd institutional-defi-platform-infra/terraform
 terraform init
 terraform apply -var-file=envs/dev.tfvars \
   -var="app_db_password=..." -var="temporal_db_password=..."
@@ -311,7 +305,7 @@ terraform apply -var-file=envs/dev.tfvars \
 # 4. Push to main → auto-deploys to dev
 ```
 
-Full walkthrough: [`docs/eks-deployment.md`](docs/eks-deployment.md)
+Deployment verification: [`docs/deployment-verification.md`](docs/deployment-verification.md)
 
 ### Cost Estimate
 

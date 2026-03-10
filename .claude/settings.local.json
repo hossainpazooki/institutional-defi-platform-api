@@ -28,7 +28,8 @@
       "Bash(kubectl describe:*)",
       "Bash(bash scripts/test-all.sh contract)",
       "Bash(bash scripts/test-all.sh frontend)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(mypy:*)"
     ]
   }
 }
