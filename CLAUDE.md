@@ -16,7 +16,7 @@ Unified institutional DeFi platform API — merged from three source projects:
 7. Do not execute git commit/push. Output git commit commands for the user to run manually. Do not wait for commits — continue working. Other CLI tools (kubectl, docker, aws, helm) are fine to run directly.
 
 ## Current Phase
-DEV DEPLOYED ON EKS — migration complete (28 steps, 457 tests, ruff clean). API running on EKS dev environment. Worker scaled to 0 (Temporal not deployed to EKS yet). Infrastructure in separate repo.
+DEV DEPLOYED ON EKS — SHA `c6d6526` deployed (2026-03-10). Migration complete (28 steps, 457 tests, ruff clean). API running on EKS dev environment. Worker scaled to 0 (Temporal not deployed to EKS yet). Commit `d4d0079` adds credit domain (not yet deployed). 3 frontend pods (regulatory-workbench, risk-console, cross-border) have placeholder INITIAL tags — no images built yet. Infrastructure in separate repo.
 
 ## Directory Structure
 ```
@@ -48,6 +48,7 @@ src/
 ├── features/                  # Feature Store — TimescaleDB hypertable, risk features
 ├── jpm_scenarios/             # JPM scenarios — 5 preset scenarios, memo generation
 ├── workflows/                 # Temporal orchestration — compliance, verification, drift, counterfactual
+├── credit/                    # Credit decisioning — PydanticAI agents, LlamaIndex RAG, Temporal workflow
 ├── production/                # Compiled IR execution — compiler, optimizer, runtime, cache
 └── ke/                        # Knowledge Engineering workbench — orchestrates rules/verification/analytics
 
@@ -74,6 +75,7 @@ Infrastructure (terraform/, kube/) is in the [institutional-defi-platform-infra]
 | features | `/features` |
 | jpm_scenarios | `/jpm` |
 | workflows | `/workflows` |
+| credit | `/credit` |
 | production | `/v2` |
 | ke | `/ke` |
 
@@ -202,3 +204,19 @@ See `.env.example` for full list. Key variables:
 - `TEMPORAL_HOST` — Temporal server (optional)
 
 On EKS, `DATABASE_URL`, `REDIS_URL`, and `ANTHROPIC_API_KEY` are injected via AWS Secrets Manager → ExternalSecret → `api-secrets` K8s secret. Non-secret config (ENVIRONMENT, etc.) comes from the `api-config-dev` ConfigMap defined in `kube/overlays/dev/configmap.yaml`.
+
+## Scripts
+| Script | Purpose |
+|--------|---------|
+| `scripts/test-all.sh` | Cross-repo test orchestration (runs tests across all 5 repos) |
+| `scripts/verify-deployment.sh` | EKS deployment validation (pod health, endpoint checks) |
+| `scripts/verify-contracts-live.py` | Live API contract verification against running endpoints |
+| `scripts/check-api-contracts.py` | Static API contract checks (route/schema consistency) |
+| `scripts/export-openapi.py` | OpenAPI spec export from FastAPI app |
+| `scripts/generate-frontend-types.sh` | Frontend TypeScript type generation from OpenAPI spec |
+
+## CI/CD
+- Pipeline config: `.github/workflows/ci.yml`
+- Steps: lint → typecheck → test → docker build → ECR push → kustomize update → kubectl apply → smoke test
+- Docker cold build ~47min (large ML deps in `.[all]`) — cached builds much faster
+- ECR push can fail transiently (Docker Desktop proxy) — retry works
