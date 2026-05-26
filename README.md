@@ -20,6 +20,7 @@ Unified backend for institutional digital asset compliance, risk analytics, and 
 | **JPM Scenarios** | Pre-/post-trade scenario evaluation with memo generation |
 | **Credit Decisioning** | PydanticAI agent pipeline with LlamaIndex RAG, document classification, HITL review |
 | **Workflows** | Temporal-orchestrated compliance checks, verification runs, drift detection |
+| **Live Session** | Binance-fed live trading session — snapshot → threshold detection → dual-path verdict → Claude rationale gated by T3 NLI, fanned over WebSocket. Feature-flagged via `LIVE_THRESHOLD_RATIONALE_ENABLED`. |
 
 ## Architecture
 
@@ -112,7 +113,7 @@ src/
 ├── rag/                       # BM25 legal corpus retrieval
 ├── embeddings/                # 4-type + graph embeddings, vector search
 ├── jurisdiction/              # Navigation, conflicts, pathway synthesis, compliance
-├── market_risk/               # VaR, stress testing, correlation
+├── market_risk/               # VaR, stress testing, correlation, live_session/ (WS pipeline)
 ├── defi_risk/                 # Protocol scoring, tokenomics, research
 ├── token_compliance/          # Howey test, GENIUS Act analysis
 ├── protocol_risk/             # Blockchain protocol risk profiles

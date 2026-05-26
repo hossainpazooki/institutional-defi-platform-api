@@ -67,6 +67,10 @@ class Settings(BaseSettings):
     pydanticai_model: str = "claude-sonnet-4-20250514"
     enable_credit_pipeline: bool = True
 
+    # ── Live Trading Session ───────────────────────────────────────────
+    live_threshold_rationale_enabled: bool = False
+    live_rationale_daily_token_cap: int = 100_000
+
     # ── Paths ────────────────────────────────────────────────────────────
     rules_dir: str = "src/rules/data"
     data_dir: str = "data"

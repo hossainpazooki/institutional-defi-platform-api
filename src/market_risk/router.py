@@ -30,6 +30,29 @@ from .service import (
 
 risk_router = APIRouter(prefix="/risk", tags=["Market Risk"])
 quant_router = APIRouter(prefix="/quant", tags=["Market Risk"])
+audit_router = APIRouter(prefix="/audit", tags=["Live Session Audit"])
+
+
+@audit_router.get("/{intent_id}")
+def get_audit(intent_id: str) -> dict[str, Any]:
+    """Return chronological audit replay for a live session by intent_id.
+
+    Joins trade_snapshots, threshold_events, rationales, nli_checks. Replay
+    fidelity preserves original `ts`.
+    """
+    from src.database import get_engine
+    from sqlmodel import Session as SQLSession
+
+    from .live_session.audit_service import fetch_audit
+
+    engine = get_engine()
+    with SQLSession(engine) as s:
+        records = fetch_audit(s, intent_id)
+    return {
+        "intent_id": intent_id,
+        "count": len(records),
+        "records": [{"table": r.table, "ts": r.ts, "row": r.row} for r in records],
+    }
 
 
 # =============================================================================

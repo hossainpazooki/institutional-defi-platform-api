@@ -24,7 +24,8 @@ from src.features.router import router as features_router
 from src.jpm_scenarios.router import router as jpm_router
 from src.jurisdiction.router import compliance_router, navigate_router
 from src.ke.router import router as ke_router
-from src.market_risk.router import quant_router, risk_router
+from src.market_risk.live_session.ws_handler import router as live_session_ws_router
+from src.market_risk.router import audit_router, quant_router, risk_router
 
 # ── Middleware ──────────────────────────────────────────────────────
 from src.middleware.audit import AuditMiddleware
@@ -126,6 +127,8 @@ def create_app() -> FastAPI:
     app.include_router(compliance_router)
     app.include_router(risk_router)
     app.include_router(quant_router)
+    app.include_router(audit_router)
+    app.include_router(live_session_ws_router)
     app.include_router(defi_risk_router)
     app.include_router(research_router)
     app.include_router(workflows_router)
