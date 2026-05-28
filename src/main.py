@@ -24,6 +24,7 @@ from src.features.router import router as features_router
 from src.jpm_scenarios.router import router as jpm_router
 from src.jurisdiction.router import compliance_router, navigate_router
 from src.ke.router import router as ke_router
+from src.market_risk.live_session.intents_router import router as intents_router
 from src.market_risk.live_session.ws_handler import router as live_session_ws_router
 from src.market_risk.router import audit_router, quant_router, risk_router
 
@@ -66,7 +67,21 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     except ImportError:
         pass
 
-    yield
+    # Live-session registry + provider — only when the feature flag is on so
+    # nothing constructs network/DB resources at import time on disabled envs.
+    if getattr(settings, "live_threshold_rationale_enabled", False):
+        from src.market_risk.live_session.bootstrap import (
+            shutdown_live_session_registry,
+            start_live_session_registry,
+        )
+
+        registry = start_live_session_registry(app)
+        try:
+            yield
+        finally:
+            await shutdown_live_session_registry(registry)
+    else:
+        yield
 
     # Shutdown: dispose DB engine
     from src.database import reset_engine
@@ -128,6 +143,7 @@ def create_app() -> FastAPI:
     app.include_router(risk_router)
     app.include_router(quant_router)
     app.include_router(audit_router)
+    app.include_router(intents_router)
     app.include_router(live_session_ws_router)
     app.include_router(defi_risk_router)
     app.include_router(research_router)

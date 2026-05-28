@@ -2,12 +2,16 @@
 
 4 hypertables on TimescaleDB: trade_snapshots (1Hz audit cadence), threshold_events,
 rationales, nli_checks. Retention 90d default (per unified-plan decision 1).
+
+1 regular table: trade_intents — the canonical record of a session's intent.
+Created via REST (POST /v2/intents), read by the session registry resolver.
 """
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from sqlalchemy import JSON
 from sqlmodel import Column, DateTime, Field, SQLModel
 
 if TYPE_CHECKING:
@@ -85,9 +89,38 @@ class NLICheckRow(SQLModel, table=True):
     entailment_score: float
 
 
+class TradeIntentRow(SQLModel, table=True):
+    """Canonical persisted trade intent — created via POST /v2/intents."""
+
+    __tablename__ = "trade_intents"
+
+    intent_id: str = Field(primary_key=True)
+    asset: str = Field(index=True)
+    direction: str  # buy | sell
+    notional_usd: Decimal
+    venue_jurisdiction: str
+    investor_type: str  # retail | professional | eligible_counterparty
+    target_jurisdictions: list[str] = Field(
+        sa_column=Column(JSON, nullable=False)
+    )
+    holding_period_days: int
+    status: str = Field(default="created", index=True)  # created | active | closed | failed
+    created_at: datetime = Field(
+        sa_column=Column(DateTime(timezone=True), nullable=False, index=True)
+    )
+    activated_at: datetime | None = Field(
+        default=None, sa_column=Column(DateTime(timezone=True), nullable=True)
+    )
+    closed_at: datetime | None = Field(
+        default=None, sa_column=Column(DateTime(timezone=True), nullable=True)
+    )
+    last_error: str | None = Field(default=None, nullable=True)
+
+
 __all__ = [
     "NLICheckRow",
     "RationaleRow",
     "ThresholdEventRow",
+    "TradeIntentRow",
     "TradeSnapshotRow",
 ]

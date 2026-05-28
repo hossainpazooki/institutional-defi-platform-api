@@ -70,6 +70,13 @@ class Settings(BaseSettings):
     # ── Live Trading Session ───────────────────────────────────────────
     live_threshold_rationale_enabled: bool = False
     live_rationale_daily_token_cap: int = 100_000
+    # WebSocket heartbeat — server pings every `ws_ping_interval_seconds` and
+    # declares the connection idle if no `pong` text frame arrives within
+    # `ws_pong_timeout_seconds` of a ping. Both are env-overridable (e.g.
+    # WS_PING_INTERVAL_SECONDS=0.05 / WS_PONG_TIMEOUT_SECONDS=0.05) so the
+    # heartbeat tests can drive a real timeout in milliseconds.
+    ws_ping_interval_seconds: float = 20.0
+    ws_pong_timeout_seconds: float = 10.0
 
     # ── Paths ────────────────────────────────────────────────────────────
     rules_dir: str = "src/rules/data"

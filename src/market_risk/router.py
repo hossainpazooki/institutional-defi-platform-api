@@ -40,8 +40,9 @@ def get_audit(intent_id: str) -> dict[str, Any]:
     Joins trade_snapshots, threshold_events, rationales, nli_checks. Replay
     fidelity preserves original `ts`.
     """
-    from src.database import get_engine
     from sqlmodel import Session as SQLSession
+
+    from src.database import get_engine
 
     from .live_session.audit_service import fetch_audit
 

@@ -1,0 +1,104 @@
+[33mcommit f73b9403c88a7ab5d741b351dce085b6988b6ba7[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m)[m
+Author: hossainpazooki <hossainpazooki@gmail.com>
+Date:   Tue May 26 18:09:13 2026 -0400
+
+    feat(live-session): backend WS pipeline for live threshold-crossing rationale
+    
+    Phase B of the unified live-threshold-rationale plan
+    (dev/briefs/unified-plan.md). Adds the structural skeleton for the
+    end-to-end live trading session: Binance ingest → snapshot → threshold
+    detection → dual-path verdict → Claude rationale gated by T3 NLI →
+    WebSocket fanout + REST audit replay.
+    
+    New modules under src/market_risk/live_session/:
+    - ws_schemas.py: Pydantic envelopes mirroring @platform/contracts,
+      discriminated union on `type`, Decimal-as-string JSON
+    - models.py: SQLModel ORM rows for 4 hypertables
+    - market_bus.py: bounded asyncio.Queue per subscriber with drop-newest
+      backpressure and drop-count metric
+    - snapshot_builder.py: Welford sigma, VaR_95 closed-form, VWAP slippage
+    - ingestor.py: Binance combined-streams ingestor with ref-counted symbol
+      tasks and exponential backoff (websockets dep optional)
+    - zone_hash.py: bucketize boundary-relevant scalars to a tuple hash
+    - threshold_detector.py: stateful detector, emits on verdict transition
+      only, zone-hash fast-path
+    - verdict_service.py: dual-path resolver (sync DecisionEngine /
+      Temporal ComplianceCheckWorkflow), path chosen at rule-load time
+    - nli_gate.py: DeBERTa entailment with deterministic stub fallback
+    - rationale_streamer.py: Claude tokens + NLI gate, emits N tokens +
+      one terminal envelope (verified or retracted)
+    - session_manager.py: per-intent Session lifecycle + monotonic seq
+    - ws_handler.py: FastAPI WS route /v2/ws/trade/{intent_id} with
+      20s/10s heartbeat
+    - audit_service.py: chronological 4-table join keyed by intent_id
+    
+    Plus:
+    - alembic 002 migration creating 4 TimescaleDB hypertables (7-day
+      chunks, 90-day retention, guarded so plain Postgres / SQLite test
+      DBs work)
+    - /audit/{intent_id} REST endpoint registered via audit_router
+    - /v2/ws/trade/{intent_id} WS endpoint registered
+    - LIVE_THRESHOLD_RATIONALE_ENABLED + LIVE_RATIONALE_DAILY_TOKEN_CAP
+      settings in src/config.py (flag defaults off)
+    - README.md updated to list the Live Session domain
+    
+    Tests under tests/market_risk/:
+    - test_ws_schemas: envelope round-trip on mock-ws fixtures +
+      discriminated-union rejection + Decimal string serialization
+    - live_session/test_snapshot_math: Welford determinism, VaR closed-form,
+      thin vs deep slippage
+    - live_session/test_market_bus: fan-out, backpressure drop counting,
+      unsubscribe cleanup, async stream iteration
+    - live_session/test_zone_hash: hash determinism, distinct buckets
+    - live_session/test_threshold_detector: first-tick suppression, emit
+      on transition, fast-path
+    - live_session/test_verdict_service: sync compliant/conditional/blocked,
+      Temporal dispatch, fallback when executor absent
+    - live_session/test_rationale_streamer: token stream -> verified,
+      drift -> retracted, stub scorer bounds
+    
+    Gates:
+    - ruff check src/market_risk/live_session/ src/market_risk/ws_schemas.py
+      tests/market_risk/ -> clean
+    - mypy --strict src/market_risk/live_session/ src/market_risk/ws_schemas.py
+      -> success, 14 source files
+    - pytest deferred: pre-existing Python 3.14 / FastAPI inspect.signature
+      bug (per CLAUDE.md known issues), not in this code.
+    
+    Follow-up: wire session_manager._consume_forever() to compose
+    ingestor + builder + detector + verdict + streamer end-to-end. The
+    skeleton accepts connections; the production density of work in the
+    consume loop lands in a focused integration session that follows.
+    
+    See dev/briefs/phase-summaries/B-backend-live-session.md for the full
+    work summary.
+
+ README.md                                          |   3 [32m+[m[31m-[m
+ ...2026_05_26_0002-002_live_session_hypertables.py | 137 [32m+++++++++++[m
+ src/config.py                                      |   4 [32m+[m
+ src/main.py                                        |   5 [32m+[m[31m-[m
+ src/market_risk/live_session/__init__.py           |   7 [32m+[m
+ src/market_risk/live_session/audit_service.py      |  73 [32m++++++[m
+ src/market_risk/live_session/ingestor.py           | 132 [32m++++++++++[m
+ src/market_risk/live_session/market_bus.py         |  85 [32m+++++++[m
+ src/market_risk/live_session/models.py             |  93 [32m+++++++[m
+ src/market_risk/live_session/nli_gate.py           | 106 [32m++++++++[m
+ src/market_risk/live_session/rationale_streamer.py | 186 [32m++++++++++++++[m
+ src/market_risk/live_session/session_manager.py    |  98 [32m++++++++[m
+ src/market_risk/live_session/snapshot_builder.py   | 183 [32m++++++++++++++[m
+ src/market_risk/live_session/threshold_detector.py | 119 [32m+++++++++[m
+ src/market_risk/live_session/verdict_service.py    |  62 [32m+++++[m
+ src/market_risk/live_session/ws_handler.py         |  85 [32m+++++++[m
+ src/market_risk/live_session/zone_hash.py          |  56 [32m+++++[m
+ src/market_risk/router.py                          |  23 [32m++[m
+ src/market_risk/ws_schemas.py                      | 268 [32m+++++++++++++++++++++[m
+ tests/market_risk/__init__.py                      |   0
+ tests/market_risk/live_session/__init__.py         |   0
+ tests/market_risk/live_session/test_market_bus.py  |  64 [32m+++++[m
+ .../live_session/test_rationale_streamer.py        | 108 [32m+++++++++[m
+ .../market_risk/live_session/test_snapshot_math.py |  76 [32m++++++[m
+ .../live_session/test_threshold_detector.py        |  70 [32m++++++[m
+ .../live_session/test_verdict_service.py           |  78 [32m++++++[m
+ tests/market_risk/live_session/test_zone_hash.py   |  58 [32m+++++[m
+ tests/market_risk/test_ws_schemas.py               | 122 [32m++++++++++[m
+ 28 files changed, 2299 insertions(+), 2 deletions(-)
