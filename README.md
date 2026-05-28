@@ -20,7 +20,7 @@ Unified backend for institutional digital asset compliance, risk analytics, and 
 | **JPM Scenarios** | Pre-/post-trade scenario evaluation with memo generation |
 | **Credit Decisioning** | PydanticAI agent pipeline with LlamaIndex RAG, document classification, HITL review |
 | **Workflows** | Temporal-orchestrated compliance checks, verification runs, drift detection |
-| **Live Session** | Binance-fed live trading session — snapshot → threshold detection → dual-path verdict → Claude rationale gated by T3 NLI, fanned over WebSocket. Feature-flagged via `LIVE_THRESHOLD_RATIONALE_ENABLED`. |
+| **Live Session** | Binance-fed live trading session — snapshot → threshold detection → dual-path verdict → Claude rationale gated by T3 NLI, fanned over WebSocket. REST `POST /v2/intents` creates a persisted intent with server-generated id; WS `/v2/ws/trade/{intent_id}` streams the envelope sequence with a server-driven `ping`/`pong` heartbeat; `closed`/`failed` intents are rejected at acquire. Feature-flagged via `LIVE_THRESHOLD_RATIONALE_ENABLED`. |
 
 ## Architecture
 
@@ -151,6 +151,9 @@ src/
 | `/jpm` | JPM Scenarios | Scenario runs, memo generation |
 | `/workflows` | Workflows | Temporal workflow management |
 | `/v2` | Production | Compiled rule evaluation |
+| `/v2/intents` | Live Session | Create / read persisted trade intent (server-generated id) |
+| `/v2/ws/trade/{intent_id}` | Live Session (WS) | Live tick → threshold → verdict → rationale envelopes; server `ping`/`pong` heartbeat |
+| `/audit/{intent_id}` | Live Session Audit | Chronological replay of snapshots, threshold events, rationales, NLI checks |
 | `/credit` | Credit Decisioning | Applications, analysis, HITL review queue |
 | `/ke` | KE Workbench | Orchestrated rule management |
 
@@ -238,6 +241,11 @@ Copy `.env.example` to `.env`. Key variables:
 | `ANTHROPIC_API_KEY` | — | LLM decoder (optional) |
 | `TEMPORAL_HOST` | — | Temporal server (optional) |
 | `ENABLE_FEATURE_STORE` | `false` | TimescaleDB feature store |
+| `LIVE_THRESHOLD_RATIONALE_ENABLED` | `false` | Mounts the live-session WS pipeline and bootstraps the registry on startup |
+| `LIVE_SESSION_PERSISTENCE` | (SQL) | `memory` swaps both audit + intent repositories to in-memory for offline demos / tests |
+| `LIVE_SESSION_INGEST` | `live` | `fixture` replays a canned frame sequence instead of reaching Binance |
+| `WS_PING_INTERVAL_SECONDS` | `20.0` | Heartbeat cadence; sub-second values are used by the heartbeat tests |
+| `WS_PONG_TIMEOUT_SECONDS` | `10.0` | Idle-timeout window after each ping before the WS is torn down |
 
 ## CI/CD Pipeline
 
@@ -306,7 +314,7 @@ terraform apply -var-file=envs/dev.tfvars \
 # 4. Push to main → auto-deploys to dev
 ```
 
-Deployment verification: [`docs/deployment-verification.md`](docs/deployment-verification.md)
+Deployment verification: `scripts/verify-deployment.sh` (pod health + endpoint checks) and `scripts/verify-contracts-live.py` (API contract checks against running endpoints).
 
 ### Cost Estimate
 
