@@ -1,19 +1,27 @@
 # institutional-defi-platform-api
 
-Unified institutional DeFi platform API — merged from three source projects:
-- **applied-ai-regulatory-workbench** — Regulatory rule engine, verification, analytics, RAG, embeddings, decoder
-- **crypto-portfolio-risk-console** — Trading, risk, technology monitoring, feature store, JPM scenarios
-- **digital-assets-cross-border** — API contract (frontend only; no backend migrated)
+Unified institutional DeFi platform API — backend for the institutional digital-asset compliance, risk, rationale, and credit stack.
 
-## Rules (CRITICAL)
-1. Sequential file operations — one edit/write at a time, wait for completion
-2. Never assume file contents — read before writing, verify after changes
-3. Run tests after every batch of changes
-3a. Run `mypy src/ --strict` after making code changes — type errors are CI-blocking
-4. Do not provide meta-commentary on your own thinking process unless requested
-5. When compacting, preserve: file list, import patterns, test commands, and current task state
-6. Autocompact at 50% context usage — proactively run /compact when context reaches ~50% to avoid hitting limits mid-task
-7. Do not execute git commit/push. Output git commit commands for the user to run manually. Do not wait for commits — continue working. Other CLI tools (kubectl, docker, aws, helm) are fine to run directly.
+## Sibling repos (active scope)
+
+- **`institutional-defi-platform-api`** (this repo) — FastAPI app, worker, Alembic migrations, all domain modules.
+- **`institutional-defi-platform-infra`** — Terraform (VPC, EKS, RDS, ElastiCache, ECR, Secrets Manager) + Kustomize overlays (`local`/`dev`/`prod`) + Temporal Helm values. Cross-border on Vercel via same-origin rewrites; `/v2/ws/*` routes to api-dev for live trading sessions.
+- **`cross-border-compliance-navigator`** (npm name `compliance-navigator`) — Vite + React + TypeScript + Tailwind frontend on Vercel. Consumes `POST /v2/intents`, `GET /v2/intents/{id}`, `WS /v2/ws/trade/{intent_id}`, and `GET /audit/{intent_id}`.
+
+Out of scope (do not include in plans, briefs, or test orchestration):
+
+- **`regulatory-rule-engine`** (internally `ke-workbench`; formerly `applied-ai-regulatory-workbench`) — out of scope as of 2026-05-25. The ATLAS artifact pipeline (signed RegimePacks + registry verification) is **not consumed in this repo**: ATLAS and `cross-border-compliance-navigator` (COMPASS) run as an **independent producer→consumer pair** — COMPASS verifies ATLAS artifacts directly via the ATLAS WASM verifier (`@platform/atlas-artifact`). No `ke-artifact` / `ke_artifact_py` consumption code lands here; if you find a `ke_artifact_py` install in `.venv`, it is a stray dev leftover, not a dependency.
+- **`crypto-portfolio-risk-console`** — code already merged into this repo; no standalone work.
+
+> Global working rules (file-op style, git default, verification, workflows,
+> shared agents) are loaded from `~/.claude/` — not repeated here. This file is
+> platform-API-specific only.
+
+## Repo-specific rules (CRITICAL)
+1. **Run tests after every batch of changes**: `pytest tests/ -x`.
+2. **Run `mypy src/ --strict` after code changes** — type errors are CI-blocking.
+3. Git follows the global default (output commit commands, don't run them; keep
+   working). kubectl/docker/aws/helm are fine to run directly.
 
 ## Current Phase
 DEV DEPLOYED ON EKS — SHA `c6d6526` deployed (2026-03-10). Migration complete (28 steps, 457 tests, ruff clean). API running on EKS dev environment. Worker scaled to 0 (Temporal not deployed to EKS yet). Commit `d4d0079` adds credit domain (not yet deployed). 3 frontend pods (regulatory-workbench, risk-console, cross-border) have placeholder INITIAL tags — no images built yet. Infrastructure in separate repo.
