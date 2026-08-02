@@ -1,8 +1,20 @@
 # institutional-defi-platform-api
 
+> **DECOMMISSIONED (2026-08-02).** This repo is archived and out of scope for new
+> work. Its EKS `api`/`worker` deployments, ECR repositories, ingress routes and
+> CD pipelines were removed from `institutional-defi-platform-infra`; the shared
+> platform (VPC, EKS, ElastiCache, Secrets Manager) stays up for
+> `regulatory-workbench`. The pending EKS→Vercel cross-border cutover was
+> abandoned, not completed. Nothing below this banner is maintained — it is kept
+> as a historical description of what the service was.
+>
+> Its last consumer had already moved on: COMPASS
+> (`cross-border-compliance-navigator`) records this API as historical and out of
+> its dependency graph, and never used `/v2/intents` from here.
+
 Unified institutional DeFi platform API — backend for the institutional digital-asset compliance, risk, rationale, and credit stack.
 
-## Sibling repos (active scope)
+## Sibling repos (historical — as of decommission)
 
 - **`institutional-defi-platform-api`** (this repo) — FastAPI app, worker, Alembic migrations, all domain modules.
 - **`institutional-defi-platform-infra`** — Terraform (VPC, EKS, RDS, ElastiCache, ECR, Secrets Manager) + Kustomize overlays (`local`/`dev`/`prod`) + Temporal Helm values. Cross-border on Vercel via same-origin rewrites; `/v2/ws/*` routes to api-dev for live trading sessions.
